@@ -339,6 +339,18 @@
         .eta-empty { font-size: 13px; color: var(--muted); padding: 10px 0; }
         @media (max-width: 760px) { .eta-grid { grid-template-columns: 1fr; } .leg-fields .wide { grid-column: span 2; } }
 
+
+        /* ===== Required speed ===== */
+        .spd-cols { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; align-items: start; }
+        .spd-fields { display: grid; grid-template-columns: 1.6fr 1fr; gap: 0 12px; }
+        .spd-fields .input-field { min-height: 36px; margin-bottom: 8px; font-size: 14px; }
+        .spd-fields .input-label { font-size: 11px; text-transform: none; letter-spacing: 0; font-weight: 600; margin-bottom: 3px; }
+        .spd-result { text-align: left; }
+        .spd-value { font-size: 48px; font-weight: 800; color: var(--accent); line-height: 1.1; font-variant-numeric: tabular-nums; margin: 4px 0 8px; }
+        .spd-value span { font-size: 16px; font-weight: 600; color: var(--muted); }
+        @media (max-width: 900px) { .spd-cols { grid-template-columns: 1fr; } }
+        @media (max-width: 480px) { .spd-fields { grid-template-columns: 1fr 1fr; } }
+
         /* ===== Deadweight ===== */
         .dwt-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
         .dwt-col { display: grid; gap: 14px; min-width: 0; }
@@ -420,7 +432,7 @@
 <body>
     <div id="root"></div>
     
-    <script src="app.js?v=3" defer></script>
+    <script src="app.js?v=4" defer></script>
 
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(e){console.log("SW failed",e)})})}</script>
 </body>
