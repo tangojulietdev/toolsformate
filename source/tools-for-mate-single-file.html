@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Maritime voyage planning tools - ROB Calculator, ETA Calculator, Speed Calculator, and Cargo Hold Ventilation">
+    <meta name="theme-color" content="#121b2d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Tools for Mate">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlRvb2xzIGZvciBNYXRlIiwKICAic2hvcnRfbmFtZSI6ICJUb29scyBmb3IgTWF0ZSIsCiAgImRlc2NyaXB0aW9uIjogIk1hcml0aW1lIHZveWFnZSBwbGFubmluZyB0b29scyIsCiAgInN0YXJ0X3VybCI6ICIuLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzBmMTcyYSIsCiAgInRoZW1lX2NvbG9yIjogIiMwZjE3MmEiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWwsJTNDc3ZnJTIwd2lkdGglM0QnMTkyJyUyMGhlaWdodCUzRCcxOTInJTIweG1sbnMlM0QnaHR0cCUzQSUyRiUyRnd3dy53My5vcmclMkYyMDAwJTJGc3ZnJyUzRSUzQ3JlY3QlMjB3aWR0aCUzRCcxOTInJTIwaGVpZ2h0JTNEJzE5MiclMjBmaWxsJTNEJyUyMzBlYTVlOSclMkYlM0UlM0N0ZXh0JTIweCUzRCc1MCUyNSclMjB5JTNEJzUwJTI1JyUyMGZvbnQtZmFtaWx5JTNEJ3NhbnMtc2VyaWYnJTIwZm9udC1zaXplJTNEJzgwJyUyMGZpbGwlM0QnJTIzZmZmJyUyMHRleHQtYW5jaG9yJTNEJ21pZGRsZSclMjBkb21pbmFudC1iYXNlbGluZSUzRCdjZW50cmFsJyUzRSVFMiU5QSU5MyUzQyUyRnRleHQlM0UlM0MlMkZzdmclM0UiLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiCiAgICB9LAogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmclMjB3aWR0aCUzRCc1MTInMjBoZWlnaHQlM0QnNTEyJyUyMHhtbG5zJTNEJ2h0dHAlM0ElMkYlMkZ3d3cudzMub3JnJTJGMjAwMCUyRnN2ZyclM0UlM0NyZWN0JTIwd2lkdGglM0QnNTEyJyUyMGhlaWdodCUzRCc1MTInJTIwZmlsbCUzRCclMjMwZWE1ZTknJTJGJTNFJTNDdGV4dCUyMHglM0QnNTAlMjUnJTIweSUzRCc1MCUyNSclMjBmb250LWZhbWlseSUzRCdzYW5zLXNlcmlmJyUyMGZvbnQtc2l6ZSUzRCcyMDAnJTIwZmlsbCUzRCclMjNmZmYnJTIwdGV4dC1hbmNob3IlM0QnbWlkZGxlJyUyMGRvbWluYW50LWJhc2VsaW5lJTNEJ2NlbnRyYWwnJTNFJUUyJTlBJTkzJTNDJTJGdGV4dCUzRSUzQyUyRnN2ZyUzRSIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0KICBdCn0=">
+    <title>Tools for Mate</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/milanova" rel="stylesheet">
+    <script>(function(){try{var t=localStorage.getItem('tfm_theme');if(!t){t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+    <style>
+        /* ===== Design tokens: light + dark designed together ===== */
+        :root {
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --bg: #f3f6fa;
+            --surface: #ffffff;
+            --surface-2: #eef2f7;
+            --border: #d5dde8;
+            --text: #0f172a;
+            --text-2: #3b4a60;
+            --muted: #5a6b82;
+            --accent: #0369a1;
+            --accent-hover: #075985;
+            --accent-soft: rgba(3, 105, 161, 0.10);
+            --on-accent: #ffffff;
+            --ok: #047857;   --ok-soft: #d9f5e8;
+            --bad: #b91c1c;  --bad-soft: #fde4e4;
+            --warn: #a16207; --warn-soft: #fdf0d0;
+            --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 14px rgba(15, 23, 42, 0.05);
+            --r: 12px;
+            --r-sm: 8px;
+            color-scheme: light;
+        }
+        :root[data-theme="dark"] {
+            --bg: #0a111f;
+            --surface: #121b2d;
+            --surface-2: #1a2640;
+            --border: #28375a;
+            --text: #e8eef8;
+            --text-2: #b8c4d8;
+            --muted: #92a3bd;
+            --accent: #38bdf8;
+            --accent-hover: #7dd3fc;
+            --accent-soft: rgba(56, 189, 248, 0.14);
+            --on-accent: #04202f;
+            --ok: #4ade80;   --ok-soft: rgba(74, 222, 128, 0.14);
+            --bad: #fb7185;  --bad-soft: rgba(251, 113, 133, 0.14);
+            --warn: #fbbf24; --warn-soft: rgba(251, 191, 36, 0.14);
+            --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 18px rgba(0, 0, 0, 0.25);
+            color-scheme: dark;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { -webkit-text-size-adjust: 100%; }
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 15px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            transition: background-color .25s ease, color .25s ease;
+        }
+        button, input, select, textarea { font-family: inherit; }
+        :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .app-bg { display: none; }
+
+        /* ===== Header ===== */
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+        }
+        .header-content {
+            max-width: 1280px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        }
+        .brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; flex-wrap: wrap; }
+        .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.2px; color: var(--text); }
+        .header-subtitle { font-family: 'Milanova', Georgia, serif; font-style: italic; font-size: 15px; color: var(--muted); }
+        .theme-toggle {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            min-height: 44px; min-width: 44px; padding: 0 14px;
+            border-radius: 999px; border: 1px solid var(--border);
+            background: var(--surface-2); color: var(--text);
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            transition: background-color .2s, border-color .2s;
+        }
+        .theme-toggle:hover { border-color: var(--accent); }
+        .theme-toggle svg { width: 18px; height: 18px; }
+
+        /* ===== Layout ===== */
+        .container { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
+        .tab-content { }
+        .section-title {
+            font-size: 18px; font-weight: 700; color: var(--text);
+            margin: 0 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+        }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
+
+        /* ===== Top tiles: the only place with per-tool colour ===== */
+        .tabs { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 24px; }
+        .tab {
+            --tc: var(--accent);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+            min-height: 68px; padding: 10px 8px;
+            border-radius: var(--r);
+            border: 1px solid color-mix(in srgb, var(--tc) 30%, var(--border));
+            background: color-mix(in srgb, var(--tc) 8%, var(--surface));
+            color: var(--text);
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            transition: background-color .2s, border-color .2s, color .2s, box-shadow .2s;
+        }
+        .tab svg { width: 22px; height: 22px; color: var(--tc); }
+        :root[data-theme="dark"] .tab:not([aria-selected="true"]) svg { color: var(--tcd, var(--tc)); }
+        .tab:hover { background: color-mix(in srgb, var(--tc) 15%, var(--surface)); }
+        .tab[aria-selected="true"] {
+            background: var(--tc); border-color: var(--tc); color: #ffffff;
+            box-shadow: 0 4px 14px color-mix(in srgb, var(--tc) 35%, transparent);
+        }
+        .tab[aria-selected="true"] svg { color: #ffffff; }
+
+        /* ===== Surfaces ===== */
+        .card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--r); padding: 20px; box-shadow: var(--shadow);
+        }
+        .card-title {
+            font-size: 12px; font-weight: 700; color: var(--muted);
+            text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px;
+        }
+
+        /* ===== Forms ===== */
+        .input-label {
+            display: block; font-size: 12px; font-weight: 600; color: var(--text-2);
+            text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px;
+        }
+        .input-field {
+            width: 100%; min-height: 44px; padding: 10px 12px; margin-bottom: 12px;
+            background: var(--surface); color: var(--text);
+            border: 1px solid var(--border); border-radius: var(--r-sm);
+            font-size: 15px; transition: border-color .15s, box-shadow .15s;
+        }
+        .input-field::placeholder, td input::placeholder, textarea::placeholder { color: var(--muted); opacity: .8; }
+        .input-field:hover { border-color: var(--muted); }
+        .input-field:focus, td input:focus, td select:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+        select option { background: var(--surface); color: var(--text); }
+
+        /* ===== Buttons ===== */
+        .btn {
+            min-height: 44px; padding: 10px 20px; border: 1px solid transparent; border-radius: var(--r-sm);
+            font-weight: 600; font-size: 14px; cursor: pointer;
+            transition: background-color .15s, transform .1s;
+        }
+        .btn:active { transform: scale(.98); }
+        .btn-primary { background: var(--accent); color: var(--on-accent); margin-top: 16px; margin-right: 10px; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-danger { background: transparent; color: var(--bad); border-color: var(--bad); margin-top: 16px; }
+        .btn-danger:hover { background: var(--bad-soft); }
+        .mode-btns { display: flex; gap: 6px; }
+        .mode-btn {
+            flex: 1; min-width: 36px; min-height: 36px; padding: 6px;
+            background: var(--surface-2); color: var(--text-2);
+            border: 1px solid var(--border); border-radius: var(--r-sm);
+            font-weight: 700; font-size: 12px; cursor: pointer; transition: background-color .15s, color .15s;
+        }
+        .mode-btn:hover { border-color: var(--accent); color: var(--text); }
+        .mode-btn.active { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+
+        /* ===== Tables ===== */
+        table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--r); overflow: hidden; box-shadow: var(--shadow);
+        }
+        th {
+            background: var(--surface-2); color: var(--text-2);
+            padding: 12px; text-align: left; white-space: nowrap;
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+            border-bottom: 1px solid var(--border);
+        }
+        td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+        tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: var(--accent-soft); }
+        td input, td select {
+            width: 100%; min-width: 80px; min-height: 40px; padding: 8px 10px;
+            background: var(--surface); color: var(--text);
+            border: 1px solid var(--border); border-radius: var(--r-sm); font-size: 14px;
+        }
+        .auto-value { color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+        /* ===== Results ===== */
+        .decision-pill {
+            display: inline-block; padding: 6px 12px; border-radius: 999px; border: 1px solid transparent;
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+        }
+        .decision-ventilate { background: var(--ok-soft); color: var(--ok); border-color: var(--ok); }
+        .decision-no-vent { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+        .remark-btn {
+            min-height: 32px; padding: 6px 12px; cursor: pointer;
+            background: var(--warn-soft); color: var(--warn); border: 1px solid var(--warn);
+            border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+        }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .summary-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+            padding: 20px; text-align: center; box-shadow: var(--shadow);
+        }
+        .summary-value { font-size: 2.6rem; font-weight: 800; line-height: 1.1; margin-bottom: 6px; font-variant-numeric: tabular-nums; }
+        .summary-label { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+        .calc-result {
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+            padding: 32px 20px; text-align: center; box-shadow: var(--shadow);
+        }
+        .calc-result h2 { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px; }
+        .calc-result .value { font-size: clamp(2.8rem, 9vw, 4.5rem); font-weight: 800; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums; }
+        .calc-result .unit { color: var(--text-2); font-size: 1.2rem; margin-top: 10px; display: block; }
+
+        /* ===== Reference content ===== */
+        .info-section {
+            background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent);
+            border-radius: var(--r); padding: 20px; margin-bottom: 16px;
+        }
+        .info-section h3 { color: var(--text); font-size: 16px; margin-bottom: 12px; font-weight: 700; }
+        .info-section p, .info-section li { color: var(--text-2); font-size: 14px; line-height: 1.7; margin-bottom: 10px; }
+        .quick-ref-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 14px; }
+        .quick-ref-card { background: var(--surface-2); padding: 14px; border-radius: var(--r-sm); border: 1px solid var(--border); }
+        .quick-ref-card h4 { color: var(--text); font-size: 14px; margin-bottom: 6px; font-weight: 700; }
+        .quick-ref-card p { color: var(--text-2); font-size: 13px; line-height: 1.6; margin: 0; }
+
+        /* ===== Login (unused, kept for safety) ===== */
+        .password-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); }
+        .password-card { background: var(--surface); border: 1px solid var(--border); padding: 32px; border-radius: var(--r); max-width: 420px; width: 100%; margin: 20px; box-shadow: var(--shadow); }
+        .password-title { font-size: 26px; font-weight: 700; color: var(--text); text-align: center; margin-bottom: 6px; }
+        .password-subtitle { font-family: 'Milanova', serif; color: var(--muted); text-align: center; font-size: 16px; margin-bottom: 24px; font-style: italic; }
+        .password-error { background: var(--bad-soft); border: 1px solid var(--bad); padding: 12px; border-radius: var(--r-sm); color: var(--bad); font-size: 13px; text-align: center; margin-bottom: 16px; }
+
+
+        /* ===== ROB legs ===== */
+        .legs { display: grid; gap: 16px; }
+        .leg-card { padding: 16px 20px 20px; }
+        .leg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px 16px; flex-wrap: wrap; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+        .leg-title { font-weight: 700; font-size: 15px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+        .leg-title span { font-weight: 500; color: var(--text-2); font-size: 14px; }
+        .leg-meta { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+        .leg-meta b { color: var(--text); }
+        .leg-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0 14px; }
+        .leg-fields .input-field { margin-bottom: 10px; }
+        .leg-fields .mode-btns { min-height: 44px; }
+        .leg-results { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; }
+        .res-panel { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 12px 14px; }
+        .res-panel.dep { background: var(--accent-soft); border-color: var(--accent); }
+        .res-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-2); margin-bottom: 8px; }
+        .res-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .res-label { display: block; font-size: 12px; color: var(--muted); }
+        .res-val { display: block; font-size: 24px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1.2; }
+        @media (max-width: 640px) {
+            .leg-results { grid-template-columns: 1fr; }
+            .leg-fields { grid-template-columns: 1fr 1fr; }
+            .res-val { font-size: 22px; }
+        }
+
+
+        /* ===== Shared controls ===== */
+        .btn-ghost {
+            min-height: 40px; padding: 8px 14px; cursor: pointer;
+            background: var(--surface); color: var(--text); border: 1px solid var(--border);
+            border-radius: var(--r-sm); font-size: 13px; font-weight: 600;
+            transition: border-color .15s, background-color .15s;
+        }
+        .btn-ghost:hover { border-color: var(--accent); background: var(--accent-soft); }
+        .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+        .tb-right { display: flex; gap: 8px; flex-wrap: wrap; }
+        .dim { color: var(--muted); font-size: 13px; }
+        .seg { display: inline-flex; border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; background: var(--surface); }
+        .seg button { min-height: 40px; padding: 8px 16px; border: 0; background: transparent; color: var(--text-2); font-size: 13px; font-weight: 600; cursor: pointer; }
+        .seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+        .sub-title { font-size: 15px; font-weight: 700; margin: 24px 0 12px; }
+        .print-only { display: none; }
+        .icon-btn { min-width: 44px; min-height: 44px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); border-radius: var(--r-sm); font-size: 20px; cursor: pointer; }
+        .icon-btn:hover { color: var(--bad); border-color: var(--bad); }
+
+        /* ===== Compact ROB legs ===== */
+        .legs { gap: 12px; }
+        .leg-card.compact { padding: 10px 14px 12px; }
+        .compact .leg-head { margin-bottom: 8px; padding-bottom: 6px; }
+        .compact .leg-fields { grid-template-columns: repeat(auto-fit, minmax(105px, 1fr)); gap: 0 10px; }
+        .compact .input-label { font-size: 11px; margin-bottom: 3px; }
+        .compact .input-field { min-height: 38px; padding: 6px 10px; margin-bottom: 6px; font-size: 14px; }
+        .compact .leg-fields .mode-btns { min-height: 38px; }
+        .compact .leg-results { gap: 8px; margin-top: 2px; }
+        .compact .res-panel { display: flex; align-items: baseline; gap: 6px 16px; flex-wrap: wrap; padding: 8px 12px; }
+        .compact .res-title { margin: 0; font-size: 11px; }
+        .res-item { display: inline-flex; align-items: baseline; gap: 6px; }
+        .compact .res-label { display: inline; font-size: 12px; }
+        .compact .res-val { display: inline; font-size: 18px; }
+
+        /* ===== ROB all-results table ===== */
+        .sum-wrap { overflow-x: auto; border-radius: var(--r); }
+        .sum-table { font-size: 13px; }
+        .sum-table th, .sum-table td { padding: 8px 10px; white-space: nowrap; }
+        .sum-table .r { text-align: right; }
+        .sum-table .grp { border-left: 2px solid var(--border); }
+        .sum-table tfoot td { background: var(--surface-2); font-weight: 600; border-top: 2px solid var(--border); border-bottom: none; }
+
+        /* ===== ETA ===== */
+        .time-note { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--r-sm); padding: 12px 14px; font-size: 14px; color: var(--text); margin-bottom: 12px; }
+        .now-bar { display: flex; flex-wrap: wrap; gap: 6px 24px; font-size: 13px; color: var(--text-2); margin-bottom: 16px; font-variant-numeric: tabular-nums; }
+        .eta-speeds { padding: 14px 16px 6px; margin-bottom: 14px; }
+        .eta-speed-row { display: grid; grid-template-columns: repeat(3, minmax(90px, 160px)); gap: 12px; }
+        .inline-field { display: flex; gap: 8px; align-items: flex-start; }
+        .inline-field .input-field { flex: 1; min-width: 0; }
+        .inline-field .btn-ghost { min-height: 38px; }
+        .leg-fields .wide { grid-column: span 2; }
+        .tz-select { font-size: 15px; font-weight: 600; min-width: 130px; }
+        .eta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 6px; }
+        .eta-tile { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 12px 14px; }
+        .eta-speed { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-2); margin-bottom: 4px; }
+        .eta-time { font-size: 17px; font-weight: 700; line-height: 1.3; font-variant-numeric: tabular-nums; margin-bottom: 4px; }
+        .eta-time .d { color: var(--text); }
+        .eta-time .t { color: var(--accent); margin-left: 6px; }
+        .eta-time .lt { font-size: 12px; font-weight: 600; color: var(--muted); margin-left: 3px; }
+        .eta-day { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+        .eta-sub { font-size: 12px; color: var(--muted); line-height: 1.5; }
+        .eta-empty { font-size: 13px; color: var(--muted); padding: 10px 0; }
+        @media (max-width: 760px) { .eta-grid { grid-template-columns: 1fr; } .leg-fields .wide { grid-column: span 2; } }
+
+        /* ===== Deadweight ===== */
+        .dwt-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+        .dwt-col { display: grid; gap: 14px; min-width: 0; }
+        @media (max-width: 900px) { .dwt-cols { grid-template-columns: 1fr; } }
+        .dwt-card { padding: 12px 14px; }
+        .dwt-card .card-title { margin-bottom: 8px; }
+        .dwt-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0 10px; }
+        .dwt-card .input-field { min-height: 34px; padding-top: 5px; padding-bottom: 5px; font-size: 14px; margin-bottom: 6px; }
+        .dwt-card .input-label { font-size: 11px; margin-bottom: 3px; text-transform: none; letter-spacing: 0; font-weight: 600; }
+        .ded-list { display: grid; gap: 5px; margin-bottom: 8px; }
+        .ded-row { display: grid; grid-template-columns: 1fr 100px auto; gap: 6px; align-items: center; }
+        .ded-row .input-field { margin-bottom: 0; }
+        .ded-row .icon-btn { min-height: 34px; min-width: 34px; }
+        .ded-total { display: flex; justify-content: space-between; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 15px; }
+        .dwt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 8px; }
+        .dwt-tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 8px 12px; }
+        .dwt-grid > .dwt-tile:last-child:nth-child(odd) { grid-column: 1 / -1; }
+        .dwt-tile.big { border-color: var(--accent); background: var(--accent-soft); }
+        .dwt-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-2); margin-bottom: 4px; }
+        .dwt-value { font-size: 20px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1.2; }
+        .dwt-value span { font-size: 12px; font-weight: 600; color: var(--muted); }
+        .dwt-verdict { border: 2px solid; border-radius: var(--r-sm); padding: 9px 12px; font-size: 14px; font-weight: 600; margin-bottom: 8px; background: var(--surface); }
+        .card .btn-ghost { margin-top: 4px; }
+
+
+        /* ===== Compact ROB settings ===== */
+        .rob-top { gap: 10px; margin-bottom: 12px; }
+        .rob-top .card { padding: 10px 14px 6px; box-shadow: none; }
+        .rob-top .input-field { min-height: 38px; padding: 6px 10px; margin-bottom: 8px; font-size: 14px; }
+        .rob-top .input-label { font-size: 11px; margin-bottom: 3px; }
+        .rob-top .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+
+        /* ===== Print ===== */
+        @media print {
+            :root, :root[data-theme="dark"] {
+                --bg: #fff; --surface: #fff; --surface-2: #f2f4f7; --border: #b8bfc9;
+                --text: #000; --text-2: #1c2733; --muted: #3b4654;
+                --accent: #0b4f7a; --accent-soft: #eef4f9; --on-accent: #fff;
+                --ok: #046a42; --bad: #a61b1b; --warn: #7a4a00; --shadow: none;
+                color-scheme: light;
+            }
+            body { background: #fff; font-size: 12px; }
+            .no-print, .header, .tabs, .toolbar { display: none !important; }
+            .print-only { display: block !important; margin-bottom: 12px; }
+            .print-head h1 { font-size: 20px; margin-bottom: 4px; }
+            .print-head div { font-size: 12px; color: #222; margin-bottom: 2px; }
+            .container { padding: 0; max-width: none; }
+            .section-title { font-size: 15px; }
+            .card, table, .dwt-tile, .info-section { box-shadow: none !important; break-inside: avoid; }
+            .sum-wrap { overflow: visible; }
+            .sum-table { font-size: 11px; }
+            .sum-table th, .sum-table td { padding: 5px 6px; }
+            .dwt-cols { grid-template-columns: 1fr 1fr; }
+            input, select { border: none !important; background: transparent !important; padding: 0 !important; min-height: 0 !important; font-size: 12px !important; appearance: none; -webkit-appearance: none; }
+            .ded-row { grid-template-columns: 1fr 90px; }
+            @page { margin: 12mm; }
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 1000px) {
+            .tabs { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .header { padding: 10px 16px; }
+            .container { padding: 16px 16px 40px; }
+            .header h1 { font-size: 18px; }
+            .theme-toggle span { display: none; }
+            .theme-toggle { padding: 0; width: 44px; }
+            .input-field, td input, td select, textarea { font-size: 16px; }
+            .card, .info-section { padding: 16px; }
+            .grid-3 { grid-template-columns: 1fr; gap: 12px; }
+            .tab { min-height: 62px; font-size: 11px; padding: 8px 2px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { transition: none !important; animation: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useMemo, useEffect } = React;
+
+        const CORRECT_PASSWORD = '';
+        const timezones = ['GMT-12:00','GMT-11:00','GMT-10:00','GMT-9:00','GMT-8:00','GMT-7:00','GMT-6:00','GMT-5:00','GMT-4:00','GMT-3:00','GMT-2:00','GMT-1:00','GMT+0:00','GMT+1:00','GMT+2:00','GMT+3:00','GMT+4:00','GMT+5:00','GMT+5:30','GMT+6:00','GMT+7:00','GMT+8:00','GMT+9:00','GMT+10:00','GMT+11:00','GMT+12:00','GMT+13:00','GMT+14:00'];
+
+        function calculateDewPoint(dryBulb, wetBulb) {
+            if (!dryBulb || !wetBulb || parseFloat(wetBulb) > parseFloat(dryBulb)) return null;
+            const T = parseFloat(dryBulb);
+            const Tw = parseFloat(wetBulb);
+            const esTw = 6.112 * Math.exp((17.67 * Tw) / (Tw + 243.5));
+            const P = 1013.25;
+            const A = 0.000662;
+            const e = esTw - A * P * (T - Tw);
+            const dewPoint = (243.5 * Math.log(e / 6.112)) / (17.67 - Math.log(e / 6.112));
+            return dewPoint;
+        }
+
+        function calculateRH(dryBulb, wetBulb) {
+            if (!dryBulb || !wetBulb || parseFloat(wetBulb) > parseFloat(dryBulb)) return null;
+            const T = parseFloat(dryBulb);
+            const Tw = parseFloat(wetBulb);
+            const esT = 6.112 * Math.exp((17.67 * T) / (T + 243.5));
+            const esTw = 6.112 * Math.exp((17.67 * Tw) / (Tw + 243.5));
+            const P = 1013.25;
+            const A = 0.000662;
+            const e = esTw - A * P * (T - Tw);
+            const RH = 100 * (e / esT);
+            return RH;
+        }
+
+        // ===== Interpolation + Hydrostatics tabs =====
+        const pn = (v) => { const t = String(v).trim().replace(/,/g, ''); return t === '' ? NaN : Number(t); };
+        const interpLerp = (x1, y1, x2, y2, x) => y1 + (x - x1) * (y2 - y1) / (x2 - x1);
+        const fmtN = (v, d) => (isFinite(v) ? v.toFixed(d) : '-');
+        const accentStyle = { color: 'var(--accent)' };
+        const noteStyle = (type) => ({
+            fontSize: 12, marginTop: 12, padding: '8px 12px', borderRadius: 8,
+            background: type === 'bad' ? 'var(--bad-soft)' : type === 'warn' ? 'var(--warn-soft)' : 'var(--surface-2)',
+            color: type === 'bad' ? 'var(--bad)' : type === 'warn' ? 'var(--warn)' : 'var(--muted)'
+        });
+        const bigVal = { fontSize: 30, fontWeight: 700, color: 'var(--accent)', wordBreak: 'break-all' };
+        const subBtn = { minHeight: 44, padding: '8px 14px', borderRadius: 8, border: '1px solid rgba(148,163,184,.25)', background: 'var(--surface-2)', color: 'var(--text)', fontSize: 13, fontWeight: 600, cursor: 'pointer' };
+
+        function NumField({ label, value, onChange, placeholder }) {
+            return (
+                <div>
+                    <label className="input-label">{label}</label>
+                    <input type="number" step="any" inputMode="decimal" className="input-field" value={value} placeholder={placeholder || ''} onChange={(e) => onChange(e.target.value)} />
+                </div>
+            );
+        }
+
+        // ===== Unit converter tab =====
+        const UNIT_CATS = {
+            length: { label: 'Length', hint: '1 NM = 1852 m. 1 cable = 0.1 NM.', units: [['m', 1], ['km', 1000], ['NM', 1852], ['cable', 185.2], ['fathom', 1.8288], ['ft', 0.3048], ['in', 0.0254], ['yd', 0.9144], ['mile (statute)', 1609.344]] },
+            speed: { label: 'Speed', hint: '1 knot = 1 NM per hour.', units: [['kn', 1852 / 3600], ['m/s', 1], ['km/h', 1 / 3.6], ['mph', 0.44704], ['ft/s', 0.3048]] },
+            mass: { label: 'Mass', hint: 'MT = metric tonne. LT = long ton (2240 lb). ST = short ton (2000 lb).', units: [['kg', 1], ['MT', 1000], ['LT', 1016.0469088], ['ST', 907.18474], ['lb', 0.45359237]] },
+            volume: { label: 'Volume', hint: 'Barrel = 42 US gal.', units: [['m³', 1], ['litre', 0.001], ['US gal', 0.003785411784], ['Imp gal', 0.00454609], ['bbl', 0.158987294928], ['ft³', 0.028316846592]] },
+            area: { label: 'Area', hint: '', units: [['m²', 1], ['cm²', 0.0001], ['ft²', 0.09290304], ['in²', 0.00064516]] },
+            density: { label: 'Density', hint: '1 t/m³ = 1 kg/L = 1 g/cm³. Sea water 1.025 t/m³.', units: [['kg/m³', 1], ['t/m³ (kg/L)', 1000], ['lb/ft³', 16.01846337], ['lb/US gal', 119.826427]] },
+            pressure: { label: 'Pressure', hint: '1 bar = 100 kPa. 1 mWC = 9.80665 kPa. Gauge or absolute is not converted.', units: [['bar', 1e5], ['kPa', 1e3], ['MPa', 1e6], ['psi', 6894.757293], ['kgf/cm²', 98066.5], ['atm', 101325], ['mmHg', 133.322387], ['mWC (m water)', 9806.65], ['Pa', 1]] },
+            force: { label: 'Force / SWL', hint: 'Tonnes-force (tf) and kN for SWL, lashing and wire loads. 1 tf = 9.80665 kN.', units: [['kN', 1000], ['N', 1], ['tf (tonne-force)', 9806.65], ['kgf', 9.80665], ['lbf', 4.4482216], ['LT-force', 9964.016384], ['ST-force', 8896.443]] },
+            flow: { label: 'Flow rate', hint: 'Pump and ballast/deballast rates.', units: [['m³/h', 1], ['L/min', 0.06], ['L/s', 3.6], ['US gpm', 0.227124707], ['Imp gpm', 0.2727655], ['bbl/h', 0.158987295]] },
+            power: { label: 'Power', hint: '', units: [['kW', 1000], ['W', 1], ['MW', 1e6], ['hp (mechanical)', 745.69987], ['PS (metric hp)', 735.49875]] },
+            temp: { label: 'Temperature', hint: '', special: true, units: [['°C'], ['°F'], ['K']] },
+            sf: { label: 'Stowage factor', hint: 'Volume per unit mass of cargo. Equivalent density is shown below.', units: [['m³/MT', 1], ['ft³/MT', 0.028316846592], ['ft³/LT', 0.028316846592 / 1.0160469088], ['m³/LT', 1 / 1.0160469088]] },
+            mv: { label: 'Mass / Volume', hint: '', special2: true, units: [] }
+        };
+        const UNIT_ORDER = ['length', 'speed', 'mass', 'volume', 'density', 'pressure', 'force', 'flow', 'sf', 'mv', 'temp', 'area', 'power'];
+        function fmtSig(v) {
+            if (!isFinite(v)) return '-';
+            if (v === 0) return '0';
+            const a = Math.abs(v);
+            if (a >= 1e-4 && a < 1e12) return String(parseFloat(v.toPrecision(8)));
+            return v.toExponential(5);
+        }
+        function tempToC(i, v) { return i === 0 ? v : i === 1 ? (v - 32) * 5 / 9 : v - 273.15; }
+        function tempFromC(i, c) { return i === 0 ? c : i === 1 ? c * 9 / 5 + 32 : c + 273.15; }
+
+        function UnitTab() {
+            const [cat, setCat] = useState('length');
+            const [val, setVal] = useState('');
+            const [from, setFrom] = useState(0);
+            const [mv, setMv] = useState({ dens: '', dUnit: 0, mass: '', vol: '' });
+            const c = UNIT_CATS[cat];
+            const v = pn(val);
+            const pickCat = (k) => { setCat(k); setFrom(0); };
+
+            let cards = [];
+            let extra = null;
+            if (!c.special2 && !isNaN(v)) {
+                if (c.special) {
+                    const base = tempToC(from, v);
+                    cards = c.units.map((u, i) => ({ name: u[0], val: fmtSig(tempFromC(i, base)), key: i === from }));
+                } else {
+                    const base = v * c.units[from][1];
+                    cards = c.units.map((u, i) => ({ name: u[0], val: fmtSig(base / u[1]), key: i === from }));
+                    if (cat === 'sf' && base > 0) extra = 'Equivalent cargo density: ' + fmtSig(1 / base) + ' t/m³.';
+                }
+            }
+
+            // Mass / Volume with density
+            const dens = pn(mv.dens) * (mv.dUnit === 1 ? 0.001 : 1); // t/m3
+            const mMass = pn(mv.mass), mVol = pn(mv.vol);
+            let mvVol = null, mvMass = null;
+            if (dens > 0 && !isNaN(mMass)) mvVol = [['m³', mMass / dens], ['litre', mMass / dens * 1000], ['bbl', mMass / dens / 0.158987294928], ['US gal', mMass / dens / 0.003785411784]];
+            if (dens > 0 && !isNaN(mVol)) mvMass = [['MT', mVol * dens], ['kg', mVol * dens * 1000], ['LT', mVol * dens / 1.0160469088]];
+
+            const resultCard = (r, i) => (
+                <div key={i} style={{ background: r.key ? 'var(--accent-soft)' : 'var(--surface-2)', border: '1px solid ' + (r.key ? 'var(--accent)' : 'var(--border)'), borderRadius: 10, padding: 10 }}>
+                    <div className="input-label" style={{ marginBottom: 2, textTransform: 'none' }}>{r.name}{r.key ? ' (input)' : ''}</div>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent)', wordBreak: 'break-all' }}>{r.val}</div>
+                </div>
+            );
+            const gridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 };
+
+            return (
+                <div>
+                    <h2 className="section-title">Unit Converter</h2>
+                    <div style={{ maxWidth: 900, margin: '0 auto' }}>
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+                            {UNIT_ORDER.map(k => (
+                                <button key={k} onClick={() => pickCat(k)} style={{ ...subBtn, padding: '9px 14px', background: cat === k ? 'var(--accent)' : 'var(--surface-2)', color: cat === k ? 'var(--on-accent)' : 'var(--text-2)' }}>{UNIT_CATS[k].label}</button>
+                            ))}
+                        </div>
+
+                        {!c.special2 && (
+                            <div className="card" style={{ marginBottom: 16 }}>
+                                <div className="grid-3" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: 0 }}>
+                                    <NumField label="Value" value={val} onChange={setVal} placeholder="Enter value" />
+                                    <div>
+                                        <label className="input-label">From</label>
+                                        <select className="input-field" value={from} onChange={(e) => setFrom(parseInt(e.target.value))}>
+                                            {c.units.map((u, i) => <option key={i} value={i}>{u[0]}</option>)}
+                                        </select>
+                                    </div>
+                                </div>
+                                {cards.length > 0 && <div style={{ ...gridStyle, marginTop: 14 }}>{cards.map(resultCard)}</div>}
+                                {extra && <div style={noteStyle('')}>{extra}</div>}
+                                {c.hint && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 12 }}>{c.hint}</div>}
+                            </div>
+                        )}
+
+                        {c.special2 && (
+                            <div className="card" style={{ marginBottom: 16 }}>
+                                <div className="card-title">Convert between mass and volume using density</div>
+                                <div className="grid-3" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: 12 }}>
+                                    <NumField label="Density" value={mv.dens} onChange={(x) => setMv({ ...mv, dens: x })} placeholder="e.g. 0.991" />
+                                    <div>
+                                        <label className="input-label">Density unit</label>
+                                        <select className="input-field" value={mv.dUnit} onChange={(e) => setMv({ ...mv, dUnit: parseInt(e.target.value) })}>
+                                            <option value={0}>t/m³ (kg/L)</option>
+                                            <option value={1}>kg/m³</option>
+                                        </select>
+                                    </div>
+                                    <NumField label="Mass (MT) to volume" value={mv.mass} onChange={(x) => setMv({ ...mv, mass: x })} />
+                                    <NumField label="Volume (m³) to mass" value={mv.vol} onChange={(x) => setMv({ ...mv, vol: x })} />
+                                </div>
+                                {mvVol && <div style={{ ...gridStyle, marginBottom: 10 }}>{mvVol.map((r, i) => resultCard({ name: r[0], val: fmtSig(r[1]) }, i))}</div>}
+                                {mvMass && <div style={gridStyle}>{mvMass.map((r, i) => resultCard({ name: r[0], val: fmtSig(r[1]) }, 'm' + i))}</div>}
+                                <div style={noteStyle('')}>Use the density at the actual temperature. This does not apply a volume correction factor (VCF), so use the ASTM tables or the supplier's figures for bunker quantities.</div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        const HYDRO_KEY = 'tfm_hydro_v1';
+        function loadHydro() {
+            try { const s = JSON.parse(localStorage.getItem(HYDRO_KEY) || 'null'); if (s && s.cols && s.rows) return s; } catch (e) {}
+            return null;
+        }
+
+        function HydroTab() {
+            const init = loadHydro();
+            const [cols, setCols] = useState(init ? init.cols : ['Draft', 'Displacement', 'TPC', 'LCB', 'LCF', 'KMt', 'MCT']);
+            const [rows, setRows] = useState(init ? init.rows : Array.from({ length: 8 }, () => ['', '', '', '', '', '', '']));
+            const [key, setKey] = useState(init && init.key < init.cols.length ? init.key : 0);
+            const [val, setVal] = useState('');
+            const [dec, setDec] = useState(3);
+            const [paste, setPaste] = useState('');
+            const [inote, setInote] = useState(null);
+            const [copied, setCopied] = useState(false);
+            const d = Math.min(8, Math.max(0, parseInt(dec) || 0));
+
+            useEffect(() => { try { localStorage.setItem(HYDRO_KEY, JSON.stringify({ cols, rows, key })); } catch (e) {} }, [cols, rows, key]);
+
+            const doImport = () => {
+                const raw = paste.replace(/\r/g, '').split('\n').map(l => l.trim()).filter(l => l);
+                if (raw.length < 2) { setInote({ t: 'bad', m: 'Paste at least a heading row and one data row.' }); return; }
+                const split = (l) => l.includes('\t') ? l.split('\t') : (l.includes(';') ? l.split(';') : (l.split(/\s{2,}/).length > 1 ? l.split(/\s{2,}/) : (l.includes(',') && !/\d,\d{3}\b/.test(l) ? l.split(',') : l.split(/\s+/))));
+                let parsed = raw.map(l => split(l).map(s => s.trim()));
+                let head = null;
+                if (parsed[0].some(c => isNaN(pn(c)))) head = parsed.shift();
+                const w = Math.max(...parsed.map(r => r.length));
+                if (head) { while (head.length < w) head.push('Col ' + (head.length + 1)); head = head.slice(0, w); }
+                else head = Array.from({ length: w }, (_, j) => j === 0 ? 'Draft' : 'Col ' + (j + 1));
+                const nr = parsed.map(r => { const x = r.slice(0, w).map(v => String(v).replace(/,/g, '')); while (x.length < w) x.push(''); return x; });
+                setCols(head); setRows(nr); setKey(0);
+                setInote({ t: '', m: 'Imported ' + nr.length + ' rows and ' + head.length + ' columns. Check headings and a few values against the booklet.' });
+            };
+            const loadExample = () => {
+                setPaste('Draft\tDisplacement\tTPC\tLCB\tLCF\tKMt\tMCT\n6.00\t30000\t45.0\t1.00\t-2.0\t11.50\t300\n7.00\t35000\t46.0\t0.90\t-2.2\t11.20\t310\n8.00\t40000\t47.0\t0.80\t-2.4\t11.00\t320');
+                setInote({ t: 'warn', m: 'Placeholder numbers only to show the format. They are NOT any ship\'s data. Replace with the figures from your own booklet.' });
+            };
+            const setCell = (i, j, v) => setRows(rows.map((r, a) => a === i ? r.map((c, b) => b === j ? v : c) : r));
+            const addRow = () => setRows([...rows, cols.map(() => '')]);
+            const delRow = () => rows.length > 2 && setRows(rows.slice(0, -1));
+            const addCol = () => { setCols([...cols, 'Col ' + (cols.length + 1)]); setRows(rows.map(r => [...r, ''])); };
+            const delCol = () => { if (cols.length > 2) { setCols(cols.slice(0, -1)); setRows(rows.map(r => r.slice(0, -1))); if (key >= cols.length - 1) setKey(0); } };
+            const sortTable = () => setRows([...rows].sort((a, b) => { const x = pn(a[0]), y = pn(b[0]); if (isNaN(x)) return 1; if (isNaN(y)) return -1; return x - y; }));
+            const clearAll = () => setRows(rows.map(r => r.map(() => '')));
+
+            // calc
+            const k = key;
+            const v = pn(val);
+            let results = null, note = null, noteT = '', hitA = -1, hitB = -1, orderInfo = '-', copyText = '';
+            const idx = rows.map((r, i) => i).filter(i => !isNaN(pn(rows[i][k])));
+            if (idx.length >= 2) {
+                const s = idx.map(i => ({ i, x: pn(rows[i][k]) })).sort((a, b) => a.x - b.x);
+                let dup = false;
+                for (let q = 1; q < s.length; q++) if (s[q].x === s[q - 1].x) dup = true;
+                const asc = idx.every((i, q) => q === 0 || pn(rows[i][k]) > pn(rows[idx[q - 1]][k]));
+                const desc = idx.every((i, q) => q === 0 || pn(rows[i][k]) < pn(rows[idx[q - 1]][k]));
+                orderInfo = dup ? 'Duplicates' : asc ? 'Ascending' : desc ? 'Descending' : 'Unsorted (handled)';
+                if (dup) { if (!isNaN(v)) { note = 'Duplicate values in "' + cols[k] + '" column. Cannot interpolate.'; noteT = 'bad'; } }
+                else if (!isNaN(v)) {
+                    let q = 1; while (q < s.length - 1 && v > s[q].x) q++;
+                    const a = s[q - 1], b = s[q];
+                    const extrap = v < s[0].x || v > s[s.length - 1].x;
+                    const f = (v - a.x) / (b.x - a.x);
+                    hitA = a.i; hitB = b.i;
+                    const missing = [];
+                    results = cols.map((c, j) => {
+                        const name = c || ('Col ' + (j + 1));
+                        if (j === k) { copyText += name + ': ' + v.toFixed(d) + '\n'; return { name: name + ' (given)', val: v.toFixed(d), key: true }; }
+                        const p1 = pn(rows[a.i][j]), p2 = pn(rows[b.i][j]);
+                        if (isNaN(p1) || isNaN(p2)) { missing.push(name); return { name, val: '-' }; }
+                        const r = (p1 + f * (p2 - p1)).toFixed(d);
+                        copyText += name + ': ' + r + '\n';
+                        return { name, val: r };
+                    });
+                    const m = ['Between rows ' + (a.i + 1) + ' (' + rows[a.i][k] + ') and ' + (b.i + 1) + ' (' + rows[b.i][k] + '), ' + (f * 100).toFixed(1) + '% of the way.'];
+                    if (extrap) { m.push('Value is outside the table: extrapolated, do not rely on this.'); noteT = 'warn'; }
+                    if (missing.length) { m.push('Missing numbers in: ' + missing.join(', ') + '.'); noteT = 'warn'; }
+                    note = m.join(' ');
+                }
+            } else if (!isNaN(v)) { note = 'Enter at least 2 rows with numbers in the "' + cols[k] + '" column.'; noteT = 'bad'; }
+
+            const copyRes = () => {
+                if (!copyText) return;
+                const done = () => { setCopied(true); setTimeout(() => setCopied(false), 1500); };
+                try { navigator.clipboard.writeText(copyText).then(done, () => {}); } catch (e) {}
+            };
+            const cellIn = { background: 'transparent', border: 0, borderRadius: 0, textAlign: 'right', minWidth: 84, padding: 8, fontSize: 13, color: 'var(--text)', width: '100%', outline: 'none' };
+            const headIn = { ...cellIn, textAlign: 'center', fontWeight: 700, fontSize: 12, background: 'var(--surface-2)' };
+            const cellBorder = { borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)', padding: 0 };
+
+            return (
+                <div>
+                    <h2 className="section-title">Hydrostatic Particulars</h2>
+                    <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+                        <div className="card" style={{ marginBottom: 16 }}>
+                            <div className="card-title">Find particulars</div>
+                            <div className="grid-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginBottom: 12 }}>
+                                <div>
+                                    <label className="input-label">Given</label>
+                                    <select className="input-field" value={key} onChange={(e) => setKey(parseInt(e.target.value))}>
+                                        {cols.map((c, j) => <option key={j} value={j}>{c || ('Col ' + (j + 1))}</option>)}
+                                    </select>
+                                </div>
+                                <NumField label={'Value of ' + (cols[k] || 'column')} value={val} onChange={setVal} placeholder="e.g. 7.50" />
+                                <div>
+                                    <label className="input-label">Decimals</label>
+                                    <input type="number" min="0" max="8" className="input-field" value={dec} onChange={(e) => setDec(e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="input-label">Table order</label>
+                                    <div style={{ padding: '10px 0', fontSize: 13, color: 'var(--muted)' }}>{orderInfo}</div>
+                                </div>
+                            </div>
+                            {results && (
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 }}>
+                                    {results.map((r, i) => (
+                                        <div key={i} style={{ background: r.key ? 'var(--accent-soft)' : 'var(--surface-2)', border: '1px solid ' + (r.key ? 'var(--accent)' : 'var(--border)'), borderRadius: 10, padding: 10 }}>
+                                            <div className="input-label" style={{ marginBottom: 2, textTransform: 'none' }}>{r.name}</div>
+                                            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent)', wordBreak: 'break-all' }}>{r.val}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            {note && <div style={noteStyle(noteT)}>{note}</div>}
+                            {results && <div style={{ marginTop: 10 }}><button style={subBtn} onClick={copyRes}>{copied ? 'Copied' : 'Copy results'}</button></div>}
+                        </div>
+
+                        <div className="card" style={{ marginBottom: 16 }}>
+                            <div className="card-title">Hydrostatic table <span style={{ fontWeight: 400, color: 'var(--muted)', fontSize: 12 }}>({rows.length} rows, {cols.length} columns, saved on this device)</span></div>
+                            <div style={{ overflowX: 'auto', borderRadius: 10, border: '1px solid var(--border)' }}>
+                                <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+                                    <thead>
+                                        <tr>
+                                            <th style={{ ...cellBorder, width: 26 }}></th>
+                                            {cols.map((c, j) => (
+                                                <th key={j} style={cellBorder}><input style={headIn} value={c} onChange={(e) => setCols(cols.map((x, b) => b === j ? e.target.value : x))} /></th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {rows.map((r, i) => (
+                                            <tr key={i} style={{ background: (i === hitA || i === hitB) ? 'var(--accent-soft)' : 'transparent' }}>
+                                                <td style={{ ...cellBorder, textAlign: 'center', fontSize: 11, color: 'var(--muted)', padding: '0 4px' }}>{i + 1}</td>
+                                                {cols.map((_, j) => (
+                                                    <td key={j} style={cellBorder}><input inputMode="decimal" style={cellIn} value={r[j] === undefined ? '' : r[j]} onChange={(e) => setCell(i, j, e.target.value)} /></td>
+                                                ))}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+                                <button style={subBtn} onClick={addRow}>+ Row</button>
+                                <button style={subBtn} onClick={delRow}>- Row</button>
+                                <button style={subBtn} onClick={addCol}>+ Column</button>
+                                <button style={subBtn} onClick={delCol}>- Column</button>
+                                <button style={subBtn} onClick={sortTable}>Sort by first column</button>
+                                <button style={subBtn} onClick={clearAll}>Clear table</button>
+                            </div>
+                        </div>
+
+                        <div className="card" style={{ marginBottom: 16 }}>
+                            <div className="card-title">Paste from Excel / PDF</div>
+                            <textarea className="input-field" style={{ minHeight: 110, fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 12 }} value={paste} onChange={(e) => setPaste(e.target.value)}
+                                placeholder="Copy the hydrostatic table from the ship's booklet or Excel (first row = headings, e.g. Draft, Displacement, TPC, LCB, LCF, KMt, MCT), paste here, then press Import." />
+                            <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
+                                <button className="btn btn-primary" onClick={doImport}>Import</button>
+                                <button style={subBtn} onClick={loadExample}>Load format example</button>
+                            </div>
+                            {inote && <div style={noteStyle(inote.t)}>{inote.m}</div>}
+                        </div>
+
+                        <div className="info-section">
+                            <h3>How it works</h3>
+                            <p>Linear interpolation between the two table rows that bracket your value, applied to every column at once: <strong>P = P1 + (X - X1) x (P2 - P1) / (X2 - X1)</strong>. Pick any column as Given. To find the draft for a known displacement, choose Displacement.</p>
+                            <p>Enter the exact figures from the approved Trim and Stability Booklet and check the units and the water density the table assumes (usually 1.025). The tool applies no trim or density correction. Keep bracketing rows close together.</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ===== Time helpers (naive local wall-clock handled in UTC arithmetic, independent of device timezone) =====
+        const gmtOff = (str) => {
+            const m = String(str).match(/GMT([+-])(\d+):(\d+)/);
+            if (!m) return 0;
+            return (m[1] === '+' ? 1 : -1) * (parseInt(m[2]) + parseInt(m[3]) / 60);
+        };
+        const naiveMs = (s) => {
+            const m = String(s).match(/^(\d+)-(\d+)-(\d+)T(\d+):(\d+)/);
+            return m ? Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) : NaN;
+        };
+        const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const p2 = (n) => String(n).padStart(2, '0');
+        const fmtDay = (ms) => { const d = new Date(ms); return DOW[d.getUTCDay()] + ' ' + p2(d.getUTCDate()) + ' ' + MON[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); };
+        const fmtDMY = (ms) => { const d = new Date(ms); return p2(d.getUTCDate()) + '/' + p2(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear(); };
+        const fmtClock = (ms) => { const d = new Date(ms); return p2(d.getUTCHours()) + ':' + p2(d.getUTCMinutes()); };
+        const durText = (hours) => { const t = Math.round(hours * 60); const d = Math.floor(t / 1440), h = Math.floor((t % 1440) / 60), m = t % 60; return (d ? d + 'd ' : '') + h + 'h ' + p2(m) + 'm'; };
+        const gmtLabel = (g) => g.replace('GMT', 'GMT ').replace(':00', '').replace(/^GMT ([+-])(\d+):(\d+)$/, (a, s, h, m) => 'GMT ' + s + h + ':' + m);
+        const etaInfo = (depStr, depGMT, dist, speed, arrGMT) => {
+            const dep = naiveMs(depStr);
+            const d = parseFloat(dist), v = parseFloat(speed);
+            if (isNaN(dep) || !d || !v) return null;
+            const hours = d / v;
+            const arrMs = dep - gmtOff(depGMT) * 3600000 + hours * 3600000 + gmtOff(arrGMT) * 3600000;
+            return { arrMs, hours };
+        };
+        const TZ_LABEL = (g) => g.replace('GMT', 'UTC ');
+
+        // ===== Deadweight / max cargo intake =====
+        const DWT_KEY = 'tfm_dwt_v1';
+        const DWT_DEFAULT = {
+            vessel: '', port: '', density: '', refDensity: '1.025', draft: '', disp: '', lightship: '',
+            ded: [['Fuel oil (FO)', ''], ['Diesel oil (DO)', ''], ['Lube oil', ''], ['Fresh water', ''], ['Ballast (unpumpable)', ''], ['Sag / hog allowance', ''], ['Constant', '']],
+            onboard: '', booked: '', holdCap: '', sf: '', planned: ''
+        };
+        function loadDwt() {
+            try { const s = JSON.parse(localStorage.getItem(DWT_KEY) || 'null'); if (s && s.ded) return { ...DWT_DEFAULT, ...s }; } catch (e) {}
+            return DWT_DEFAULT;
+        }
+        function readHydro() {
+            try {
+                const s = JSON.parse(localStorage.getItem('tfm_hydro_v1') || 'null');
+                if (!s || !s.cols || !s.rows) return null;
+                let di = s.cols.findIndex(c => /draft/i.test(c)); if (di < 0) di = 0;
+                let wi = s.cols.findIndex(c => /displ/i.test(c)); if (wi < 0) wi = 1;
+                const pts = s.rows.map(r => [pn(r[di]), pn(r[wi])]).filter(p => !isNaN(p[0]) && !isNaN(p[1])).sort((a, b) => a[0] - b[0]);
+                return pts.length >= 2 ? pts : null;
+            } catch (e) { return null; }
+        }
+        function interpPts(pts, xi, yi, v) {
+            const s = [...pts].sort((a, b) => a[xi] - b[xi]);
+            let i = 1; while (i < s.length - 1 && v > s[i][xi]) i++;
+            const a = s[i - 1], b = s[i];
+            if (a[xi] === b[xi]) return null;
+            return { val: a[yi] + (v - a[xi]) * (b[yi] - a[yi]) / (b[xi] - a[xi]), extrap: v < s[0][xi] || v > s[s.length - 1][xi] };
+        }
+        const f2 = (v) => isFinite(v) ? v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-';
+
+        function DwtTab() {
+            const [d, setD] = useState(loadDwt);
+            const [hmsg, setHmsg] = useState(null);
+            useEffect(() => { try { localStorage.setItem(DWT_KEY, JSON.stringify(d)); } catch (e) {} }, [d]);
+            const set = (k) => (v) => setD({ ...d, [k]: v });
+            const setDed = (i, j, v) => setD({ ...d, ded: d.ded.map((r, a) => a === i ? (j === 0 ? [v, r[1]] : [r[0], v]) : r) });
+            const hydro = readHydro();
+
+            const fillDisp = () => {
+                const dr = pn(d.draft);
+                if (!hydro) { setHmsg({ t: 'bad', m: 'No Hydrostatics table found. Enter the Draft and Displacement columns in the Hydrostatics tab first, or type the displacement here.' }); return; }
+                if (isNaN(dr)) { setHmsg({ t: 'bad', m: 'Enter the maximum permissible draft first.' }); return; }
+                const r = interpPts(hydro, 0, 1, dr);
+                if (!r) { setHmsg({ t: 'bad', m: 'Could not interpolate. Check for duplicate drafts in the table.' }); return; }
+                setD({ ...d, disp: String(Math.round(r.val * 100) / 100) });
+                setHmsg({ t: r.extrap ? 'warn' : '', m: 'Displacement at ' + dr + ' m taken from the Hydrostatics table' + (r.extrap ? ' by extrapolation, check it against the booklet.' : '.') });
+            };
+
+            const rho = pn(d.density), rhoRef = pn(d.refDensity) || 1.025;
+            const dispSW = pn(d.disp), ls = pn(d.lightship);
+            const dispDock = (!isNaN(dispSW) && rho > 0) ? dispSW * rho / rhoRef : NaN;
+            const dwt = dispDock - ls;
+            const dedTotal = d.ded.reduce((a, r) => a + (pn(r[1]) || 0), 0);
+            const capacity = dwt - dedTotal;
+            const onboard = pn(d.onboard) || 0;
+            const maxIntake = capacity - onboard;
+            const booked = pn(d.booked);
+            const diff = !isNaN(booked) ? booked - maxIntake : NaN;
+            const sf = pn(d.sf), hc = pn(d.holdCap);
+            const volLimit = (sf > 0 && hc > 0) ? hc / sf : NaN;
+            const limiting = isFinite(volLimit) && isFinite(maxIntake) ? (volLimit < maxIntake ? 'volume' : 'draft') : null;
+            const finalIntake = limiting === 'volume' ? volLimit - onboard : maxIntake;
+            const planned = pn(d.planned);
+            let expDraft = null;
+            if (hydro && rho > 0 && !isNaN(ls) && !isNaN(planned)) {
+                const mass = ls + dedTotal + onboard + planned;
+                const eq = mass * rhoRef / rho;
+                const r = interpPts(hydro, 1, 0, eq);
+                if (r) expDraft = { draft: r.val, mass, extrap: r.extrap };
+            }
+            const ready = isFinite(dwt);
+            const noteS = (t) => noteStyle(t);
+
+            const Tile = ({ label, value, unit, tone, big }) => (
+                <div className={'dwt-tile' + (big ? ' big' : '')}>
+                    <div className="dwt-label">{label}</div>
+                    <div className="dwt-value" style={tone === 'bad' ? { color: 'var(--bad)' } : tone === 'ok' ? { color: 'var(--ok)' } : undefined}>{value}<span>{unit}</span></div>
+                </div>
+            );
+
+            return (
+                <div>
+                    <h2 className="section-title">Deadweight &amp; Max Cargo Intake</h2>
+
+                    <div className="print-only print-head">
+                        <h1>Deadweight &amp; Max Cargo Intake{d.vessel ? ' : ' + d.vessel : ''}</h1>
+                        <div>{d.port ? 'Port: ' + d.port + '. ' : ''}Dock water density {d.density || '-'} t/m³, maximum permissible draft {d.draft || '-'} m. Printed {fmtDay(Date.now())}.</div>
+                    </div>
+
+                    <div className="toolbar no-print">
+                        <span className="dim">Saved on this device. Results update as you type.</span>
+                        <div className="tb-right">
+                            <button type="button" className="btn-ghost" onClick={() => window.print()}>Print / Save PDF</button>
+                            <button type="button" className="btn-ghost" onClick={() => { if (window.confirm('Clear all deadweight inputs?')) setD(DWT_DEFAULT); }}>Reset</button>
+                        </div>
+                    </div>
+
+                    <div className="dwt-cols">
+                        <div className="dwt-col">
+                        <div className="card dwt-card">
+                            <div className="card-title">1. Loading condition</div>
+                            <div className="dwt-fields">
+                                <div><label className="input-label">Vessel</label><input className="input-field" value={d.vessel} onChange={(e) => set('vessel')(e.target.value)} /></div>
+                                <div><label className="input-label">Loading port</label><input className="input-field" value={d.port} onChange={(e) => set('port')(e.target.value)} /></div>
+                                <NumField label="Dock water density (t/m³)" value={d.density} onChange={set('density')} placeholder="e.g. 1.020" />
+                                <NumField label="Max permissible draft (m)" value={d.draft} onChange={set('draft')} placeholder="e.g. 12.50" />
+                                <NumField label="Displacement at that draft, SW (t)" value={d.disp} onChange={set('disp')} placeholder="from hydrostatics" />
+                                <NumField label="Table reference density (t/m³)" value={d.refDensity} onChange={set('refDensity')} />
+                                <NumField label="Lightship (t)" value={d.lightship} onChange={set('lightship')} />
+                            </div>
+                            <div className="no-print"><button type="button" className="btn-ghost" onClick={fillDisp}>Get displacement from Hydrostatics tab</button></div>
+                            {hmsg && <div style={noteS(hmsg.t)} className="no-print">{hmsg.m}</div>}
+                        </div>
+
+                        <div className="card dwt-card">
+                            <div className="card-title">2. Deductibles (t)</div>
+                            <div className="ded-list">
+                                {d.ded.map((r, i) => (
+                                    <div key={i} className="ded-row">
+                                        <input className="input-field" value={r[0]} aria-label="Item name" onChange={(e) => setDed(i, 0, e.target.value)} />
+                                        <input className="input-field" type="number" step="any" inputMode="decimal" aria-label={r[0] + ' tonnes'} value={r[1]} placeholder="0" onChange={(e) => setDed(i, 1, e.target.value)} />
+                                        <button type="button" className="icon-btn no-print" aria-label={'Remove ' + r[0]} onClick={() => setD({ ...d, ded: d.ded.filter((_, a) => a !== i) })}>&times;</button>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="no-print"><button type="button" className="btn-ghost" onClick={() => setD({ ...d, ded: [...d.ded, ['New item', '']] })}>+ Add item</button></div>
+                            <div className="ded-total"><span>Total deductibles</span><b>{f2(dedTotal)} t</b></div>
+                        </div>
+                        </div>
+                        <div className="dwt-col">
+                    <div className="card dwt-card">
+                        <div className="card-title">3. Cargo</div>
+                        <div className="dwt-fields">
+                            <NumField label="Cargo already on board (t)" value={d.onboard} onChange={set('onboard')} placeholder="0" />
+                            <NumField label="Total cargo booked (t)" value={d.booked} onChange={set('booked')} />
+                            <NumField label="Total hold capacity (m³, optional)" value={d.holdCap} onChange={set('holdCap')} />
+                            <NumField label="Stowage factor (m³/t, optional)" value={d.sf} onChange={set('sf')} />
+                            <NumField label="Planned cargo to load (t, for draft)" value={d.planned} onChange={set('planned')} />
+                        </div>
+                    </div>
+
+                    <div className="card dwt-card dwt-results"><div className="card-title">Results</div>
+                    {!ready && <div style={noteS('')}>Enter dock water density, displacement and lightship to see results.</div>}
+                    {ready && (
+                        <>
+                            <div className="dwt-grid">
+                                <Tile label="Displacement at dock density" value={f2(dispDock)} unit=" t" />
+                                <Tile label="Deadweight" value={f2(dwt)} unit=" t" />
+                                <Tile label="Total deductibles" value={f2(dedTotal)} unit=" t" />
+                                <Tile label="Cargo capacity (DWT less deductibles)" value={f2(capacity)} unit=" t" />
+                            </div>
+                            <div className="dwt-grid">
+                                <Tile big label="Max cargo intake (draft limit)" value={f2(maxIntake)} unit=" t" />
+                                {isFinite(volLimit) && <Tile big label={'Volume limit (cargo to fill holds)'} value={f2(volLimit - onboard)} unit=" t" />}
+                                {limiting && <Tile big label="Limiting factor" value={limiting === 'volume' ? 'Volume' : 'Draft'} unit="" />}
+                                {limiting && <Tile big label="Practical max intake" value={f2(finalIntake)} unit=" t" />}
+                            </div>
+                            {!isNaN(booked) && (
+                                <div className="dwt-verdict" style={{ borderColor: diff > 0 ? 'var(--bad)' : 'var(--ok)', color: diff > 0 ? 'var(--bad)' : 'var(--ok)' }}>
+                                    {diff > 0
+                                        ? 'Booked cargo exceeds the max intake by ' + f2(diff) + ' t. Loading all of it would exceed the permitted draft.'
+                                        : 'Booked cargo is within the max intake. Spare capacity ' + f2(-diff) + ' t.'}
+                                </div>
+                            )}
+                            {expDraft && (
+                                <div className="dwt-verdict" style={{ borderColor: 'var(--accent)', color: 'var(--text)' }}>
+                                    With {f2(planned)} t to load (total mass {f2(expDraft.mass)} t) the expected mean draft in dock water is about <b>{expDraft.draft.toFixed(2)} m</b>{expDraft.extrap ? ' (outside the table, extrapolated)' : ''}. This ignores trim, sag and hog.
+                                </div>
+                            )}
+                        </>
+                    )}
+                    </div>
+                        </div>
+                    </div>
+
+                    <div className="info-section" style={{ marginTop: 16 }}>
+                        <h3>How it is calculated</h3>
+                        <p>Displacement at dock density = table displacement x dock density / table reference density. Deadweight = that displacement less lightship. Max intake = deadweight less total deductibles less cargo already on board.</p>
+                        <p>Check every figure against the approved Trim and Stability Booklet and the port draft limit. Sag, hog and the constant should follow your own recent figures. This is a planning aid and does not replace the official loading computer.</p>
+                    </div>
+                </div>
+            );
+        }
+
+        const TABS = [
+            { key: 'rob', label: 'ROB', c: '#0369a1', cd: '#38bdf8' },
+            { key: 'eta', label: 'ETA', c: '#4f46e5', cd: '#a5b4fc' },
+            { key: 'speed', label: 'Speed', c: '#b45309', cd: '#fbbf24' },
+            { key: 'vent', label: 'Ventilation', c: '#0f766e', cd: '#2dd4bf' },
+            { key: 'conv', label: 'Converter', c: '#15803d', cd: '#4ade80' },
+            { key: 'hydro', label: 'Hydrostatics', c: '#be123c', cd: '#fb7185' },
+            { key: 'dwt', label: 'Deadweight', c: '#c2410c', cd: '#fb923c' }
+        ];
+        const ICON_PATHS = {
+            rob: <><path d="M12 2.7s6 6.2 6 10.8a6 6 0 0 1-12 0C6 8.9 12 2.7 12 2.7z" /></>,
+            eta: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+            speed: <><path d="M4.9 19a9 9 0 1 1 14.2 0" /><path d="M12 13l4-5" /></>,
+            vent: <><path d="M3 8h9a3 3 0 1 0-3-3" /><path d="M3 12h14a3 3 0 1 1-3 3" /><path d="M3 16h6" /></>,
+            conv: <><path d="M7 7h12l-3-3" /><path d="M17 17H5l3 3" /></>,
+            hydro: <><path d="M2 20c2 0 2-1.5 5-1.5S9 20 12 20s3-1.5 5-1.5S20 20 22 20" /><path d="M4 14l1.5 3.5h13L20 14z" /><path d="M12 14V7h4v7" /></>,
+            dwt: <><path d="M21 8l-9-5-9 5 9 5 9-5z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></>,
+            sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></>,
+            moon: <><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></>
+        };
+        function Icon({ name }) {
+            return (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+                    {ICON_PATHS[name]}
+                </svg>
+            );
+        }
+
+        function App() {
+            const [isUnlocked, setIsUnlocked] = useState(true);
+            const [passwordInput, setPasswordInput] = useState('');
+            const [passwordError, setPasswordError] = useState(false);
+            const [activeTab, setActiveTab] = useState(0);
+            const [robView, setRobView] = useState('cards');
+            const [nowMs, setNowMs] = useState(Date.now());
+            useEffect(() => { const t = setInterval(() => setNowMs(Date.now()), 20000); return () => clearInterval(t); }, []);
+            const [theme, setTheme] = useState(() => document.documentElement.getAttribute('data-theme') || 'dark');
+            const toggleTheme = () => {
+                const next = theme === 'dark' ? 'light' : 'dark';
+                setTheme(next);
+                document.documentElement.setAttribute('data-theme', next);
+                try { localStorage.setItem('tfm_theme', next); } catch (e) {}
+                const m = document.querySelector('meta[name="theme-color"]');
+                if (m) m.setAttribute('content', next === 'dark' ? '#121b2d' : '#ffffff');
+            };
+
+            // Speed profiles
+            const [superEco, setSuperEco] = useState({ name: 'SUPER ECO', speed: 10, fuel: 18 });
+            const [eco, setEco] = useState({ name: 'ECO', speed: 12, fuel: 25 });
+            const [full, setFull] = useState({ name: 'FULL', speed: 14, fuel: 35 });
+            const [fwConsumption, setFwConsumption] = useState(8);
+            const [fwGeneration, setFwGeneration] = useState(12);
+            const [startingFuelROB, setStartingFuelROB] = useState(500);
+            const [startingFWROB, setStartingFWROB] = useState(200);
+            const [portFuel, setPortFuel] = useState(0);
+            const [robRows, setRobRows] = useState([{fromPort:'',toPort:'',distance:'',daysInPort:'',mode:'E',fwGen:12,bunker:''}]);
+
+            // ETA Calculator
+            const [etaSpeed1, setEtaSpeed1] = useState(10);
+            const [etaSpeed2, setEtaSpeed2] = useState(12);
+            const [etaSpeed3, setEtaSpeed3] = useState(14);
+            const [etaRows, setEtaRows] = useState([{fromPort:'',toPort:'',distance:'',depDateTime:'',depGMT:'GMT+0:00',arrGMT:'GMT+0:00'}]);
+
+            // Required Speed
+            const [reqSpeed, setReqSpeed] = useState({destination:'',dtg:'',currentDateTime:'',currentGMT:'GMT+0:00',desiredETA:'',desiredGMT:'GMT+0:00'});
+
+            // Ventilation
+            const [outsideAir, setOutsideAir] = useState({ dryBulb: '', wetBulb: '' });
+            const [holds, setHolds] = useState(Array.from({ length: 10 }, (_, i) => ({
+                holdNo: i + 1, cargo: '', dryBulb: '', wetBulb: ''
+            })));
+
+            useEffect(() => {
+                const saved = localStorage.getItem('toolsForMateUnlocked');
+                if (saved === 'true') setIsUnlocked(true);
+            }, []);
+
+            const handleLogin = (e) => {
+                e.preventDefault();
+                if (passwordInput === CORRECT_PASSWORD) {
+                    setIsUnlocked(true);
+                    localStorage.setItem('toolsForMateUnlocked', 'true');
+                    setPasswordError(false);
+                    setPasswordInput('');
+                } else {
+                    setPasswordError(true);
+                    setTimeout(() => setPasswordError(false), 2000);
+                }
+            };
+
+            const getSpeedProfile = (mode) => {
+                switch(mode) {
+                    case 'S': return superEco;
+                    case 'E': return eco;
+                    case 'F': return full;
+                    default: return eco;
+                }
+            };
+
+            const calculateSeaDays = (distance, speed) => !distance || !speed ? 0 : distance / (speed * 24);
+
+            const calculateROB = () => {
+                let fuelROB = parseFloat(startingFuelROB) || 0, fwROB = parseFloat(startingFWROB) || 0;
+                const portFuelRate = parseFloat(portFuel) || 0;
+                const results = [];
+                robRows.forEach((row) => {
+                    const profile = getSpeedProfile(row.mode);
+                    const seaDays = calculateSeaDays(parseFloat(row.distance) || 0, profile.speed);
+                    const portDays = parseFloat(row.daysInPort) || 0;
+                    const fwGenRate = parseFloat(row.fwGen) || 0;
+                    const bunker = parseFloat(row.bunker) || 0;
+                    const fuelUsed = seaDays * profile.fuel;
+                    const portFuelUsed = portDays * portFuelRate;
+                    const fwGenerated = seaDays * fwGenRate;
+                    const fwConsumed = (seaDays + portDays) * fwConsumption;
+                    const fwNet = fwGenerated - fwConsumed;
+                    // Arrival (after sea passage), then departure (after port stay and bunkering)
+                    const arrFuel = fuelROB - fuelUsed;
+                    const arrFW = fwROB + fwGenerated - seaDays * fwConsumption;
+                    const depFuel = arrFuel - portFuelUsed + bunker;
+                    const depFW = fwROB + fwNet;
+                    fuelROB = depFuel;
+                    fwROB = depFW;
+                    results.push({
+                        seaDays: seaDays.toFixed(1),
+                        fuelUsed: fuelUsed.toFixed(1),
+                        portFuel: portFuelUsed.toFixed(1),
+                        fwNet: fwNet.toFixed(1),
+                        arrFuel: arrFuel.toFixed(1),
+                        arrFW: arrFW.toFixed(1),
+                        depFuel: depFuel.toFixed(1),
+                        depFW: depFW.toFixed(1)
+                    });
+                });
+                return results;
+            };
+
+            const parseGMTOffset = (gmtStr) => {
+                const match = gmtStr.match(/GMT([+-])(\d+):(\d+)/);
+                if (!match) return 0;
+                const sign = match[1] === '+' ? 1 : -1;
+                return sign * (parseInt(match[2]) + parseInt(match[3]) / 60);
+            };
+
+            const calculateETA = (depDateTime, depGMT, distance, speed, arrGMT) => {
+                if (!depDateTime || !distance || !speed) return '';
+                const depDate = new Date(depDateTime);
+                const hoursAtSea = distance / speed;
+                const depOffset = parseGMTOffset(depGMT);
+                const arrOffset = parseGMTOffset(arrGMT);
+                const utcDep = new Date(depDate.getTime() - depOffset * 60 * 60 * 1000);
+                const utcArr = new Date(utcDep.getTime() + hoursAtSea * 60 * 60 * 1000);
+                const arrDate = new Date(utcArr.getTime() + arrOffset * 60 * 60 * 1000);
+                return arrDate.toISOString().slice(0, 16);
+            };
+
+            const calculateRequiredSpeed = () => {
+                if (!reqSpeed.currentDateTime || !reqSpeed.desiredETA || !reqSpeed.dtg) return null;
+                const currentDate = new Date(reqSpeed.currentDateTime);
+                const desiredDate = new Date(reqSpeed.desiredETA);
+                const currentOffset = parseGMTOffset(reqSpeed.currentGMT);
+                const desiredOffset = parseGMTOffset(reqSpeed.desiredGMT);
+                const utcCurrent = new Date(currentDate.getTime() - currentOffset * 60 * 60 * 1000);
+                const utcDesired = new Date(desiredDate.getTime() - desiredOffset * 60 * 60 * 1000);
+                const hoursAvailable = (utcDesired - utcCurrent) / (1000 * 60 * 60);
+                const distance = parseFloat(reqSpeed.dtg);
+                if (hoursAvailable <= 0) return null;
+                return (distance / hoursAvailable).toFixed(2);
+            };
+
+            const outsideDP = useMemo(() => calculateDewPoint(outsideAir.dryBulb, outsideAir.wetBulb), [outsideAir]);
+            const outsideRH = useMemo(() => calculateRH(outsideAir.dryBulb, outsideAir.wetBulb), [outsideAir]);
+
+            const holdCalculations = useMemo(() => {
+                return holds.map(hold => {
+                    const dp = calculateDewPoint(hold.dryBulb, hold.wetBulb);
+                    const rh = calculateRH(hold.dryBulb, hold.wetBulb);
+                    const dpDelta = (dp !== null && outsideDP !== null) ? (dp - outsideDP) : null;
+                    let decision = '-';
+                    let remark = null;
+                    if (hold.dryBulb && hold.wetBulb) {
+                        if (dpDelta !== null) {
+                            decision = dpDelta > 0 ? 'VENTILATE' : 'NO VENT';
+                        }
+                        if (rh !== null && rh > 60) {
+                            remark = {
+                                title: 'High Humidity Warning',
+                                message: `Relative humidity in this hold is ${rh.toFixed(1)}%, which exceeds the 60% threshold. This creates high corrosion risk for steel cargo. Monitor this hold closely and ventilate aggressively when outside conditions permit (DP Delta is positive).`
+                            };
+                        }
+                    }
+                    return { dp, rh, dpDelta, decision, remark };
+                });
+            }, [holds, outsideDP]);
+
+            const summary = useMemo(() => {
+                const counts = { VENTILATE: 0, 'NO VENT': 0, CAUTION: 0, EMPTY: 0 };
+                holdCalculations.forEach(calc => {
+                    if (calc.decision === 'VENTILATE') counts.VENTILATE++;
+                    else if (calc.decision === 'NO VENT') counts['NO VENT']++;
+                    else counts.EMPTY++;
+                    if (calc.remark) counts.CAUTION++;
+                });
+                return counts;
+            }, [holdCalculations]);
+
+            const robResults = calculateROB();
+            const requiredSpeedValue = calculateRequiredSpeed();
+
+
+            if (!isUnlocked) {
+                return (
+                    <div className="password-screen">
+                        <div className="password-card">
+                            <h1 className="password-title">Tools for Mate</h1>
+                            <p className="password-subtitle">by Tango Juliet</p>
+                            <form onSubmit={handleLogin}>
+                                <label className="input-label">Password</label>
+                                <input
+                                    type="password"
+                                    className="input-field"
+                                    value={passwordInput}
+                                    onChange={(e) => setPasswordInput(e.target.value)}
+                                    placeholder="Enter password"
+                                    autoFocus
+                                />
+                                {passwordError && (
+                                    <div className="password-error">
+                                        Incorrect password
+                                    </div>
+                                )}
+                                <button type="submit" className="btn btn-primary" style={{width: '100%'}}>
+                                    Unlock
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <>
+                    <header className="header">
+                        <div className="header-content">
+                            <div className="brand">
+                                <h1>Tools for Mate</h1>
+                                <span className="header-subtitle">by Tango Juliet</span>
+                            </div>
+                            <button className="theme-toggle" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+                                <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
+                                <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+                            </button>
+                        </div>
+                    </header>
+                    <div className="container">
+                        <div className="tabs" role="tablist" aria-label="Tools">
+                            {TABS.map((t, idx) => (
+                                <button key={t.key} role="tab" aria-selected={activeTab === idx} className="tab" style={{ '--tc': t.c, '--tcd': t.cd }} onClick={() => setActiveTab(idx)}>
+                                    <Icon name={t.key} />
+                                    <span>{t.label}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="tab-content" role="tabpanel">
+                            {activeTab === 0 && (
+                                <div>
+                                    <h2 className="section-title no-print">Speed Profiles</h2>
+                                    <div className="grid-3 no-print rob-top">
+                                        {[
+                                            { state: superEco, setState: setSuperEco },
+                                            { state: eco, setState: setEco },
+                                            { state: full, setState: setFull }
+                                        ].map((profile, idx) => (
+                                            <div key={idx} className="card">
+                                                <input 
+                                                    type="text" 
+                                                    className="input-field"
+                                                    value={profile.state.name}
+                                                    onChange={(e) => profile.setState({...profile.state, name: e.target.value})}
+                                                    placeholder="Profile name"
+                                                    style={{fontWeight: 700, textTransform: 'uppercase'}}
+                                                />
+                                                <div className="pair">
+                                                    <div>
+                                                        <label className="input-label">Speed (kts)</label>
+                                                        <input type="number" inputMode="decimal" className="input-field" value={profile.state.speed}
+                                                            onChange={(e) => profile.setState({...profile.state, speed: parseFloat(e.target.value)})}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="input-label">Fuel (T/day)</label>
+                                                        <input type="number" inputMode="decimal" className="input-field" value={profile.state.fuel}
+                                                            onChange={(e) => profile.setState({...profile.state, fuel: parseFloat(e.target.value)})}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="grid-3 no-print rob-top" style={{gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))'}}>
+                                        <div className="card">
+                                            <label className="input-label">Port Fuel Consumption (T/day)</label>
+                                            <input type="number" className="input-field" value={portFuel} onChange={(e) => setPortFuel(parseFloat(e.target.value))} />
+                                        </div>
+                                        <div className="card">
+                                            <label className="input-label">FW Consumption (T/day)</label>
+                                            <input type="number" className="input-field" value={fwConsumption} onChange={(e) => setFwConsumption(parseFloat(e.target.value))} />
+                                        </div>
+                                        <div className="card">
+                                            <label className="input-label">FW Generation at Sea (T/day)</label>
+                                            <input type="number" className="input-field" value={fwGeneration} onChange={(e) => setFwGeneration(parseFloat(e.target.value))} />
+                                        </div>
+                                    </div>
+
+                                    <h2 className="section-title" style={{marginTop: '32px'}}>ROB Calculator</h2>
+                                    
+                                    <div className="grid-3 no-print rob-top" style={{gridTemplateColumns: 'repeat(2, 1fr)', marginBottom: '24px'}}>
+                                        <div className="card">
+                                            <label className="input-label">Starting Fuel ROB at first departure (tons)</label>
+                                            <input type="number" className="input-field" value={startingFuelROB} onChange={(e) => setStartingFuelROB(parseFloat(e.target.value))} />
+                                        </div>
+                                        <div className="card">
+                                            <label className="input-label">Starting FW ROB at first departure (tons)</label>
+                                            <input type="number" className="input-field" value={startingFWROB} onChange={(e) => setStartingFWROB(parseFloat(e.target.value))} />
+                                        </div>
+                                    </div>
+
+                                    <div className="toolbar no-print">
+                                        <div className="seg" role="group" aria-label="ROB view">
+                                            <button type="button" aria-pressed={robView === 'cards'} onClick={() => setRobView('cards')}>Leg cards</button>
+                                            <button type="button" aria-pressed={robView === 'summary'} onClick={() => setRobView('summary')}>All results</button>
+                                        </div>
+                                        <button type="button" className="btn-ghost" onClick={() => { setRobView('summary'); setTimeout(() => window.print(), 150); }}>Print / Save PDF</button>
+                                    </div>
+
+                                    <div className="print-only print-head">
+                                        <h1>ROB Forecast</h1>
+                                        <div>Printed {fmtDay(nowMs)} {fmtClock(nowMs)} UTC. Starting ROB at first departure: fuel {startingFuelROB} T, FW {startingFWROB} T.</div>
+                                        <div>Speed profiles: {[superEco, eco, full].map(p => p.name + ' ' + p.speed + ' kts / ' + p.fuel + ' T/day').join('; ')}. Port fuel {portFuel || 0} T/day. FW consumption {fwConsumption} T/day.</div>
+                                    </div>
+
+                                    {robView === 'cards' && (
+                                    <div className="legs no-print">
+                                        {robRows.map((row, idx) => {
+                                            const r = robResults[idx] || {};
+                                            const neg = (v) => parseFloat(v) < 0 ? { color: 'var(--bad)' } : undefined;
+                                            const upd = (k, v) => { const n = [...robRows]; n[idx] = { ...n[idx], [k]: v }; setRobRows(n); };
+                                            return (
+                                                <div key={idx} className="card leg-card compact">
+                                                    <div className="leg-head">
+                                                        <div className="leg-title">Leg {idx + 1}<span>{(row.fromPort || '?') + ' to ' + (row.toPort || '?')}</span></div>
+                                                        <div className="leg-meta">{r.seaDays || '0.0'} sea days &middot; {r.fuelUsed || '0.0'} T sea fuel &middot; {r.portFuel || '0.0'} T port fuel &middot; FW net <b style={neg(r.fwNet)}>{r.fwNet || '0.0'}</b> T</div>
+                                                    </div>
+                                                    <div className="leg-fields">
+                                                        <div><label className="input-label">From</label><input type="text" className="input-field" value={row.fromPort} onChange={(e) => upd('fromPort', e.target.value)} /></div>
+                                                        <div><label className="input-label">To</label><input type="text" className="input-field" value={row.toPort} onChange={(e) => upd('toPort', e.target.value)} /></div>
+                                                        <div><label className="input-label">Dist (NM)</label><input type="number" inputMode="decimal" className="input-field" value={row.distance} onChange={(e) => upd('distance', e.target.value)} /></div>
+                                                        <div><label className="input-label">Days in port</label><input type="number" inputMode="decimal" className="input-field" value={row.daysInPort} onChange={(e) => upd('daysInPort', e.target.value)} /></div>
+                                                        <div>
+                                                            <label className="input-label">Mode</label>
+                                                            <div className="mode-btns">
+                                                                {['S', 'E', 'F'].map(mode => (
+                                                                    <button key={mode} type="button" className={`mode-btn ${row.mode === mode ? 'active' : ''}`} aria-pressed={row.mode === mode} onClick={() => upd('mode', mode)}>{mode}</button>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                        <div><label className="input-label">FW gen (T/d)</label><input type="number" inputMode="decimal" className="input-field" value={row.fwGen} onChange={(e) => upd('fwGen', parseFloat(e.target.value))} /></div>
+                                                        <div><label className="input-label">Bunker at To (T)</label><input type="number" inputMode="decimal" className="input-field" placeholder="0" value={row.bunker} onChange={(e) => upd('bunker', e.target.value)} /></div>
+                                                    </div>
+                                                    <div className="leg-results">
+                                                        <div className="res-panel">
+                                                            <span className="res-title">Arrival {row.toPort || ''}</span>
+                                                            <span className="res-item"><span className="res-label">Fuel</span><span className="res-val" style={neg(r.arrFuel)}>{r.arrFuel || '0.0'}</span></span>
+                                                            <span className="res-item"><span className="res-label">FW</span><span className="res-val" style={neg(r.arrFW)}>{r.arrFW || '0.0'}</span></span>
+                                                        </div>
+                                                        <div className="res-panel dep">
+                                                            <span className="res-title">Departure {row.toPort || ''}</span>
+                                                            <span className="res-item"><span className="res-label">Fuel</span><span className="res-val" style={neg(r.depFuel)}>{r.depFuel || '0.0'}</span></span>
+                                                            <span className="res-item"><span className="res-label">FW</span><span className="res-val" style={neg(r.depFW)}>{r.depFW || '0.0'}</span></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    )}
+
+                                    {robView === 'summary' && (() => {
+                                        const num = (v) => parseFloat(v) || 0;
+                                        const tot = robRows.reduce((a, row, i) => { const r = robResults[i] || {}; return { dist: a.dist + num(row.distance), sea: a.sea + num(r.seaDays), fuel: a.fuel + num(r.fuelUsed) + num(r.portFuel), bunker: a.bunker + num(row.bunker) }; }, { dist: 0, sea: 0, fuel: 0, bunker: 0 });
+                                        const last = robResults[robResults.length - 1] || {};
+                                        const neg = (v) => parseFloat(v) < 0 ? { color: 'var(--bad)' } : undefined;
+                                        return (
+                                            <div className="sum-wrap">
+                                                <table className="sum-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Leg</th><th>From</th><th>To</th><th className="r">Dist NM</th><th className="r">Port days</th><th>Mode</th><th className="r">Sea days</th><th className="r">Sea fuel</th><th className="r">Port fuel</th><th className="r">Bunker</th><th className="r">FW net</th><th className="r grp">Arr fuel</th><th className="r">Arr FW</th><th className="r grp">Dep fuel</th><th className="r">Dep FW</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {robRows.map((row, i) => { const r = robResults[i] || {}; return (
+                                                            <tr key={i}>
+                                                                <td>{i + 1}</td><td>{row.fromPort || '-'}</td><td>{row.toPort || '-'}</td>
+                                                                <td className="r">{row.distance || '0'}</td><td className="r">{row.daysInPort || '0'}</td><td>{row.mode}</td>
+                                                                <td className="r">{r.seaDays}</td><td className="r">{r.fuelUsed}</td><td className="r">{r.portFuel}</td><td className="r">{row.bunker || '0'}</td>
+                                                                <td className="r" style={neg(r.fwNet)}>{r.fwNet}</td>
+                                                                <td className="r grp" style={neg(r.arrFuel)}><b>{r.arrFuel}</b></td><td className="r" style={neg(r.arrFW)}>{r.arrFW}</td>
+                                                                <td className="r grp" style={neg(r.depFuel)}><b>{r.depFuel}</b></td><td className="r" style={neg(r.depFW)}>{r.depFW}</td>
+                                                            </tr>); })}
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <td colSpan="3">Total</td><td className="r">{tot.dist.toFixed(0)}</td><td></td><td></td>
+                                                            <td className="r">{tot.sea.toFixed(1)}</td><td className="r" colSpan="2">{tot.fuel.toFixed(1)} fuel used</td><td className="r">{tot.bunker.toFixed(1)}</td><td></td>
+                                                            <td className="r grp"></td><td></td><td className="r grp"><b>{last.depFuel}</b></td><td className="r"><b>{last.depFW}</b></td>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        );
+                                    })()}
+
+                                    <button className="btn btn-primary no-print" onClick={() => setRobRows([...robRows, { fromPort: '', toPort: '', distance: '', daysInPort: '', mode: 'E', fwGen: fwGeneration, bunker: '' }])}>+ Add Row</button>
+                                    {robRows.length > 1 && (<button className="btn btn-danger no-print" onClick={() => setRobRows(robRows.slice(0, -1))}>− Remove</button>)}
+                                </div>
+                            )}
+
+                            {activeTab === 1 && (
+                                <div>
+                                    <h2 className="section-title">ETA Calculator</h2>
+                                    <div className="time-note">
+                                        <strong>All times are local.</strong> Departure time is the local clock time at the departure port. Each ETA is the local clock time at the arrival port. Set the correct GMT offset for both ports and the calculator converts between them.
+                                    </div>
+                                    <div className="now-bar">
+                                        <span><b>Now, UTC:</b> {fmtDay(nowMs)} {fmtClock(nowMs)}</span>
+                                        <span><b>Now, this device:</b> {fmtDay(nowMs - new Date().getTimezoneOffset() * 60000)} {fmtClock(nowMs - new Date().getTimezoneOffset() * 60000)}</span>
+                                    </div>
+                                    <div className="card eta-speeds">
+                                        <div className="card-title">Planning speeds (kts)</div>
+                                        <div className="eta-speed-row">
+                                            <div><label className="input-label">Speed 1</label><input type="number" inputMode="decimal" className="input-field" value={etaSpeed1} onChange={(e) => setEtaSpeed1(parseFloat(e.target.value))} /></div>
+                                            <div><label className="input-label">Speed 2</label><input type="number" inputMode="decimal" className="input-field" value={etaSpeed2} onChange={(e) => setEtaSpeed2(parseFloat(e.target.value))} /></div>
+                                            <div><label className="input-label">Speed 3</label><input type="number" inputMode="decimal" className="input-field" value={etaSpeed3} onChange={(e) => setEtaSpeed3(parseFloat(e.target.value))} /></div>
+                                        </div>
+                                    </div>
+
+                                    <div className="legs">
+                                        {etaRows.map((row, idx) => {
+                                            const upd = (k, v) => { const n = [...etaRows]; n[idx] = { ...n[idx], [k]: v }; setEtaRows(n); };
+                                            const setNow = () => upd('depDateTime', new Date(nowMs + gmtOff(row.depGMT) * 3600000).toISOString().slice(0, 16));
+                                            return (
+                                                <div key={idx} className="card leg-card">
+                                                    <div className="leg-head">
+                                                        <div className="leg-title">Leg {idx + 1}<span>{(row.fromPort || '?') + ' to ' + (row.toPort || '?')}</span></div>
+                                                        <div className="leg-meta">{row.distance ? row.distance + ' NM' : 'Enter distance'}</div>
+                                                    </div>
+                                                    <div className="leg-fields">
+                                                        <div><label className="input-label">From</label><input type="text" className="input-field" value={row.fromPort} onChange={(e) => upd('fromPort', e.target.value)} /></div>
+                                                        <div><label className="input-label">To</label><input type="text" className="input-field" value={row.toPort} onChange={(e) => upd('toPort', e.target.value)} /></div>
+                                                        <div><label className="input-label">Distance (NM)</label><input type="number" inputMode="decimal" className="input-field" value={row.distance} onChange={(e) => upd('distance', e.target.value)} /></div>
+                                                        <div className="wide">
+                                                            <label className="input-label">Departure (local time at {row.fromPort || 'departure port'})</label>
+                                                            <div className="inline-field">
+                                                                <input type="datetime-local" className="input-field" value={row.depDateTime} onChange={(e) => upd('depDateTime', e.target.value)} />
+                                                                <button type="button" className="btn-ghost" onClick={setNow} title="Fill with the current time in the departure zone">Now</button>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label className="input-label">Departure zone</label>
+                                                            <select className="input-field tz-select" value={row.depGMT} onChange={(e) => upd('depGMT', e.target.value)}>
+                                                                {timezones.map(tz => <option key={tz} value={tz}>{TZ_LABEL(tz)}</option>)}
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label className="input-label">Arrival zone</label>
+                                                            <select className="input-field tz-select" value={row.arrGMT} onChange={(e) => upd('arrGMT', e.target.value)}>
+                                                                {timezones.map(tz => <option key={tz} value={tz}>{TZ_LABEL(tz)}</option>)}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div className="eta-grid">
+                                                        {[etaSpeed1, etaSpeed2, etaSpeed3].map((sp, k) => {
+                                                            const info = etaInfo(row.depDateTime, row.depGMT, row.distance, sp, row.arrGMT);
+                                                            return (
+                                                                <div key={k} className="eta-tile">
+                                                                    <div className="eta-speed">ETA at {sp} kts</div>
+                                                                    {info ? (
+                                                                        <>
+                                                                            <div className="eta-time"><span className="d">{fmtDMY(info.arrMs)}</span><span className="t">{fmtClock(info.arrMs)}</span><span className="lt">LT</span></div>
+                                                                            <div className="eta-sub">Local time at {row.toPort || 'arrival port'} ({TZ_LABEL(row.arrGMT)})</div>
+                                                                            <div className="eta-sub">Passage {durText(info.hours)}</div>
+                                                                        </>
+                                                                    ) : (<div className="eta-empty">Enter distance and departure time</div>)}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    <button className="btn btn-primary" onClick={() => setEtaRows([...etaRows, { fromPort: '', toPort: '', distance: '', depDateTime: '', depGMT: 'GMT+0:00', arrGMT: 'GMT+0:00' }])}>+ Add Row</button>
+                                    {etaRows.length > 1 && (<button className="btn btn-danger" onClick={() => setEtaRows(etaRows.slice(0, -1))}>− Remove</button>)}
+                                </div>
+                            )}
+
+                            {activeTab === 2 && (
+                                <div>
+                                    <h2 className="section-title">Required Speed Calculator</h2>
+                                    <div style={{maxWidth: '800px', margin: '0 auto'}}>
+                                        <div className="card" style={{marginBottom: '20px'}}>
+                                            <label className="input-label">Destination</label>
+                                            <input type="text" className="input-field" value={reqSpeed.destination} onChange={(e) => setReqSpeed({...reqSpeed, destination: e.target.value})} />
+                                        </div>
+                                        <div className="card" style={{marginBottom: '20px'}}>
+                                            <label className="input-label">Distance to Go (NM)</label>
+                                            <input type="number" className="input-field" value={reqSpeed.dtg} onChange={(e) => setReqSpeed({...reqSpeed, dtg: e.target.value})} />
+                                        </div>
+                                        <div className="grid-3" style={{gridTemplateColumns: '2fr 1fr', marginBottom: '20px'}}>
+                                            <div className="card">
+                                                <label className="input-label">Current Date/Time</label>
+                                                <input type="datetime-local" className="input-field" value={reqSpeed.currentDateTime} onChange={(e) => setReqSpeed({...reqSpeed, currentDateTime: e.target.value})} />
+                                            </div>
+                                            <div className="card">
+                                                <label className="input-label">GMT</label>
+                                                <select className="input-field" value={reqSpeed.currentGMT} onChange={(e) => setReqSpeed({...reqSpeed, currentGMT: e.target.value})}>
+                                                    {timezones.map(tz => <option key={tz} value={tz}>{tz}</option>)}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="grid-3" style={{gridTemplateColumns: '2fr 1fr', marginBottom: '32px'}}>
+                                            <div className="card">
+                                                <label className="input-label">Desired ETA</label>
+                                                <input type="datetime-local" className="input-field" value={reqSpeed.desiredETA} onChange={(e) => setReqSpeed({...reqSpeed, desiredETA: e.target.value})} />
+                                            </div>
+                                            <div className="card">
+                                                <label className="input-label">GMT</label>
+                                                <select className="input-field" value={reqSpeed.desiredGMT} onChange={(e) => setReqSpeed({...reqSpeed, desiredGMT: e.target.value})}>
+                                                    {timezones.map(tz => <option key={tz} value={tz}>{tz}</option>)}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className="calc-result">
+                                            <h2>Required Speed</h2>
+                                            <div className="value">{requiredSpeedValue || '-'}</div>
+                                            <div className="unit">knots</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 3 && (
+                                <div>
+                                    <h2 className="section-title">Cargo Hold Ventilation</h2>
+                                    
+                                    <div className="grid-3" style={{gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: '24px'}}>
+                                        <div className="card">
+                                            <label className="input-label">Outside Dry Bulb (°C)</label>
+                                            <input type="number" step="0.1" className="input-field" value={outsideAir.dryBulb} onChange={(e) => setOutsideAir({...outsideAir, dryBulb: e.target.value})} />
+                                        </div>
+                                        <div className="card">
+                                            <label className="input-label">Outside Wet Bulb (°C)</label>
+                                            <input type="number" step="0.1" className="input-field" value={outsideAir.wetBulb} onChange={(e) => setOutsideAir({...outsideAir, wetBulb: e.target.value})} />
+                                        </div>
+                                        <div className="card">
+                                            <div className="card-title">Outside Dew Point</div>
+                                            <div style={{fontSize: '24px', fontWeight: '800', marginTop: '8px'}}>
+                                                <span className="auto-value">{outsideDP !== null ? outsideDP.toFixed(1) : '-'} °C</span>
+                                            </div>
+                                        </div>
+                                        <div className="card">
+                                            <div className="card-title">Outside RH</div>
+                                            <div style={{fontSize: '24px', fontWeight: '800', marginTop: '8px'}}>
+                                                <span className="auto-value">{outsideRH !== null ? outsideRH.toFixed(1) : '-'} %</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="summary-grid">
+                                        <div className="summary-card">
+                                            <div className="summary-value" style={{color: 'var(--ok)'}}>{summary.VENTILATE}</div>
+                                            <div className="summary-label">Ventilate</div>
+                                        </div>
+                                        <div className="summary-card">
+                                            <div className="summary-value" style={{color: 'var(--bad)'}}>{summary['NO VENT']}</div>
+                                            <div className="summary-label">No Vent</div>
+                                        </div>
+                                        <div className="summary-card">
+                                            <div className="summary-value" style={{color: 'var(--warn)'}}>{summary.CAUTION}</div>
+                                            <div className="summary-label">Caution</div>
+                                        </div>
+                                        <div className="summary-card">
+                                            <div className="summary-value" style={{color: 'var(--muted)'}}>{summary.EMPTY}</div>
+                                            <div className="summary-label">Empty</div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{overflowX: 'auto', borderRadius: '16px'}}>
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Hold</th><th>Cargo</th><th>Dry °C</th><th>Wet °C</th><th>RH %</th><th>DP °C</th><th>DP Δ</th><th>Decision</th><th>Caution</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {holds.map((hold, idx) => {
+                                                    const calc = holdCalculations[idx];
+                                                    return (
+                                                        <tr key={idx}>
+                                                            <td><strong>H{hold.holdNo}</strong></td>
+                                                            <td><input type="text" value={hold.cargo} placeholder="Cargo" onChange={(e) => { const n = [...holds]; n[idx].cargo = e.target.value; setHolds(n); }} /></td>
+                                                            <td><input type="number" step="0.1" value={hold.dryBulb} onChange={(e) => { const n = [...holds]; n[idx].dryBulb = e.target.value; setHolds(n); }} /></td>
+                                                            <td><input type="number" step="0.1" value={hold.wetBulb} onChange={(e) => { const n = [...holds]; n[idx].wetBulb = e.target.value; setHolds(n); }} /></td>
+                                                            <td><span className="auto-value">{calc.rh !== null ? calc.rh.toFixed(1) : '-'}</span></td>
+                                                            <td><span className="auto-value">{calc.dp !== null ? calc.dp.toFixed(1) : '-'}</span></td>
+                                                            <td><span className="auto-value">{calc.dpDelta !== null ? (calc.dpDelta > 0 ? '+' : '') + calc.dpDelta.toFixed(1) : '-'}</span></td>
+                                                            <td>
+                                                                {calc.decision === 'VENTILATE' && <span className="decision-pill decision-ventilate">VENTILATE</span>}
+                                                                {calc.decision === 'NO VENT' && <span className="decision-pill decision-no-vent">NO VENT</span>}
+                                                                {calc.decision === '-' && <span style={{color: 'var(--muted)'}}>-</span>}
+                                                            </td>
+                                                            <td>
+                                                                {calc.remark ? (
+                                                                    <div style={{fontSize: '11px', color: 'var(--warn)', lineHeight: '1.4'}}>
+                                                                        <strong>RH {calc.rh.toFixed(1)}%</strong><br/>
+                                                                        High corrosion risk<br/>
+                                                                        <span style={{fontSize: '10px', color: 'var(--text-2)'}}>Use dehumidifier if available</span>
+                                                                    </div>
+                                                                ) : (
+                                                                    <span style={{color: 'var(--muted)', fontSize: '11px'}}>OK</span>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div className="info-section" style={{marginTop: '32px'}}>
+                                        <h3>Understanding the Numbers</h3>
+                                        <div className="quick-ref-grid">
+                                            <div className="quick-ref-card">
+                                                <h4>Relative Humidity (RH)</h4>
+                                                <p>Percentage of moisture in air vs. maximum it can hold at that temperature. RH above 60% = high corrosion risk for steel cargo.</p>
+                                            </div>
+                                            <div className="quick-ref-card">
+                                                <h4>Dew Point (DP)</h4>
+                                                <p>Temperature where air becomes saturated and water condenses. If a surface is colder than the dew point, moisture will form on it.</p>
+                                            </div>
+                                            <div className="quick-ref-card">
+                                                <h4>DP Delta (DP Δ)</h4>
+                                                <p><strong>Hold DP - Outside DP</strong><br/>Positive (+) = Outside air is drier → Safe to ventilate<br/>Negative (-) = Outside air is wetter → Do NOT ventilate</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="info-section">
+                                        <h3>Types of Condensation</h3>
+                                        <p><strong>Cargo Sweat:</strong> Occurs when warm, humid air contacts cold cargo. The cargo surface cools the air below its dew point, causing condensation directly on the cargo.</p>
+                                        <ul style={{marginLeft: '20px', marginTop: '8px', color: 'var(--text-2)', fontSize: '13px', lineHeight: '1.7'}}>
+                                            <li>Common when loading cold cargo in warm/humid ports</li>
+                                            <li>Happens when sailing from cold to warm climates</li>
+                                            <li>Prevention: DO NOT ventilate with warm outside air</li>
+                                        </ul>
+                                        
+                                        <p style={{marginTop: '16px'}}><strong>Ship Sweat:</strong> Occurs when cold outside air enters a warm hold. The cold air contacts warm ship structures (bulkheads, deckhead), cooling them below the dew point. Water condenses on ship surfaces and drips onto cargo.</p>
+                                        <ul style={{marginLeft: '20px', marginTop: '8px', color: 'var(--text-2)', fontSize: '13px', lineHeight: '1.7'}}>
+                                            <li>Common when sailing from warm to cold climates</li>
+                                            <li>Affects ship structures, not cargo directly</li>
+                                            <li>Prevention: Limit ventilation in cold weather, use dehumidifier</li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="info-section">
+                                        <h3>Ventilation Decision Rules</h3>
+                                        <p><strong style={{color: 'var(--ok)'}}>VENTILATE (Green):</strong> Outside dew point is lower than hold dew point. Introducing outside air will remove moisture from the hold. Safe to open vents.</p>
+                                        <p style={{marginTop: '12px'}}><strong style={{color: 'var(--bad)'}}>NO VENT (Red):</strong> Outside dew point is higher than hold dew point. Outside air contains more moisture and will increase humidity inside the hold. Keep vents closed.</p>
+                                        <p style={{marginTop: '12px'}}><strong style={{color: 'var(--warn)'}}>CAUTION (Amber):</strong> Relative humidity inside hold exceeds 60%. High corrosion risk for steel cargo. Monitor closely and ventilate aggressively when conditions permit (DP Delta is positive).</p>
+                                    </div>
+
+                                    <div className="info-section">
+                                        <h3>Using a Dehumidifier</h3>
+                                        <p>A dehumidifier mechanically removes moisture from hold air without relying on outside conditions. It works by:</p>
+                                        <ul style={{marginLeft: '20px', marginTop: '8px', color: 'var(--text-2)', fontSize: '13px', lineHeight: '1.7'}}>
+                                            <li>Drawing air over cold coils (condensing moisture)</li>
+                                            <li>Collecting condensed water in a drain tank</li>
+                                            <li>Returning drier air to the hold</li>
+                                        </ul>
+                                        <p style={{marginTop: '12px'}}><strong>When to use:</strong> When outside air is consistently humid, when natural ventilation is insufficient, when RH remains above 60% despite ventilation, or during critical cargo operations.</p>
+                                        <p style={{marginTop: '8px'}}><strong>Benefits:</strong> Works 24/7 regardless of weather, precise humidity control, no risk of introducing more moisture, protects cargo in any climate.</p>
+                                    </div>
+
+                                    <div className="info-section">
+                                        <h3>Best Practices</h3>
+                                        <ul style={{marginLeft: '20px', color: 'var(--text-2)', fontSize: '13px', lineHeight: '1.7'}}>
+                                            <li><strong>Measure twice daily:</strong> Morning (0800) and evening (2000) readings minimum</li>
+                                            <li><strong>Use sling hygrometer:</strong> Measure at hold exhaust, not inlet</li>
+                                            <li><strong>Record in log:</strong> Date, time, hold number, dry/wet bulb, DP, RH, decision, weather observations</li>
+                                            <li><strong>Ventilate strategically:</strong> Only when DP Delta is positive</li>
+                                            <li><strong>Steel cargo threshold:</strong> Maintain RH below 60% to minimize corrosion</li>
+                                            <li><strong>Surface ventilation:</strong> Daytime only (0600-1700), good weather only, close at night</li>
+                                            <li><strong>Forced ventilation:</strong> Use when surface ventilation insufficient, monitor power consumption</li>
+                                            <li><strong>Know your cargo:</strong> Different cargoes have different moisture tolerances</li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="info-section">
+                                        <h3>Legal Protection</h3>
+                                        <p>Proper ventilation logs are your legal defense against cargo damage claims. Courts recognize that moisture damage is often unavoidable at sea, but only if the ship's officers demonstrated reasonable care through systematic monitoring and appropriate ventilation decisions. Your log entries prove due diligence.</p>
+                                    </div>
+                                </div>
+                            )}
+                            {activeTab === 4 && <UnitTab />}
+                            {activeTab === 5 && <HydroTab />}
+                            {activeTab === 6 && <DwtTab />}
+                        </div>
+                    </div>
+                </>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    const CACHE_NAME = 'tools-for-mate-v2';
+                    const urlsToCache = ['./', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap', 'https://fonts.cdnfonts.com/css/milanova'];
+                    
+                    self.addEventListener('install', event => {
+                        event.waitUntil(
+                            caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+                        );
+                    });
+                    
+                    self.addEventListener('fetch', event => {
+                        event.respondWith(
+                            caches.match(event.request).then(response => response || fetch(event.request))
+                        );
+                    });
+                `;
+                
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                
+                navigator.serviceWorker.register(swUrl).then(registration => {
+                    console.log('Service Worker registered');
+                }).catch(err => {
+                    console.log('Service Worker registration failed:', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
