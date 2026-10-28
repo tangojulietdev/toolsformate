@@ -111,7 +111,7 @@
         .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
 
         /* ===== Top tiles: the only place with per-tool colour ===== */
-        .tabs { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 24px; }
+        .tabs { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-bottom: 24px; }
         .tab {
             --tc: var(--accent);
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
@@ -352,6 +352,53 @@
         @media (max-width: 900px) { .spd-cols { grid-template-columns: 1fr; } }
         @media (max-width: 480px) { .spd-fields { grid-template-columns: 1fr 1fr; } }
 
+        /* ===== Proofread ===== */
+        .pf-cols { display: grid; grid-template-columns: 1.25fr 1fr; gap: 14px; align-items: start; }
+        @media (max-width: 900px) { .pf-cols { grid-template-columns: 1fr; } }
+        @media (max-width: 640px) { .pf-wrap { height: 230px; } }
+        .pf-wrap { position: relative; height: 340px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); }
+        .pf-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+        .pf-back, .pf-text { position: absolute; inset: 0; margin: 0; padding: 12px 14px; font: 15px/1.65 'Inter', system-ui, sans-serif; white-space: pre-wrap; overflow-wrap: break-word; word-break: normal; letter-spacing: 0; border: 0; overflow-y: scroll; overflow-x: hidden; box-sizing: border-box; width: 100%; height: 100%; tab-size: 4; }
+        .pf-back { color: transparent; pointer-events: none; scrollbar-color: transparent transparent; }
+        .pf-back::-webkit-scrollbar { background: transparent; }
+        .pf-back::-webkit-scrollbar-thumb { background: transparent; }
+        .pf-text { background: transparent; color: var(--text); resize: none; outline: none; border-radius: var(--r-sm); }
+        .pf-m { background: none; color: transparent; text-decoration: underline wavy; text-decoration-thickness: 1.5px; text-underline-offset: 3px; border-radius: 2px; }
+        .pf-spelling { text-decoration-color: var(--bad); }
+        .pf-grammar { text-decoration-color: #2563eb; }
+        .pf-style { text-decoration-style: dotted; text-decoration-color: var(--muted); }
+        .pf-sel { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+        .pf-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; color: var(--muted); }
+        .pf-foot .btn-ghost { margin: 0 0 0 auto; min-height: 34px; padding: 4px 12px; font-size: 13px; }
+        .pf-foot .btn-ghost:disabled { opacity: .45; cursor: default; }
+        .pf-msg { color: var(--ok); font-weight: 600; }
+        .pf-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+        .pf-chip { border: 1px solid var(--border); background: var(--surface); color: var(--text-2); border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 600; cursor: pointer; opacity: .55; }
+        .pf-chip.on { opacity: 1; background: var(--surface-2); color: var(--text); }
+        .pf-chip b { margin-left: 4px; }
+        .pf-chip.on.pf-c-spelling { border-color: var(--bad); }
+        .pf-chip.on.pf-c-grammar { border-color: #2563eb; }
+        .pf-list { max-height: 330px; overflow-y: auto; display: grid; gap: 6px; align-content: start; }
+        .pf-issue { border: 1px solid var(--border); border-radius: var(--r-sm); padding: 8px 10px; background: var(--surface); cursor: pointer; }
+        .pf-issue.sel { border-color: var(--accent); background: var(--accent-soft); }
+        .pf-top { display: flex; align-items: center; gap: 8px; }
+        .pf-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 1px 6px; border-radius: 4px; color: #fff; background: var(--muted); }
+        .pf-tag.pf-c-spelling { background: var(--bad); }
+        .pf-tag.pf-c-grammar { background: #2563eb; }
+        .pf-word { font-weight: 700; font-size: 14px; color: var(--text); word-break: break-word; }
+        .pf-msg2 { font-size: 12px; color: var(--muted); margin: 2px 0 6px; }
+        .pf-actions { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+        .pf-sug { border: 1px solid var(--accent); background: var(--accent-soft); color: var(--accent); border-radius: 6px; padding: 3px 9px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .pf-link { border: 0; background: none; color: var(--text-2); font-size: 12px; text-decoration: underline; cursor: pointer; padding: 3px 4px; }
+        .pf-ok { color: var(--ok); font-weight: 600; padding: 10px 2px; }
+        .pf-mywords { margin-top: 10px; font-size: 13px; }
+        .pf-mywords summary { cursor: pointer; font-weight: 600; color: var(--text-2); }
+        .pf-addrow { display: flex; gap: 6px; margin: 8px 0; }
+        .pf-addrow .input-field { margin: 0; min-height: 34px; font-size: 14px; }
+        .pf-wordlist { display: flex; flex-wrap: wrap; gap: 5px; }
+        .pf-w { display: inline-flex; align-items: center; gap: 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 1px 4px 1px 10px; font-size: 12px; }
+        .pf-w button { border: 0; background: none; cursor: pointer; font-size: 15px; color: var(--muted); }
+
         /* ===== Deadweight ===== */
         .dwt-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
         .dwt-col { display: grid; gap: 14px; min-width: 0; }
@@ -434,7 +481,7 @@
     <div id="root"></div>
     
     <script type="text/babel">
-        const { useState, useMemo, useEffect } = React;
+        const { useState, useMemo, useEffect, useRef } = React;
 
         const CORRECT_PASSWORD = '';
         const timezones = ['GMT-12:00','GMT-11:00','GMT-10:00','GMT-9:00','GMT-8:00','GMT-7:00','GMT-6:00','GMT-5:00','GMT-4:00','GMT-3:00','GMT-2:00','GMT-1:00','GMT+0:00','GMT+1:00','GMT+2:00','GMT+3:00','GMT+4:00','GMT+5:00','GMT+5:30','GMT+6:00','GMT+7:00','GMT+8:00','GMT+9:00','GMT+10:00','GMT+11:00','GMT+12:00','GMT+13:00','GMT+14:00'];
@@ -997,6 +1044,482 @@
             );
         }
 
+// ===== Proofread engine (offline) =====
+const Proof = (function () {
+    const WORD_RE = /[A-Za-zÀ-ɏ]+(?:['’][A-Za-z]+)*/g;
+    let VALID = new Set(), SUGG = new Set(), RANK = new Map();
+    const KEYS = 'qwertyuiop|asdfghjkl|zxcvbnm'.split('|');
+    const ADJ = {}; KEYS.forEach((row, r) => { for (let i = 0; i < row.length; i++) { const a = row[i]; ADJ[a] = ADJ[a] || ''; if (row[i - 1]) ADJ[a] += row[i - 1]; if (row[i + 1]) ADJ[a] += row[i + 1]; [r - 1, r + 1].forEach((rr) => { if (KEYS[rr]) { for (let j = i - 1; j <= i + 1; j++) if (KEYS[rr][j]) ADJ[a] += KEYS[rr][j]; } }); } });
+
+    function loadCommon(text) { RANK = new Map(); const l = text.split('\n'); for (let i = 0; i < l.length; i++) if (l[i]) RANK.set(l[i], i); }
+    function load(text, extra) {
+        VALID = new Set(); SUGG = new Set();
+        const lines = text.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+            let w = lines[i];
+            if (!w) continue;
+            if (w.charCodeAt(0) === 33) { VALID.add(w.slice(1)); } else { VALID.add(w); SUGG.add(w); }
+        }
+        (extra || []).forEach((w) => { VALID.add(w); SUGG.add(w); });
+        return VALID.size;
+    }
+    function addWord(w) { w = w.toLowerCase(); VALID.add(w); SUGG.add(w); }
+    function ready() { return VALID.size > 0; }
+
+    // UK -> US variants so British spellings are accepted
+    const GB_RULES = [
+        [/our(s|ed|ing|able|ite|less)?$/, 'or$1'], [/ise(s|d)?$/, 'ize$1'], [/ising$/, 'izing'], [/isation(s)?$/, 'ization$1'],
+        [/yse(s|d)?$/, 'yze$1'], [/ysing$/, 'yzing'], [/tre(s)?$/, 'ter$1'], [/ence$/, 'ense'], [/ogue(s)?$/, 'og$1'],
+        [/ae/, 'e'], [/oe/, 'e'], [/lled$/, 'led'], [/lling$/, 'ling'], [/ller$/, 'ler'], [/lment$/, 'llment'],
+        [/ments?$/, (m) => m], [/ageing$/, 'aging'], [/ey(s)?$/, 'y$1'], [/ough$/, 'o'], [/ugh$/, 'u'], [/mme$/, 'm'],
+        [/ium$/, 'um'], [/grey/, 'gray'], [/tyre/, 'tire'], [/kerb/, 'curb'], [/ceed/, 'cede'], [/ll(?=[^aeiou]|$)/, 'l'],
+        [/(.)\1(ed|ing)$/, '$1$2'], [/ence(s)?$/, 'ense$1'], [/ance(s)?$/, 'ense$1']
+    ];
+    function gbOk(w) {
+        for (const [re, rep] of GB_RULES) {
+            if (typeof rep === 'function') continue;
+            if (re.test(w)) { const v = w.replace(re, rep); if (v !== w && VALID.has(v)) return true; }
+        }
+        return false;
+    }
+    function isWord(w) {
+        w = w.toLowerCase().replace(/’/g, "'");
+        if (VALID.has(w)) return true;
+        if (w.endsWith("'s") && VALID.has(w.slice(0, -2))) return true;
+        if (w.endsWith("s'") && VALID.has(w.slice(0, -2))) return true;
+        if (gbOk(w)) return true;
+        return false;
+    }
+
+    // ---- suggestions ----
+    const AL = "abcdefghijklmnopqrstuvwxyz'";
+    function edits1(w) {
+        const out = new Set(), n = w.length;
+        for (let i = 0; i < n; i++) out.add(w.slice(0, i) + w.slice(i + 1));
+        for (let i = 0; i < n - 1; i++) out.add(w.slice(0, i) + w[i + 1] + w[i] + w.slice(i + 2));
+        for (let i = 0; i < n; i++) for (const c of AL) out.add(w.slice(0, i) + c + w.slice(i + 1));
+        for (let i = 0; i <= n; i++) for (const c of AL) out.add(w.slice(0, i) + c + w.slice(i));
+        return out;
+    }
+    function score(orig, cand, d) {
+        let s = d * 10;
+        if (cand[0] !== orig[0]) s += 3;
+        let pre = 0; while (pre < orig.length && pre < cand.length && orig[pre] === cand[pre]) pre++;
+        s -= Math.min(pre, 4) * 0.6;
+        let suf = 0; while (suf < orig.length && suf < cand.length && orig[orig.length - 1 - suf] === cand[cand.length - 1 - suf]) suf++;
+        s -= Math.min(suf, 3) * 0.4;
+        s += Math.abs(orig.length - cand.length) * 0.8;
+        if (orig.length === cand.length) {
+            let i = 0; while (orig[i] === cand[i]) i++;
+            if (orig[i] === cand[i + 1] && orig[i + 1] === cand[i] && orig.slice(i + 2) === cand.slice(i + 2)) s -= 2.5;
+            else if (orig.slice(i + 1) === cand.slice(i + 1) && ADJ[orig[i]] && ADJ[orig[i]].indexOf(cand[i]) >= 0) s -= 1;
+        }
+        const rk = RANK.get(cand); if (rk !== undefined && rk < 6000) s -= 3 * (1 - Math.log10(rk + 1) / 3.8);
+        if (cand.indexOf("'") >= 0 && orig.indexOf("'") < 0) s += 1.5;
+        return s;
+    }
+    function matchCase(orig, cand) {
+        if (orig.length > 1 && orig === orig.toUpperCase()) return cand.toUpperCase();
+        if (orig[0] !== orig[0].toLowerCase()) return cand[0].toUpperCase() + cand.slice(1);
+        return cand;
+    }
+    function suggest(word, max) {
+        max = max || 6;
+        const w = word.toLowerCase().replace(/’/g, "'");
+        const found = new Map();
+        const e1 = edits1(w);
+        e1.forEach((c) => { if (SUGG.has(c)) found.set(c, 1); });
+        // split into two words
+        const splits = [];
+        for (let i = 2; i <= w.length - 2; i++) {
+            const a = w.slice(0, i), b = w.slice(i);
+            if ((SUGG.has(a) || a === 'a') && SUGG.has(b) && (a.length > 2 || ['a', 'an', 'in', 'on', 'to', 'of', 'at', 'it', 'is', 'as', 'be', 'by', 'we', 'he', 'my', 'no', 'so', 'up', 'us', 'or', 'do', 'go', 'if'].indexOf(a) >= 0) && b.length > 2) splits.push(a + ' ' + b);
+        }
+        if (found.size < 4 && w.length >= 4 && w.length <= 14) {
+            const seen = new Set();
+            e1.forEach((x) => { edits1(x).forEach((c) => { if (!seen.has(c)) { seen.add(c); if (SUGG.has(c) && !found.has(c)) found.set(c, 2); } }); });
+        }
+        const list = [];
+        found.forEach((d, c) => list.push([score(w, c, d), c]));
+        splits.slice(0, 2).forEach((c) => list.push([8, c]));
+        list.sort((a, b) => a[0] - b[0] || a[1].length - b[1].length || (a[1] < b[1] ? -1 : 1));
+        const out = []; const seen = new Set();
+        for (const [, c] of list) { const m = matchCase(word, c); if (!seen.has(m)) { seen.add(m); out.push(m); } if (out.length >= max) break; }
+        return out;
+    }
+
+    // ---- spelling ----
+    function spellCheck(text, ignore) {
+        const issues = [];
+        let m; WORD_RE.lastIndex = 0;
+        while ((m = WORD_RE.exec(text))) {
+            const w = m[0], s = m.index, e = s + w.length;
+            const prev = text[s - 1], next = text[e];
+            if (/[0-9@\/\\_.]/.test(prev || '') && prev !== '.' ) continue;
+            if (prev === '.' && /[a-z0-9]/i.test(text[s - 2] || '')) continue; // domains, e.g. a.b
+            if (/[0-9@_\/]/.test(next || '')) continue;
+            if (w.length < 2) continue;
+            if (w === w.toUpperCase() && w.length <= 8) continue; // abbreviations
+            if (ignore && ignore.has(w.toLowerCase())) continue;
+            if (isWord(w)) continue;
+            // hyphenated or apostrophe parts
+            // capitalised unknown word that is not at a sentence start: probably a name or port
+            const before = text.slice(0, s).replace(/[\s"'(\[]+$/, '');
+            const sentStart = before === '' || /[.!?:]$/.test(before) || /\n$/.test(text.slice(0, s).replace(/[ \t]+$/, ''));
+            if (w[0] !== w[0].toLowerCase() && !sentStart) continue;
+            if (w[0] !== w[0].toLowerCase() && w.slice(1) !== w.slice(1).toLowerCase() && w.length > 1 && w !== w.toUpperCase()) { /* CamelCase */ continue; }
+            issues.push({ type: 'spell', start: s, end: e, text: w, message: 'Possible spelling mistake', fixes: null });
+        }
+        return issues;
+    }
+
+    // ---- grammar ----
+    const VOWEL_SOUND_EXC = /^(uni|use|usu|uti|uri|eur|one|once|ubiq|ufo|uk$)/i;
+    const SILENT_H = /^(hour|honest|honou?r|heir)/i;
+    const ABBR = /^(e\.g|i\.e|etc|vs|approx|no|nos|min|max|mr|mrs|ms|dr|st|fig|eq|ref|incl|ca|cf|al|ex|vol|co|ltd|inc|sr|jr|capt|cdr|lt|eng|mt|mv|ss|sq|sec|hrs?|kts?|lat|long|abt|apr|jan|feb|aug|sep|sept|oct|nov|dec|tel|dept)$/i;
+    const IRR_PP = { went: 'gone', took: 'taken', wrote: 'written', did: 'done', began: 'begun', ran: 'run', came: 'come', saw: 'seen', gave: 'given', ate: 'eaten', drank: 'drunk', flew: 'flown', broke: 'broken', chose: 'chosen', spoke: 'spoken', swam: 'swum', rang: 'rung', sang: 'sung', sank: 'sunk', drove: 'driven', rode: 'ridden', stole: 'stolen', threw: 'thrown', grew: 'grown', knew: 'known', showed: 'shown', froze: 'frozen', wore: 'worn', tore: 'torn', forgot: 'forgotten', fell: 'fallen' };
+    const THIRD = { go: 'goes', have: 'has', do: 'does', be: 'is' };
+    const third = (v) => THIRD[v] || (/(s|x|z|ch|sh)$/.test(v) ? v + 'es' : /[^aeiou]y$/.test(v) ? v.slice(0, -1) + 'ies' : v + 's');
+    const BARE_VERBS = 'go|come|make|take|need|want|say|get|give|look|work|seem|become|keep|show|use|find|know|think|require|include|remain|run|send|bring|leave|move|hold|stand|happen|appear|expect|allow|suggest|provide|follow|carry|reach|check|call|tell|ask|feel|try|put|let|begin|start|stop|help|mean|play|turn|cause|pass|stay|lie|offer|serve|contain|depend|apply|change|cover|add|lead|mention|increase|reduce|affect|result';
+
+    const MOD = 'will|would|can|could|should|must|may|might|shall|to|did|does|do|don\'t|didn\'t|doesn\'t|cannot|not';
+    const R = [];
+    function rule(id, cat, re, msg, fn, opts) { R.push(Object.assign({ id, cat, re, msg, fn }, opts || {})); }
+
+    // helper to build rule replacement quickly
+    function simple(id, cat, re, msg, rep, opts) { rule(id, cat, re, msg, (m) => (typeof rep === 'function' ? rep(m) : m[0].replace(re, rep)), opts); }
+
+    simple('its1', 'grammar', /\bits (a|an|the|been|not|going|time|about|also|only|just|very|too|so|now|still|always|never|possible|likely|important|necessary|better|worse|clear|ok|okay|fine|done|ready|being|getting|my|our|your|their|his|her|all|no|more|less|because|true|false|good|bad|best|worst|due|expected|required)\b/gi, "Use “it's” (it is / it has).", (m) => m[0].replace(/^its/i, (x) => x[0] + "t's"), {});
+    simple('its2', 'grammar', /\bit's (own|self|way|way of|purpose|design|use|size|weight|position|speed|course|length|draft|draught|crew|owner|master|captain)\b/gi, "Possessive: use “its” (no apostrophe).", (m) => m[0].replace("'", ''), {});
+    simple('your1', 'grammar', /\byour (a|an|going|welcome|not|being|doing|the best|right|wrong|ready|able|late|early|on time|sure|correct|likely|about|supposed|required|asked|expected|aware|here|there|all|very|so|too|still|just|already)\b/gi, "Use \u201Cyou're\u201D (you are).", (m) => m[0].replace(/^your/i, (x) => x.slice(0, 3) + "'re"));
+    simple('your2', 'grammar', /\byou're (own|name|ship|vessel|crew|team|company|report|email|cargo|ballast|hatch|job|work|opinion|help|time|plan|port|master|captain|boss|manager|office|cabin|watch|duty|departure|arrival)\b/gi, "Possessive: use “your”.", (m) => m[0].replace(/^(you)'re/i, '$1r'), {});
+    simple('their1', 'grammar', /\bthere (own|ship|vessel|crew|cargo|team|work|job|report|company|port|master|captain|manager|office|cabin|watch|duty|departure|arrival|time|plan|email|opinion)\b/gi, "Possessive: use “their”.", (m) => m[0].replace(/^there/i, (x) => x[0] + 'heir'), {});
+    simple('their2', 'grammar', /\btheir (is|are|was|were|will be|has been|have been|must be|should be|might be|may be|a lot|no)\b/gi, "Use “there”.", (m) => m[0].replace(/^their/i, (x) => x[0] + 'here'), {});
+    simple('their3', 'grammar', /\btheir (going|not|coming|doing|being|ready|late|here|waiting|working|sailing|arriving|leaving|always|still|just|also|only|probably|about)\b/gi, "Use “they're” (they are).", (m) => m[0].replace(/^their/i, (x) => x[0] + "hey're"), {});
+    simple('their4', 'grammar', /\bthey're (own|ship|vessel|crew|cargo|team|work|job|report|company|port|master|captain|manager|office|cabin|watch|duty)\b/gi, "Possessive: use “their”.", (m) => m[0].replace(/^(the)y're/i, '$1ir'), {});
+    simple('modof', 'grammar', /\b(should|could|would|must|might|may) of\b/gi, "Use “have”, not “of”.", (m) => m[0].replace(/ of$/i, ' have'), { auto: true });
+    simple('then', 'grammar', /\b(more|less|better|worse|greater|higher|lower|larger|smaller|rather|other|bigger|faster|slower|earlier|later|fewer|older|younger|longer|shorter|heavier|lighter|deeper|wider|narrower|stronger|weaker|easier|harder) then\b/gi, "Comparison: use “than”.", (m) => m[0].replace(/then$/i, 'than'), { auto: true });
+    simple('affect1', 'grammar', /\b(an|the|no|any|this|that|its|their|adverse|negative|positive|major|minor|little|great) affect\b/gi, "Noun: use “effect”.", (m) => m[0].replace(/affect$/i, 'effect'));
+    simple('advice1', 'grammar', /\b(an|the|some|your|good|my|his|her|any|no|expert|professional|this|that|our|their) advise\b/gi, "Noun: use “advice”.", (m) => m[0].replace(/advise$/i, 'advice'));
+    simple('advice2', 'grammar', /\b(to|will|please|can|could|should|would|must|kindly) advice\b/gi, "Verb: use “advise”.", (m) => m[0].replace(/advice$/i, 'advise'));
+    simple('lose', 'grammar', /\b(to|will|not|may|might|could|would|can|don't|never|you'll|we'll|they'll) loose\b/gi, "Use “lose”.", (m) => m[0].replace(/loose$/i, 'lose'));
+    simple('whose', 'grammar', /\bwho's (ship|vessel|cargo|turn|job|responsibility|name|fault|duty|watch|report|order|call)\b/gi, "Possessive: use “whose”.", (m) => m[0].replace(/^who's/i, (x) => x.slice(0, 1) + 'hose'));
+    simple('passed', 'grammar', /\b(has|have|had|was|were|been) past\b/gi, "Verb: use “passed”.", (m) => m[0].replace(/past$/i, 'passed'));
+    simple('led', 'grammar', /\b(was|were|been|being|has|have|had) lead\b/gi, "Past tense: use “led”.", (m) => m[0].replace(/lead$/i, 'led'));
+    simple('whether1', 'grammar', /\bweather (or not)\b/gi, "Use “whether”.", (m) => m[0].replace(/^weather/i, (x) => 'whether'), { auto: true });
+    simple('whether2', 'grammar', /\b(decide|know|ask|check|see|wonder|confirm|advise|unsure|determine|query|doubt|whether or) weather\b/gi, "Use “whether”.", (m) => m[0].replace(/weather$/i, 'whether'));
+    simple('whether3', 'grammar', /\bwhether (conditions|forecast|report|permitting|routing|window|data|deck|criteria|limits|warning|warnings|delay|delays)\b/gi, "Use “weather”.", (m) => m[0].replace(/^whether/i, 'weather'));
+    simple('too1', 'grammar', /\b(is|are|was|were|be|been|get|gets|very|way|not|so) to (much|many|late|early|long|big|small|high|low|far|slow|fast|soon|heavy|hot|cold|expensive|busy|tight|loose|deep|shallow|wide|narrow)\b/gi, "Use “too”.", (m) => m[0].replace(/ to /i, ' too '));
+    simple('too2', 'grammar', /\b(want|wants|need|needs|going|able|try|tries|trying|ready|asked|requested|required|ordered|instructed|supposed|have|has|had|continue|continues|plan|plans) too (go|do|be|see|get|make|take|have|send|check|call|keep|ensure|find|inform|advise|confirm|arrange|load|discharge|proceed|use|start|stop|inspect|arrive|sail|depart|complete|submit|report)\b/gi, "Use “to”.", (m) => m[0].replace(/ too /i, ' to '));
+    simple('alot', 'grammar', /\balot\b/gi, "Two words: “a lot”.", (m) => (m[0][0] === 'A' ? 'A lot' : 'a lot'), { auto: true });
+    simple('regards', 'style', /\bin regards? to\b/gi, "Say “with regard to” or “regarding”.", () => 'regarding');
+    simple('irreg', 'grammar', /\birregardless\b/gi, "Use “regardless”.", () => 'regardless', { auto: true });
+    simple('betweenI', 'grammar', /\bbetween you and I\b/gi, "After “between” use “me”.", () => 'between you and me');
+    simple('eachothers', 'grammar', /\beach others\b/gi, "Use “each other”.", () => 'each other', { auto: true });
+    simple('supposably', 'grammar', /\bsupposably\b/gi, "Use “supposedly”.", () => 'supposedly', { auto: true });
+    simple('apos', 'grammar', /\b(dont|cant|wont|isnt|arent|wasnt|werent|didnt|doesnt|havent|hasnt|hadnt|shouldnt|couldnt|wouldnt|mustnt|im|ive|youre|theyre|thats|whats|hasn't t)\b/gi, "Missing apostrophe.", (m) => {
+        const k = m[0].toLowerCase();
+        const map = { dont: "don't", cant: "can't", wont: "won't", isnt: "isn't", arent: "aren't", wasnt: "wasn't", werent: "weren't", didnt: "didn't", doesnt: "doesn't", havent: "haven't", hasnt: "hasn't", hadnt: "hadn't", shouldnt: "shouldn't", couldnt: "couldn't", wouldnt: "wouldn't", mustnt: "mustn't", im: "I'm", ive: "I've", youre: "you're", theyre: "they're", thats: "that's", whats: "what's" };
+        const r = map[k] || m[0];
+        return m[0][0] === m[0][0].toUpperCase() && r[0] !== 'I' ? r[0].toUpperCase() + r.slice(1) : r;
+    }, { auto: true });
+    simple('i', 'grammar', /(^|[^A-Za-z0-9'’])i(?=$|[^A-Za-z0-9'’]|'(?:m|ll|ve|d)\b)/g, "Capitalise “I”.", (m) => m[0].slice(0, -1) + 'I', { auto: true, shift: 1 });
+    simple('days', 'grammar', /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday|january|february|april|june|july|august|september|october|november|december)\b/g, "Capitalise days and months.", (m) => m[0][0].toUpperCase() + m[0].slice(1), { auto: true });
+    simple('sv1', 'grammar', /\b(he|she|it) (don't|are|have|were|do)\b/gi, "Subject–verb agreement.", (m) => { const map = { "don't": "doesn't", are: 'is', have: 'has', were: 'was', do: 'does' }; return m[1] + ' ' + map[m[2].toLowerCase()]; });
+    simple('sv2', 'grammar', /\b(they|we|you) (is|was|has|doesn't)\b/gi, "Subject–verb agreement.", (m) => { const p = m[1].toLowerCase(), v = m[2].toLowerCase(); const map = { is: 'are', was: 'were', has: 'have', "doesn't": "don't" }; return m[1] + ' ' + (v === 'was' && p !== 'you' && p !== 'they' && p !== 'we' ? 'was' : map[v]); });
+    simple('sv3', 'grammar', /\bI (is|are|has|was\b(?=.*\bwere)|doesn't)\b/gi, "Subject–verb agreement.", (m) => { const map = { is: 'am', are: 'am', has: 'have', "doesn't": "don't", was: 'was' }; return 'I ' + map[m[1].toLowerCase()]; });
+    simple('sv4', 'grammar', /\b(this|that) (are|were|have|don't)\b/gi, "Subject–verb agreement.", (m) => { const map = { are: 'is', were: 'was', have: 'has', "don't": "doesn't" }; return m[1] + ' ' + map[m[2].toLowerCase()]; });
+    simple('sv5', 'grammar', /\b(these|those) (is|was|has|doesn't)\b/gi, "Subject–verb agreement.", (m) => { const map = { is: 'are', was: 'were', has: 'have', "doesn't": "don't" }; return m[1] + ' ' + map[m[2].toLowerCase()]; });
+    simple('sv6', 'grammar', /\bthere (is|was) (many|several|multiple|numerous|two|three|four|five|six|seven|eight|nine|ten|few|some other|a number of|a few)\b/gi, "Plural noun: use “are/were”.", (m) => 'there ' + (m[1].toLowerCase() === 'is' ? 'are' : 'were') + ' ' + m[2]);
+    rule('sv7', 'grammar', new RegExp('\\b(he|she|it) (' + BARE_VERBS + ')\\b(?!\\s+(?:and|or)\\b)', 'gi'), 'Third person: add “s” to the verb.', (m) => m[1] + ' ' + third(m[2].toLowerCase()));
+    rule('ed1', 'grammar', new RegExp("\\b(" + MOD + ") (\\w{3,}ed)\\b", 'gi'), 'After “$1” use the base form of the verb.', (m) => {
+        const w = m[2].toLowerCase(); const cands = [w.slice(0, -2), w.slice(0, -1), w.slice(0, -3) + (w.length > 4 ? '' : ''), w.slice(0, -3) + 'y', w.length > 5 && w[w.length - 3] === w[w.length - 4] ? w.slice(0, -3) : null];
+        for (const c of cands) if (c && c.length > 2 && SUGG.has(c) && w !== c) return m[1] + ' ' + c;
+        return null;
+    });
+    rule('irrpp', 'grammar', new RegExp('\\b(has|have|had|having) (' + Object.keys(IRR_PP).join('|') + ')\\b', 'gi'), 'Use the past participle.', (m) => m[1] + ' ' + IRR_PP[m[2].toLowerCase()]);
+    simple('iseen', 'grammar', /\bI (seen|done|gone)\b/g, "Missing “have”.", (m) => 'I have ' + m[1]);
+    simple('doubleword', 'grammar', /\b([A-Za-z]+)\s+\1\b/gi, "Repeated word.", (m) => m[1], { auto: true, skip: (m) => /^(had|that|is|very|so|no|bye|ha|blah|yes)$/i.test(m[1]) });
+    simple('aan', 'grammar', /\b(a|an)\s+([A-Za-z][A-Za-z'-]*)/gi, "a / an.", (m) => {
+        const art = m[1], w = m[2];
+        if (w === w.toUpperCase() && w.length > 1) return null;
+        const vowel = /^[aeiou]/i.test(w) && !VOWEL_SOUND_EXC.test(w) || SILENT_H.test(w);
+        const need = vowel ? 'an' : 'a';
+        if (art.toLowerCase() === need) return null;
+        return (art[0] === 'A' ? need[0].toUpperCase() + need.slice(1) : need) + ' ' + w;
+    }, { auto: true });
+    // spacing and punctuation
+    simple('dblspace', 'grammar', /(?<=\S) {2,}(?=\S)/g, "Extra space.", () => ' ', { auto: true });
+    simple('spbefore', 'grammar', /[ \t]+([,;:!?])(?=\s|$)/g, "No space before punctuation.", (m) => m[1], { auto: true });
+    simple('spbeforedot', 'grammar', /(?<=[A-Za-z0-9)])[ \t]+\.(?=\s|$)/g, "No space before the full stop.", () => '.', { auto: true });
+    simple('spafter', 'grammar', /(?<=[a-z]{2})([,;])(?=[A-Za-z])/g, "Missing space after punctuation.", (m) => m[1] + ' ', { auto: true });
+    simple('spafterdot', 'grammar', /(?<=[a-z]{3})\.(?=[A-Z][a-z])/g, "Missing space after the full stop.", () => '. ', { auto: true });
+    simple('dblpunct', 'grammar', /([,;:])\1+/g, "Repeated punctuation.", (m) => m[1], { auto: true });
+    simple('dblpunct2', 'grammar', /([!?])\1{1,}/g, "Too much punctuation.", (m) => m[1], {});
+    simple('ellip', 'grammar', /(?<!\.)\.\.(?!\.)/g, "Two full stops. Use one, or three for an ellipsis.", () => '.', {});
+
+    const WORDY = [
+        [/\bin order to\b/gi, 'to'], [/\bdue to the fact that\b/gi, 'because'], [/\bat this point in time\b/gi, 'now'], [/\bat the present time\b/gi, 'now'],
+        [/\ba large number of\b/gi, 'many'], [/\bin the event that\b/gi, 'if'], [/\bwith regards? to\b/gi, 'regarding'], [/\bprior to\b/gi, 'before'], [/\bsubsequent to\b/gi, 'after'],
+        [/\butili[sz]e\b/gi, 'use'], [/\bcommence\b/gi, 'start'], [/\bin the near future\b/gi, 'soon'], [/\bhas the ability to\b/gi, 'can'], [/\bis able to\b/gi, 'can'],
+        [/\bfor the purpose of\b/gi, 'for'], [/\bin spite of the fact that\b/gi, 'although'], [/\bkindly be advised that\b/gi, ''], [/\bplease be advised that\b/gi, ''],
+        [/\bat all times\b/gi, 'always'], [/\bon a daily basis\b/gi, 'daily'], [/\bon a regular basis\b/gi, 'regularly'], [/\bin close proximity to\b/gi, 'near'], [/\bthe majority of\b/gi, 'most'],
+        [/\bvery unique\b/gi, 'unique'], [/\bbasically\b/gi, ''], [/\bactually\b/gi, ''], [/\bI think that I\b/gi, 'I']
+    ];
+    WORDY.forEach((w, i) => simple('wordy' + i, 'style', w[0], 'Wordy. Try “' + (w[1] || 'delete') + '”.', () => w[1]));
+
+    function sentenceCaps(text) {
+        const out = [];
+        const re = /(^|[.!?]["')\]]*\s+|\n\s*)([a-z][A-Za-z']*)/g; let m;
+        while ((m = re.exec(text))) {
+            const word = m[2]; const s = m.index + m[1].length;
+            // abbreviation before? find the previous token
+            const head = text.slice(0, m.index + (m[1].match(/^[.!?]/) ? 1 : 0));
+            const pm = head.match(/([A-Za-z.]+)[.!?]["')\]]*$/);
+            if (m[1] && /^[.!?]/.test(m[1])) {
+                const tok = pm ? pm[1] : '';
+                if (ABBR.test(tok.replace(/\.$/, '')) || /^[A-Za-z]$/.test(tok) || /\b[a-z]\.[a-z]$/i.test(head.slice(-4))) continue;
+                if (/\d$/.test(head.replace(/[.!?]+$/, ''))) { /* number then full stop, e.g. "at 5. then" still a sentence; allow */ }
+            }
+            // list markers / bullet lines starting with lowercase after newline are common: only flag after punctuation or at very start
+            if (m[1] && /^\n/.test(m[1])) {
+                const prevLine = text.slice(0, m.index).trimEnd();
+                if (!/[.!?]["')\]]*$/.test(prevLine)) continue;
+            }
+            out.push({ type: 'grammar', rule: 'cap', start: s, end: s + word.length, text: word, message: 'Start the sentence with a capital letter.', fixes: [word[0].toUpperCase() + word.slice(1)], auto: true });
+        }
+        return out;
+    }
+    function longSentences(text) {
+        const out = []; const re = /[^.!?\n]+[.!?]?/g; let m;
+        while ((m = re.exec(text))) {
+            const n = (m[0].match(/\S+/g) || []).length;
+            if (n > 40) { const lead = m[0].match(/^\s*/)[0].length; out.push({ type: 'style', rule: 'long', start: m.index + lead, end: m.index + m[0].replace(/\s+$/, '').length, text: m[0].trim().slice(0, 40) + '...', message: 'Very long sentence (' + n + ' words). Consider splitting it.', fixes: [] }); }
+        }
+        return out;
+    }
+
+    function grammarCheck(text, spellMasks) {
+        const issues = [];
+        for (const r of R) {
+            r.re.lastIndex = 0; let m;
+            while ((m = r.re.exec(text))) {
+                if (m[0] === '') { r.re.lastIndex++; continue; }
+                if (r.skip && r.skip(m)) continue;
+                let rep = r.fn(m);
+                if (rep === null || rep === undefined) continue;
+                let s = m.index, e = m.index + m[0].length;
+                if (r.shift) { s += r.shift; rep = rep.slice(r.shift); }
+                // apostrophe-less check: only if exact match to start of a word
+                const orig = text.slice(s, e);
+                if (orig === rep) continue;
+                issues.push({ type: r.cat, rule: r.id, start: s, end: e, text: orig, message: r.msg.replace('$1', m[1] || ''), fixes: [rep], auto: !!r.auto });
+            }
+        }
+        sentenceCaps(text).forEach((i) => issues.push(i));
+        longSentences(text).forEach((i) => issues.push(i));
+        return issues;
+    }
+
+    function check(text, opts) {
+        opts = opts || {};
+        let issues = [];
+        if (opts.spelling !== false && ready()) {
+            spellCheck(text, opts.ignore).forEach((i) => { i.cat = 'spelling'; issues.push(i); });
+        }
+        if (opts.grammar !== false) {
+            grammarCheck(text).forEach((i) => { i.cat = i.type === 'style' ? 'style' : 'grammar'; issues.push(i); });
+        }
+        // drop spelling issues that overlap a grammar fix (e.g. alot, dont) and de-duplicate overlaps
+        const gram = issues.filter((i) => i.cat !== 'spelling');
+        issues = issues.filter((i) => i.cat !== 'spelling' || !gram.some((g) => g.fixes && g.fixes.length && g.start <= i.start && g.end >= i.end));
+        issues.sort((a, b) => a.start - b.start || b.end - a.end);
+        const res = [];
+        let lastEnd = -1;
+        for (const i of issues) {
+            if (i.cat === 'style' && opts.style === false) continue;
+            if (i.start < lastEnd && i.cat !== 'style') {
+                // overlapping with previous: keep the earlier one
+                continue;
+            }
+            res.push(i); if (i.cat !== 'style') lastEnd = Math.max(lastEnd, i.end);
+        }
+        return res;
+    }
+    function applyFix(text, issue, replacement) { return text.slice(0, issue.start) + replacement + text.slice(issue.end); }
+    function autoFix(text, opts) {
+        // apply safe fixes from the end of the text to the start, repeat until stable (max 3 passes)
+        for (let pass = 0; pass < 3; pass++) {
+            const list = check(text, Object.assign({}, opts, { spelling: false })).filter((i) => i.auto && i.fixes && i.fixes.length).sort((a, b) => b.start - a.start);
+            if (!list.length) break;
+            let lastStart = Infinity;
+            for (const i of list) { if (i.end > lastStart) continue; text = applyFix(text, i, i.fixes[0]); lastStart = i.start; }
+        }
+        return text;
+    }
+    return { load, loadCommon, addWord, ready, isWord, suggest, check, applyFix, autoFix, size: () => VALID.size };
+})();
+
+        // ===== Proofread tab =====
+        let PROOF_LOAD = null;
+        function loadProofDict() {
+            if (!PROOF_LOAD) {
+                PROOF_LOAD = Promise.all([
+                    fetch('dict-en.txt').then((r) => { if (!r.ok) throw new Error('dict'); return r.text(); }),
+                    fetch('dict-common.txt').then((r) => (r.ok ? r.text() : ''))
+                ]).then(([d, c]) => { Proof.load(d); Proof.loadCommon(c); }).catch((e) => { PROOF_LOAD = null; throw e; });
+            }
+            return PROOF_LOAD;
+        }
+        const PF_TEXT = 'tfm_proof_text', PF_WORDS = 'tfm_proof_words';
+        const pfRead = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } };
+        const SUGG_CACHE = new Map();
+
+        function ProofTab() {
+            const [text, setText] = useState(() => pfRead(PF_TEXT, ''));
+            const [debounced, setDebounced] = useState(text);
+            const [words, setWords] = useState(() => { try { return JSON.parse(pfRead(PF_WORDS, '[]')) || []; } catch (e) { return []; } });
+            const [dict, setDict] = useState(Proof.ready() ? 'ready' : 'loading');
+            const [ignored, setIgnored] = useState([]);
+            const [filters, setFilters] = useState({ spelling: true, grammar: true, style: true });
+            const [sel, setSel] = useState(-1);
+            const [newWord, setNewWord] = useState('');
+            const [msg, setMsg] = useState('');
+            const taRef = useRef(null), backRef = useRef(null);
+
+            useEffect(() => {
+                let alive = true;
+                if (!Proof.ready()) loadProofDict().then(() => { if (alive) { words.forEach(Proof.addWord); setDict('ready'); } }).catch(() => { if (alive) setDict('error'); });
+                else words.forEach(Proof.addWord);
+                return () => { alive = false; };
+            }, []);
+            useEffect(() => { try { localStorage.setItem(PF_TEXT, text); } catch (e) {} const t = setTimeout(() => setDebounced(text), 220); return () => clearTimeout(t); }, [text]);
+            useEffect(() => { try { localStorage.setItem(PF_WORDS, JSON.stringify(words)); } catch (e) {} }, [words]);
+
+            const ignoreSet = useMemo(() => new Set(ignored), [ignored]);
+            const all = useMemo(() => {
+                const wordSet = new Set(words.map((w) => w.toLowerCase()));
+                const list = Proof.check(debounced, { ignore: wordSet });
+                return list.filter((i) => !ignoreSet.has((i.rule || 'spell') + ':' + i.text.toLowerCase()));
+            }, [debounced, dict, words, ignoreSet]);
+            const counts = useMemo(() => ({ spelling: all.filter((i) => i.cat === 'spelling').length, grammar: all.filter((i) => i.cat === 'grammar').length, style: all.filter((i) => i.cat === 'style').length }), [all]);
+            const shown = all.filter((i) => filters[i.cat]);
+            const autoCount = all.filter((i) => i.auto && i.fixes && i.fixes.length).length;
+            const synced = debounced === text;
+            const nWords = (text.match(/\S+/g) || []).length;
+
+            const sync = () => { if (backRef.current && taRef.current) { backRef.current.scrollTop = taRef.current.scrollTop; backRef.current.scrollLeft = taRef.current.scrollLeft; } };
+            const segs = useMemo(() => {
+                const out = []; let pos = 0;
+                shown.forEach((i, idx) => {
+                    if (i.start < pos) return;
+                    if (i.start > pos) out.push(debounced.slice(pos, i.start));
+                    out.push(<mark key={idx} data-i={idx} className={'pf-m pf-' + i.cat + (idx === sel ? ' pf-sel' : '')}>{debounced.slice(i.start, i.end)}</mark>);
+                    pos = i.end;
+                });
+                out.push(debounced.slice(pos) + '\n');
+                return out;
+            }, [shown, debounced, sel]);
+
+            const suggestionsFor = (i) => {
+                if (i.cat !== 'spelling') return i.fixes || [];
+                const k = i.text;
+                if (!SUGG_CACHE.has(k)) { if (SUGG_CACHE.size > 800) SUGG_CACHE.clear(); SUGG_CACHE.set(k, Proof.suggest(k, 5)); }
+                return SUGG_CACHE.get(k);
+            };
+            const apply = (i, rep) => { setText(Proof.applyFix(text, i, rep)); setDebounced(Proof.applyFix(text, i, rep)); setSel(-1); };
+            const pick = (idx) => {
+                setSel(idx);
+                const el = backRef.current && backRef.current.querySelector('[data-i="' + idx + '"]');
+                if (el && taRef.current) { const top = el.offsetTop - 70; taRef.current.scrollTop = Math.max(0, top); sync(); }
+            };
+            const ignore = (i) => setIgnored([...ignored, (i.rule || 'spell') + ':' + i.text.toLowerCase()]);
+            const addWord = (w) => { w = w.trim().toLowerCase(); if (!w || w.indexOf(' ') >= 0) return; Proof.addWord(w); if (words.indexOf(w) < 0) setWords([...words, w]); };
+            const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 2200); };
+            const autoFix = () => { const n = autoCount; const t = Proof.autoFix(text, {}); setText(t); setDebounced(t); flash(n + ' safe fixes applied'); };
+            const copy = () => { try { navigator.clipboard.writeText(text).then(() => flash('Copied'), () => flash('Copy failed')); } catch (e) { flash('Copy failed'); } };
+            const paste = () => { try { navigator.clipboard.readText().then((t) => { setText(t); setDebounced(t); }, () => flash('Paste blocked, use long-press paste')); } catch (e) { flash('Paste blocked, use long-press paste'); } };
+
+            return (
+                <div>
+                    <h2 className="section-title">Spelling &amp; Grammar Check</h2>
+                    <div className="toolbar no-print">
+                        <span className="dim">
+                            {dict === 'loading' && 'Loading offline dictionary...'}
+                            {dict === 'ready' && 'Offline. British and American spellings accepted. Text is saved on this device.'}
+                            {dict === 'error' && 'Dictionary file not found, so only grammar checks run. Keep dict-en.txt next to index.html.'}
+                        </span>
+                        <div className="tb-right">
+                            <button type="button" className="btn-ghost" onClick={paste}>Paste</button>
+                            <button type="button" className="btn-ghost" onClick={copy}>Copy</button>
+                            <button type="button" className="btn-ghost" onClick={() => { if (!text || window.confirm('Clear the text?')) { setText(''); setDebounced(''); setSel(-1); } }}>Clear</button>
+                        </div>
+                    </div>
+
+                    <div className="pf-cols">
+                        <div className="card dwt-card">
+                            <div className="card-title">Your text</div>
+                            <div className="pf-wrap">
+                                <div className="pf-back" ref={backRef} aria-hidden="true">{segs}</div>
+                                <textarea className="pf-text" ref={taRef} value={text} spellCheck={false} autoCapitalize="off" placeholder="Type or paste an email, report or log remark here. Mistakes are underlined and listed on the right." onChange={(e) => setText(e.target.value)} onScroll={sync} aria-label="Text to check" />
+                            </div>
+                            <div className="pf-foot">
+                                <span>{nWords} words, {text.length} characters</span>
+                                <button type="button" className="btn-ghost" disabled={!autoCount} onClick={autoFix} title="Fixes spacing, capital letters, repeated words and missing apostrophes">Auto-fix safe issues{autoCount ? ' (' + autoCount + ')' : ''}</button>
+                                {msg && <span className="pf-msg">{msg}</span>}
+                            </div>
+                        </div>
+
+                        <div className="card dwt-card">
+                            <div className="card-title">Issues {synced ? '' : '(checking...)'}</div>
+                            <div className="pf-chips">
+                                {[['spelling', 'Spelling'], ['grammar', 'Grammar'], ['style', 'Style']].map(([k, l]) => (
+                                    <button key={k} type="button" className={'pf-chip pf-c-' + k + (filters[k] ? ' on' : '')} aria-pressed={filters[k]} onClick={() => setFilters({ ...filters, [k]: !filters[k] })}>{l} <b>{counts[k]}</b></button>
+                                ))}
+                            </div>
+                            <div className="pf-list">
+                                {!text.trim() && <div className="eta-empty">Nothing to check yet.</div>}
+                                {text.trim() && shown.length === 0 && synced && <div className="pf-ok">No issues found.</div>}
+                                {shown.slice(0, 120).map((i, idx) => {
+                                    const sg = suggestionsFor(i);
+                                    return (
+                                        <div key={i.start + ':' + i.rule + ':' + i.text} className={'pf-issue' + (idx === sel ? ' sel' : '')} onClick={() => pick(idx)}>
+                                            <div className="pf-top"><span className={'pf-tag pf-c-' + i.cat}>{i.cat === 'spelling' ? 'Spelling' : i.cat === 'style' ? 'Style' : 'Grammar'}</span><span className="pf-word">{i.text.length > 38 ? i.text.slice(0, 38) + '...' : i.text}</span></div>
+                                            <div className="pf-msg2">{i.message}</div>
+                                            <div className="pf-actions">
+                                                {sg.map((s) => <button key={s} type="button" className="pf-sug" onClick={(e) => { e.stopPropagation(); apply(i, s); }}>{s === '' ? 'Delete' : s}</button>)}
+                                                {sg.length === 0 && i.cat === 'spelling' && <span className="dim">No suggestions</span>}
+                                                {i.cat === 'spelling' && <button type="button" className="pf-link" onClick={(e) => { e.stopPropagation(); addWord(i.text); }}>Add to dictionary</button>}
+                                                <button type="button" className="pf-link" onClick={(e) => { e.stopPropagation(); ignore(i); }}>Ignore</button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                {shown.length > 120 && <div className="eta-empty">Showing the first 120 issues. Fix these to see more.</div>}
+                            </div>
+                            <details className="pf-mywords">
+                                <summary>My dictionary ({words.length})</summary>
+                                <div className="pf-addrow">
+                                    <input className="input-field" value={newWord} placeholder="Add a word, port or name" onChange={(e) => setNewWord(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { addWord(newWord); setNewWord(''); } }} />
+                                    <button type="button" className="btn-ghost" onClick={() => { addWord(newWord); setNewWord(''); }}>Add</button>
+                                </div>
+                                <div className="pf-wordlist">
+                                    {words.map((w) => <span key={w} className="pf-w">{w}<button type="button" aria-label={'Remove ' + w} onClick={() => setWords(words.filter((x) => x !== w))}>&times;</button></span>)}
+                                    {words.length === 0 && <span className="dim">Words you add are saved on this device.</span>}
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+
+                    <div className="info-section" style={{ marginTop: 14 }}>
+                        <h3>About this checker</h3>
+                        <p>Spelling uses a built-in English dictionary of about 160,000 words plus maritime terms, and works with no signal. Grammar uses fixed rules for common mistakes such as its / it's, there / their, subject and verb agreement, a / an, repeated words, spacing and capital letters. It is not a full grammar engine, so re-read important messages before sending.</p>
+                        <p>Capitalised names and all-capital abbreviations (ports, MARPOL, ETA) are not flagged. Add anything else you use often to My dictionary.</p>
+                    </div>
+                </div>
+            );
+        }
+
         const TABS = [
             { key: 'rob', label: 'ROB', c: '#0369a1', cd: '#38bdf8' },
             { key: 'eta', label: 'ETA', c: '#4f46e5', cd: '#a5b4fc' },
@@ -1004,7 +1527,8 @@
             { key: 'vent', label: 'Ventilation', c: '#0f766e', cd: '#2dd4bf' },
             { key: 'conv', label: 'Converter', c: '#15803d', cd: '#4ade80' },
             { key: 'hydro', label: 'Hydrostatics', c: '#be123c', cd: '#fb7185' },
-            { key: 'dwt', label: 'Deadweight', c: '#c2410c', cd: '#fb923c' }
+            { key: 'dwt', label: 'Deadweight', c: '#c2410c', cd: '#fb923c' },
+            { key: 'proof', label: 'Proofread', c: '#a21caf', cd: '#e879f9' }
         ];
         const ICON_PATHS = {
             rob: <><path d="M12 2.7s6 6.2 6 10.8a6 6 0 0 1-12 0C6 8.9 12 2.7 12 2.7z" /></>,
@@ -1014,6 +1538,7 @@
             conv: <><path d="M7 7h12l-3-3" /><path d="M17 17H5l3 3" /></>,
             hydro: <><path d="M2 20c2 0 2-1.5 5-1.5S9 20 12 20s3-1.5 5-1.5S20 20 22 20" /><path d="M4 14l1.5 3.5h13L20 14z" /><path d="M12 14V7h4v7" /></>,
             dwt: <><path d="M21 8l-9-5-9 5 9 5 9-5z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></>,
+            proof: <><path d="m6 16 6-12 6 12" /><path d="M8 12h8" /><path d="m16 20 2 2 4-4" /></>,
             sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></>,
             moon: <><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></>
         };
@@ -1706,6 +2231,7 @@
                             {activeTab === 4 && <UnitTab />}
                             {activeTab === 5 && <HydroTab />}
                             {activeTab === 6 && <DwtTab />}
+                            {activeTab === 7 && <ProofTab />}
                         </div>
                     </div>
                 </>
