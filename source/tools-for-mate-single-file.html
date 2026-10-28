@@ -1339,7 +1339,9 @@ const Proof = (function () {
         for (const i of issues) {
             if (i.cat === 'style' && opts.style === false) continue;
             if (i.start < lastEnd && i.cat !== 'style') {
-                // overlapping with previous: keep the earlier one
+                // overlapping with previous: keep the earlier one (auto-fix prefers the safe one)
+                const prev = res[res.length - 1];
+                if (opts.preferAuto && i.auto && prev && !prev.auto && prev.cat !== 'style') { res[res.length - 1] = i; lastEnd = i.end; }
                 continue;
             }
             res.push(i); if (i.cat !== 'style') lastEnd = Math.max(lastEnd, i.end);
@@ -1350,7 +1352,7 @@ const Proof = (function () {
     function autoFix(text, opts) {
         // apply safe fixes from the end of the text to the start, repeat until stable (max 3 passes)
         for (let pass = 0; pass < 3; pass++) {
-            const list = check(text, Object.assign({}, opts, { spelling: false })).filter((i) => i.auto && i.fixes && i.fixes.length).sort((a, b) => b.start - a.start);
+            const list = check(text, Object.assign({}, opts, { spelling: false, preferAuto: true })).filter((i) => i.auto && i.fixes && i.fixes.length).sort((a, b) => b.start - a.start);
             if (!list.length) break;
             let lastStart = Infinity;
             for (const i of list) { if (i.end > lastStart) continue; text = applyFix(text, i, i.fixes[0]); lastStart = i.start; }
