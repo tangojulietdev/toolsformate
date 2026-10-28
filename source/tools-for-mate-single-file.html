@@ -111,7 +111,7 @@
         .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
 
         /* ===== Top tiles: the only place with per-tool colour ===== */
-        .tabs { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-bottom: 24px; }
+        .tabs { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; margin-bottom: 24px; }
         .tab {
             --tc: var(--accent);
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
@@ -457,9 +457,98 @@
             @page { margin: 12mm; }
         }
 
+        /* ===== World map, Time Zones, Load Line ===== */
+        :root { --wm-sea: #e4edf8; --wm-land: #f8fafc; --wm-land-stroke: #94a3b8; --wm-line: rgba(71,85,105,.28); --dst: #d97706; --ll-S: #dbe9fb; --ll-T: #f8c98d; --ll-W: #c7bdf7; --ll-WNA: #f3a8e6; }
+        :root[data-theme="dark"] { --wm-sea: #0e1a30; --wm-land: #2a3a5c; --wm-land-stroke: #5a6f9a; --wm-line: rgba(146,163,189,.28); --dst: #fbbf24; --ll-S: #15294a; --ll-T: #8a5a14; --ll-W: #5a45a8; --ll-WNA: #a23c93; }
+        .wm-wrap { position: relative; }
+        .wm-svg { display: block; width: 100%; height: auto; border-radius: var(--r-sm); border: 1px solid var(--border); background: var(--wm-sea); cursor: crosshair; user-select: none; -webkit-user-select: none; }
+        .wm-sea { fill: var(--wm-sea); }
+        .wm-land { fill: var(--wm-land); stroke: var(--wm-land-stroke); stroke-width: .8px; vector-effect: non-scaling-stroke; stroke-linejoin: round; pointer-events: none; }
+        .wm-nl { stroke: var(--wm-line); stroke-width: 1px; vector-effect: non-scaling-stroke; stroke-dasharray: 3 4; pointer-events: none; }
+        .wm-nt { fill: var(--muted); font-weight: 700; pointer-events: none; }
+        .wm-eq, .wm-tr { stroke: var(--wm-line); stroke-width: 1px; vector-effect: non-scaling-stroke; pointer-events: none; }
+        .wm-tr { stroke-dasharray: 6 5; }
+        .wm-dot { stroke: var(--surface); stroke-width: 1.4px; vector-effect: non-scaling-stroke; pointer-events: none; }
+        .wm-dot.dst { fill: var(--dst); } .wm-dot.std { fill: var(--accent); } .wm-dot.none { fill: var(--muted); }
+        .wm-dot.pin { stroke: var(--text); stroke-width: 2px; }
+        .wm-ring { fill: none; stroke: #d946ef; stroke-width: 1.4px; vector-effect: non-scaling-stroke; opacity: .6; pointer-events: none; }
+        .wm-ring.ev { stroke-width: 2.6px; opacity: 1; } .wm-ring.sel { stroke: var(--text); stroke-width: 2.4px; opacity: 1; }
+        .wm-ctl { position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column; gap: 4px; }
+        .wm-ctl button { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 17px; font-weight: 700; cursor: pointer; line-height: 1; }
+        .wm-ctl button:hover { border-color: var(--accent); }
+        .wm-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; font-size: 12px; color: var(--text-2); align-items: center; }
+        .wm-legend span { display: inline-flex; align-items: center; gap: 5px; }
+        .wm-hint { color: var(--muted); }
+        .wm-sw, .ll-sw { width: 12px; height: 12px; border-radius: 50%; display: inline-block; border: 1px solid var(--surface); box-shadow: 0 0 0 1px var(--border); }
+        .wm-sw.dst { background: var(--dst); } .wm-sw.std { background: var(--accent); } .wm-sw.none { background: var(--muted); } .wm-sw.ring { background: transparent; box-shadow: 0 0 0 2px #d946ef; }
+        .ll-sw { border-radius: 3px; } .ll-sw.T { background: var(--ll-T); } .ll-sw.S { background: var(--ll-S); } .ll-sw.W { background: var(--ll-W); } .ll-sw.WNA { background: var(--ll-WNA); }
+        .wt-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 14px; align-items: start; margin-bottom: 14px; }
+        .wt-grid.ll-grid { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); }
+        @media (max-width: 900px) { .wt-grid, .wt-grid.ll-grid { grid-template-columns: minmax(0, 1fr); } .wt-left, .wt-right { min-width: 0; } }
+        .wt-clocks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+        .wt-clock { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 14px; box-shadow: var(--shadow); }
+        .wt-cl-h { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 2px; }
+        .wt-big { font-size: 32px; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+        .wt-big .t { color: var(--accent); } .wt-big .s { color: var(--muted); font-size: 18px; }
+        .wt-date { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; font-variant-numeric: tabular-nums; }
+        .wt-sub { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+        .wt-sel { min-height: 32px !important; padding: 3px 8px !important; font-size: 13px !important; margin-bottom: 0 !important; }
+        .wt-small { min-height: 30px !important; padding: 3px 10px !important; font-size: 12px !important; margin: 0 !important; }
+        .wt-chip { font-size: 10px; background: var(--warn-soft); color: var(--warn); border-radius: 999px; padding: 1px 7px; margin-left: 4px; text-transform: none; letter-spacing: 0; }
+        .wt-conv { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .wt-conv-in { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
+        .wt-conv-in .input-field { margin: 0; width: auto; flex: 1 1 160px; min-height: 36px; padding: 5px 10px; font-size: 14px; }
+        .wt-tw { overflow-x: auto; }
+        .wt-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .wt-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 4px 6px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .wt-table td { padding: 5px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text-2); font-variant-numeric: tabular-nums; }
+        .wt-table tr.on td { background: var(--accent-soft); }
+        .wt-table tr.dim td { opacity: .55; }
+        .wt-link { background: none; border: 0; padding: 0; text-align: left; cursor: pointer; color: var(--text); display: flex; flex-direction: column; line-height: 1.2; }
+        .wt-link small { font-size: 11px; color: var(--muted); }
+        .wt-lt { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .wt-lt .d { color: var(--text); } .wt-lt .t { color: var(--accent); } .wt-lt small { color: var(--muted); font-weight: 600; font-size: 11px; }
+        .wt-badge { font-size: 10px; font-weight: 700; margin-left: 6px; padding: 1px 6px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); white-space: nowrap; }
+        .wt-x { background: none; border: 0; color: var(--muted); font-size: 18px; cursor: pointer; padding: 0 6px; }
+        .wt-x:hover { color: var(--bad); }
+        .wt-mapctl { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .wt-mapctl .input-field { margin: 0; width: 150px; min-height: 34px; padding: 4px 8px; font-size: 14px; flex: none; }
+        .wt-mapctl input[type=range] { flex: 1; min-width: 80px; accent-color: var(--accent); }
+        .wt-info { margin-top: 10px; padding: 10px 12px; background: var(--surface-2); border-radius: var(--r-sm); font-size: 13px; color: var(--text-2); display: grid; gap: 6px; }
+        .wt-info-h { font-size: 15px; color: var(--text); } .wt-info-h small { color: var(--muted); margin-left: 6px; }
+        .wt-actions, .wt-clickrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .wt-range { display: grid; grid-template-columns: 170px 170px auto; gap: 12px; align-items: end; margin-bottom: 6px; }
+        .wt-range .input-field { margin-bottom: 0; min-height: 36px; }
+        @media (max-width: 640px) { .wt-range { grid-template-columns: 1fr 1fr; } .wt-clocks { grid-template-columns: 1fr; } .wt-big { font-size: 28px; } }
+        .wt-evsum { font-size: 13px; color: var(--text-2); margin: 6px 0; }
+        .wt-evlist { max-height: 360px; overflow: auto; border: 1px solid var(--border); border-radius: var(--r-sm); }
+        .wt-ev { border-bottom: 1px solid var(--border); } .wt-ev:last-child { border-bottom: 0; } .wt-ev.on { background: var(--accent-soft); }
+        .wt-ev-h { display: grid; grid-template-columns: 190px 110px 1fr; gap: 10px; width: 100%; text-align: left; background: none; border: 0; padding: 8px 10px; cursor: pointer; font-size: 13px; color: var(--text-2); align-items: center; }
+        @media (max-width: 760px) { .wt-ev-h { grid-template-columns: 1fr; gap: 2px; } }
+        .wt-delta { font-weight: 700; font-size: 12px; } .wt-delta.fwd { color: var(--warn); } .wt-delta.back { color: var(--accent); }
+        .wt-names { color: var(--muted); }
+        .wt-evrows { padding: 2px 12px 10px; display: grid; gap: 3px; font-size: 13px; color: var(--text-2); }
+        .wt-evrows div { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; } .wt-evrows span { color: var(--muted); font-variant-numeric: tabular-nums; } .wt-evrows small { color: var(--muted); }
+        .ll-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .ll-big { display: flex; gap: 12px; align-items: center; margin-bottom: 6px; }
+        .ll-mark { font-size: 18px; font-weight: 700; color: var(--text); } .ll-zone { font-size: 13px; color: var(--text-2); }
+        .ll-line { font-size: 13px; color: var(--text-2); margin-top: 5px; }
+        .ll-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 46px; height: 46px; border-radius: 10px; font-size: 18px; font-weight: 800; color: var(--text); border: 2px solid var(--text-2); padding: 0 6px; }
+        .ll-chip.sm { min-width: 30px; height: 22px; font-size: 12px; border-width: 1px; border-radius: 6px; margin-right: 4px; vertical-align: middle; }
+        .ll-chip.T { background: var(--ll-T); } .ll-chip.S { background: var(--ll-S); } .ll-chip.W { background: var(--ll-W); } .ll-chip.WNA { background: var(--ll-WNA); }
+        .ll-poly { stroke: none; } .ll-poly.T { fill: var(--ll-T); } .ll-poly.S { fill: var(--ll-S); } .ll-poly.W { fill: var(--ll-W); } .ll-poly.WNA { fill: var(--ll-WNA); }
+        .ll-poly.seas { stroke: var(--text-2); stroke-opacity: .55; stroke-width: 1px; vector-effect: non-scaling-stroke; stroke-dasharray: 5 4; }
+        .ll-poly.hl { stroke: var(--accent); stroke-opacity: 1; stroke-width: 3px; stroke-dasharray: none; }
+        .ll-pos-ring { fill: none; stroke: var(--bad); stroke-width: 2.4px; vector-effect: non-scaling-stroke; pointer-events: none; }
+        .ll-pos-dot { fill: var(--bad); pointer-events: none; }
+        .ll-table td, .ll-table th { white-space: nowrap; }
+        .ll-maxbox { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; padding: 10px 12px; background: var(--accent-soft); border-radius: var(--r-sm); }
+        .ll-maxbox span { display: block; font-size: 12px; color: var(--text-2); } .ll-maxbox b { font-size: 22px; color: var(--accent); font-variant-numeric: tabular-nums; }
+        .ll-maxbox .btn-ghost { margin: 0 !important; }
+
         /* ===== Responsive ===== */
         @media (max-width: 1000px) {
-            .tabs { grid-template-columns: repeat(4, 1fr); }
+            .tabs { grid-template-columns: repeat(5, 1fr); }
         }
         @media (max-width: 640px) {
             .header { padding: 10px 16px; }
@@ -1523,6 +1612,688 @@ const Proof = (function () {
             );
         }
 
+// @@NEWTABS-BEGIN
+        /* ================= World map + Time Zones + Load Line ================= */
+        const WM_LAND = "M2412 543l10 4l8 -1l2 -5l13 -4l2 -8l9 -2l1 -4l24 7l8 -3l3 1l3 -4l6 0l7 -9l5 2l1 12l4 4l15 -8l17 1l2 3l-34 6l-5 4l3 9l-5 5l-2 7l-10 0l4 6l-6 3l-4 6l0 6l-4 3l-11 0l-1 3l-8 0l-5 6l-1 8l-13 4l-25 2l-16 -5l9 -9l-1 -7l-8 -1l-4 -15l5 -5l-5 -2l3 -7zM1963 959l12 22l15 -1l4 -8l7 -3l5 0l-1 4l12 0l2 22l3 4l0 12l17 -2l1 20l-21 0l0 32l13 14l-18 4l-24 -1l-7 -5l-42 1l-6 -4l-18 3l1 -15l7 -23l11 -15l1 -13l-8 -15l3 -6l-5 -17l-5 -6l12 -4zM1924 957l-2 1l-3 -8l7 -6l4 4l-5 4zM2006 481l-1 4l5 9l-8 10l-8 -7l1 -14l-2 -5l4 -5l8 5zM2316 658l2 2l22 -1l21 -20l3 12l-5 0l1 8l-5 2l-5 14l-30 -5l-4 -10zM1145 1452l-31 -3l0 -23l8 12l14 6l14 3zM1150 1121l6 7l4 -8l12 0l20 19l30 13l2 4l-10 15l21 4l8 -1l9 -8l2 -9l5 -2l5 6l0 8l-16 10l-24 23l-9 42l13 9l-2 7l7 4l-1 5l-9 13l-15 5l-31 1l2 19l-6 3l-11 2l-9 -4l-4 3l1 10l7 3l5 -4l3 6l-17 9l-4 15l-9 0l-8 6l-3 7l10 7l10 2l-4 9l-12 6l-6 12l-13 8l3 11l7 5l-38 -3l-4 -6l0 -7l-7 0l-3 -3l-1 -11l8 -4l3 -7l-1 -5l8 -21l-1 -6l5 -2l-1 -4l-5 -2l3 -4l-4 -4l-2 -11l4 -2l-2 -13l5 -19l6 -3l-3 -19l7 -7l0 -8l6 -10l0 -9l-7 -19l6 -11l-1 -9l3 -9l14 -16l-3 -4l2 -20l11 -5l2 -13l8 -9zM2236 489l14 -1l9 10l-3 3l9 4l0 7l-4 1l-4 -8l-20 -8l1 -4zM1204 1700l-6 10l-43 -1l-12 -3l-6 -3l44 1l13 -8zM208 1695l-19 1l-26 -10l6 -4l19 2l17 6zM1348 1680l13 5l4 6l2 9l-51 8l-45 2l-13 -4l2 -4l30 -6l23 -16l20 -2zM588 1635l25 0l-15 6l-14 -1l-10 -3l2 -4zM544 1635l16 4l-33 -4l7 -3zM810 1619l22 1l6 5l-46 0l-10 -2l-5 -4l19 0zM1115 1610l2 4l-5 8l-36 3l5 -4l-23 3l-8 -3l0 -4l11 -4l18 -1l3 -5l1 -12l5 -5l9 -1l16 16zM1214 1542l-4 2l-16 -1l-14 5l-6 7l5 7l-16 3l-18 11l-2 4l9 7l16 5l14 15l11 25l-1 5l-12 7l-13 2l-11 7l-54 9l-8 4l-66 1l3 4l15 2l17 6l-11 3l-17 -1l-14 3l-1 8l26 11l157 21l15 8l84 -15l70 4l6 -4l14 -3l26 -1l97 -10l-12 -7l0 -3l-59 2l-3 -4l1 -8l5 -2l31 -4l33 -10l64 -6l50 -10l18 -6l3 -4l-11 -2l11 -8l31 -7l20 -11l29 4l0 -4l5 -4l11 1l3 4l12 1l36 -3l5 4l65 -11l14 -6l8 2l10 -1l13 8l26 -8l13 0l4 4l8 -4l34 -1l22 2l11 6l45 -2l49 -8l19 -12l23 7l10 0l14 6l34 -12l45 -10l9 1l16 -6l18 -2l1 -4l9 -3l27 -4l19 2l8 2l1 5l14 6l27 7l10 0l17 -6l48 5l8 13l-1 5l-18 6l1 4l12 0l-12 12l20 4l11 -2l21 -14l8 -8l37 -4l15 -12l37 -11l40 0l7 -3l5 -7l8 8l9 2l45 -1l16 3l39 -2l31 -16l34 13l40 -2l15 -6l19 -2l20 8l11 0l31 6l34 -8l56 3l60 -6l3 -9l6 3l9 12l9 2l80 -1l7 3l-2 4l6 3l22 5l37 5l11 0l7 -3l25 8l24 2l24 10l57 2l39 9l-1 4l-18 16l-32 7l-19 11l-6 7l-1 9l12 11l19 1l4 5l-52 4l-20 17l39 15l52 9l5 5l29 2l9 4l28 -2l40 5l-3599 0l8 -6l18 4l15 -4l14 4l15 -4l29 -2l30 7l89 8l29 -3l67 5l54 -6l2 -4l-72 -3l-8 -4l-27 -2l9 -12l-2 -5l-39 -9l47 -1l15 3l42 -10l-4 -4l-27 -5l-58 -3l-28 -11l-3 -11l14 4l33 -2l8 4l16 -1l52 -9l-4 -8l3 -3l13 -2l6 3l91 -12l155 2l22 -5l13 2l23 -5l16 10l10 -3l37 8l27 -3l43 4l5 -4l-12 -7l-12 -1l-6 -4l-6 -11l46 3l14 7l14 0l39 -4l23 1l9 -7l8 4l24 1l8 4l37 4l12 -8l10 4l14 -1l17 6l73 -10l9 -2l9 -8l-14 -23l9 -12l2 -4l-3 -8l4 -4l43 -23l10 0l42 -13l6 2l-4 4zM2489 1386l17 7l-3 4l-16 1l2 -10zM3254 1308l10 3l19 -2l1 12l-4 3l-1 8l-3 -3l-7 7l-9 -1l-13 -23l0 -5zM3236 1038l3 7l7 -3l8 8l1 13l4 6l5 21l24 14l-1 2l6 7l4 10l4 -2l4 5l2 -2l2 11l20 18l2 8l0 12l5 8l-7 35l-4 10l-8 4l-14 27l-3 17l-6 4l-11 0l-20 12l-14 -6l1 -5l-14 9l-30 -8l-6 -6l-4 -13l-5 -4l-10 -1l3 -5l-2 -7l-5 7l-9 2l11 -17l-1 -7l-14 12l-4 8l-8 -4l0 -6l-11 -11l2 -2l-30 -11l-18 1l-24 7l-10 -1l-19 8l-5 9l-38 1l-19 11l-14 -1l-16 -8l0 -6l7 -3l1 -11l-8 -22l0 -5l-17 -34l5 4l-4 -9l8 7l0 -5l-8 -14l4 -13l-1 -6l4 -7l1 7l4 -7l21 -11l7 0l19 -7l16 -3l13 -15l1 -9l7 -9l4 9l5 -2l-4 -5l3 -5l5 2l1 -7l8 -9l5 -2l0 -3l4 1l0 -2l10 -3l13 11l12 1l-2 -6l9 -10l-1 -3l4 -6l6 -3l14 -1l0 -5l-8 -3l6 -2l12 7l17 4l12 -3l5 5l-7 9l-3 0l1 4l-7 10l1 3l36 21l2 3l9 3l7 -3l8 -24l-2 -13l6 -27l4 -3l11 27zM1970 419l-1 4l-6 0l2 2l-5 8l-14 3l-22 -4l-2 -3l-12 3l-15 -3l1 -4l3 -1l5 3l1 -3l16 -1l8 2l0 -8l7 -6l7 3l10 -4l16 5zM2250 503l7 2l4 8l-6 -2l-7 -8zM2274 488l4 0l8 -6l10 12l8 3l-8 1l-4 12l-3 2l0 5l-9 -5l4 -5l-3 -3l-16 8l0 -7l-9 -4l3 -3l-9 -10l2 -2l13 3l-4 -6l6 -1zM2093 945l-3 -17l6 1l3 -6l6 1l3 10l-10 11zM1833 387l17 -2l12 7l-5 13l-9 -5l-5 1l-12 -9l-4 0l-2 -3zM1827 837l-8 2l-3 -7l1 -23l-3 -7l-6 -7l1 -5l16 -12l11 5l1 16l-8 10l-2 12zM1772 804l-7 -3l-8 3l-11 -8l2 -13l8 -8l4 -10l5 2l15 -13l15 -5l9 2l0 9l6 7l0 4l12 3l0 7l-8 4l-2 4l-41 1l-1 6zM2727 680l0 7l-4 -2l1 8l-10 -21l-9 0l1 4l-3 6l-13 -3l-5 -15l2 -6l-6 -3l8 -7l-7 -6l4 -6l12 4l1 7l25 3l-5 9l-4 0l-3 6l5 5l2 -6l2 0zM2027 458l2 4l27 1l16 -5l14 5l-9 11l3 6l-9 -1l-10 3l0 5l-9 1l-7 -4l-15 3l-1 -7l-5 -3l6 -9l-6 -8zM1025 662l-3 1l-6 -9l2 -6l3 0l4 9zM1022 634l-11 2l-1 -4l12 0zM1990 451l4 0l-3 5l5 4l-1 4l-8 4l-1 6l-9 -4l-19 -18l2 -4l3 2l7 -2l16 1zM2035 361l20 -4l3 -5l8 -4l-1 -4l17 -6l12 5l15 1l-1 8l9 10l10 4l-14 3l5 10l-9 1l-3 7l-53 -6l-18 3l-3 -9l6 -2l-3 -8zM909 722l6 -7l4 2l-5 20l-6 4l0 -11zM1172 1120l-12 0l-4 8l-6 -7l-13 -3l-8 9l-7 2l-10 -25l4 -10l-6 -4l-6 -14l6 -11l-4 -8l2 -4l-1 -3l4 -5l2 -19l-8 -16l12 0l17 -11l13 -1l-1 18l11 9l11 1l15 9l12 3l2 13l-2 0l3 12l20 0l-1 10l6 3l2 6l-4 12l0 6l-3 2l0 -3l-9 -5l-27 2l-9 26zM1224 1202l24 -23l16 -10l0 -8l-5 -6l-5 2l3 -17l-11 0l-4 -16l-7 -3l-4 2l-10 -2l0 -14l-3 -5l3 -2l0 -6l4 -12l-2 -6l-6 -3l1 -10l-20 0l-3 -12l2 0l-2 -13l-12 -3l-15 -9l-11 -1l-11 -9l1 -18l-13 1l-17 11l-22 0l0 -15l-8 6l-9 0l-4 -6l-6 0l2 -5l-10 -15l3 -6l6 -3l-1 -5l3 -8l21 -10l9 0l5 -32l-6 -9l0 -7l7 -1l1 -4l-6 -1l0 -6l19 0l4 -3l4 9l2 -2l6 6l8 -1l21 -14l0 -2l-9 -1l-1 -13l-4 -3l17 3l21 -7l4 -4l-1 -3l7 2l-1 4l6 6l-5 12l4 10l6 5l5 0l12 -6l13 1l0 -7l31 4l12 -21l4 0l8 23l5 2l1 7l-8 8l3 3l18 1l0 10l8 -6l29 10l5 5l-2 6l12 -3l19 5l15 0l28 19l16 3l4 4l5 18l-4 17l-36 41l-3 7l1 19l-4 22l-3 4l-2 13l-10 13l-1 10l-9 5l-2 6l-26 4l-30 15l-9 10l0 13l-4 15l-45 51l-3 -6l5 -5l-6 -7l-32 -19zM2942 855l13 -9l-2 11l-4 0l-2 3zM2717 622l4 3l-1 7l-23 1l-9 -4l7 -9l5 -3l13 3zM2056 1085l17 19l4 1l3 10l14 6l-23 15l-6 10l-6 1l-2 8l-15 2l-9 -4l-17 14l-7 1l-2 -3l1 -6l-9 -11l0 -30l10 0l0 -35l23 -4l4 4l17 -6zM1953 826l27 -5l9 -7l-1 -4l13 0l9 -5l7 -11l12 -5l7 10l-1 11l16 12l0 3l11 10l3 6l9 7l-17 -1l-9 4l-4 -2l-11 5l-5 -1l-4 7l-15 -3l-14 -7l-10 8l0 7l-14 -2l-11 14l-1 -7l-14 -17l0 -15l3 -2zM1163 434l17 2l-9 4l-12 -4l-3 -3l4 -3zM1182 409l-18 -3l-9 -5l16 2l11 4zM565 415l-5 1l-17 -4l-13 -10l-11 -2l-3 -8l26 5l9 8l10 4zM1239 393l-7 9l7 -4l6 3l-3 3l23 4l-3 7l7 -2l5 12l-5 8l-11 -1l2 -8l-2 -2l-12 9l-6 0l7 -5l-10 -2l-30 0l-1 -3l6 -4l-4 -2l8 -6l10 -16l15 -9l5 0l-2 3zM473 360l10 -1l-3 11l8 8l-4 0l-15 -12l-1 -8zM1007 278l-4 6l-4 -1l-2 -4l8 -3zM981 273l-12 5l-7 0l-2 -3l7 -4l14 0zM948 243l2 5l5 -2l29 9l0 5l8 -1l7 4l-9 3l-15 -3l-6 -4l-24 10l-4 -5l-13 1l8 -5l5 -17zM1041 229l-11 0l-2 -5l4 -5l9 -2l8 3l-1 6zM844 209l-7 3l-13 -3l-8 1l-14 -4l16 -7l19 6zM895 205l-1 10l14 -8l12 7l-3 7l9 7l18 -16l1 -11l29 2l13 5l1 5l-8 6l7 5l-1 5l-19 7l-14 1l-11 -3l-15 18l-12 7l-14 1l-8 4l-1 6l-11 2l-23 19l-4 8l-1 12l15 1l9 17l14 -2l19 4l40 16l27 2l-1 8l3 10l7 11l15 10l8 -3l5 -11l-5 -15l-7 -6l16 -4l11 -7l6 -7l-1 -7l-7 -9l-12 -7l12 -11l-8 -24l7 -3l27 4l9 -2l21 9l3 4l18 0l3 21l9 2l8 6l14 -6l16 -15l32 33l-4 7l22 11l23 6l4 8l7 2l4 3l1 12l-14 7l-17 3l-12 9l-64 0l-8 7l-13 4l-26 23l8 -2l17 -13l20 -8l15 -1l9 5l-9 6l6 19l13 5l17 -2l10 -11l1 7l6 4l-12 6l-23 6l-21 12l-7 -1l-1 -9l18 -8l-27 2l-7 -6l0 -14l-14 -3l-8 7l-7 12l-8 5l-34 0l-19 14l-19 0l-5 1l3 6l-38 12l-4 -4l10 -15l-5 -17l-10 -5l1 -2l-6 -5l-5 1l-3 -5l-35 -14l-9 3l-23 -1l-27 -6l-5 -7l-4 0l0 4l-278 0l-26 -14l-18 -4l-6 -9l1 -6l-12 -5l-2 -8l-12 -7l0 -5l5 -5l0 -6l-17 -7l-17 -18l-21 -14l-20 9l-15 -11l-20 -3l0 -94l45 8l21 -7l15 1l31 -7l7 4l7 -2l3 -5l23 10l14 -7l1 8l16 -5l12 1l39 8l24 1l13 5l-14 5l18 2l36 -3l10 6l11 -5l-10 -4l6 -4l20 -1l19 8l11 -1l17 5l31 -2l-2 -6l9 -2l16 4l0 9l6 -8l8 0l5 -10l-23 -10l1 -11l12 -7l13 1l10 5l14 11l-9 5zM658 169l-5 4l23 -3l13 5l12 -5l9 4l8 9l5 -4l-7 -10l19 0l11 4l9 17l35 10l-1 4l-16 1l6 4l-3 3l-36 -4l-73 7l-6 -5l-22 -2l-12 -8l49 -4l-55 -1l-5 -4l23 -4l-33 -3l15 -11l27 -6zM755 166l-9 6l-15 -7l16 -1zM1037 169l0 3l-35 0l-11 -5l1 -4l27 0zM934 168l8 7l9 -8l26 -5l17 11l-1 6l29 -6l36 9l1 5l19 -3l10 7l24 4l9 4l9 9l-18 5l39 9l15 9l15 0l-3 7l-17 12l-28 -14l-13 1l-1 6l28 13l6 10l-3 7l-38 -10l25 14l1 4l-48 -10l-12 -5l3 -3l-29 -10l0 3l-29 2l-9 -4l7 -7l39 -2l-3 -3l16 -15l-2 -4l-19 -9l-21 -3l7 -2l-11 -7l-17 -4l-5 3l-18 2l-74 -7l-8 -4l10 -4l-14 0l-3 -10l8 -9l10 -4l26 -3zM796 162l30 0l3 3l-10 5l16 4l-2 9l-17 4l-9 -1l-32 -11l0 -3l21 1l-11 -7zM868 172l-11 8l-11 -1l-6 -8l0 -5l15 -7l40 2l-15 9zM595 186l-26 5l-5 -4l-23 -6l20 -18l-10 -6l34 -1l39 2l21 7l-37 10l-13 7zM864 150l-6 4l-26 -3l5 -5l14 -2l9 3zM815 133l8 4l0 6l-5 7l-27 -1l0 -5l-16 0l-1 -7l40 -3zM718 138l4 4l19 -2l2 5l-6 5l-74 6l-2 -3l21 -5l-59 0l14 -10l9 -3l28 4l18 6l17 0l-14 -9l9 -4l11 1zM853 129l11 3l20 0l9 4l-3 3l18 5l28 1l36 -3l17 1l10 4l3 4l-21 5l-63 0l-42 -4l-5 -11l-10 -4l-32 -5l4 -4zM638 124l-1 7l-8 4l-28 4l-16 2l-14 -2l38 -14l15 0zM862 125l-24 -1l-2 -2l27 2zM698 123l-19 3l-14 -3l8 -4l28 1zM842 119l-15 2l-8 -2l-5 -8l30 5zM799 117l4 4l-55 -5l10 -3l-12 -2l-1 -4l47 5zM930 103l12 4l-32 10l-18 1l-21 -1l-11 -5l1 -3l8 -3l-19 0l-17 -8l14 -7l10 -1l-4 -2l23 -1l13 6l33 4zM1115 69l48 2l19 3l-1 2l-58 9l22 0l-40 9l-17 8l-57 5l14 1l-7 2l8 5l-44 13l2 2l17 0l0 2l-27 6l-26 -3l-29 2l-34 -2l-1 -5l18 -2l-5 -7l33 4l-13 -7l-17 -2l8 -4l18 -2l3 -3l-14 -4l-4 -6l35 2l16 -4l-58 0l-18 -4l-20 -7l-2 -3l46 -4l15 -4l23 4l8 -6l31 -2l86 -1zM1896 425l-1 4l9 2l0 4l-12 1l-2 4l-7 -2l-10 4l-8 -6l-5 1l0 -4l8 -6l-1 -2l16 -1l2 -2zM1114 1426l0 23l16 0l-11 7l-11 -1l-31 -10l-24 -17l36 13l8 -12l10 -4zM1118 1115l4 14l7 -2l1 3l-3 10l-11 5l-2 20l3 4l-14 16l-3 9l1 9l-6 11l7 19l0 9l-6 10l0 8l-7 7l3 19l-6 3l-5 19l2 13l-4 2l2 11l4 4l-3 4l5 2l1 4l-5 2l1 6l-8 21l1 5l-3 7l-8 4l1 11l3 3l7 0l0 7l4 6l33 3l-9 0l-13 6l-2 9l-4 1l-35 -16l-4 -7l3 -6l-5 -6l-1 -17l4 -10l11 -8l-15 -3l9 -8l3 -17l12 4l5 -21l-7 -3l-3 13l-6 -2l6 -33l5 -6l-4 -21l4 -1l18 -47l-3 -15l3 -8l-1 -12l6 -13l8 -62l-3 -31l8 -7l6 14l6 4l-4 10zM2903 713l-8 5l-8 -3l-1 -9l5 -4l17 -3l2 4l-4 4zM3077 402l17 4l12 7l4 9l15 0l25 -7l-9 13l-3 11l-7 10l-12 -2l-9 3l3 9l-2 12l-5 0l0 5l-6 -6l-4 6l-15 4l1 5l-9 0l-4 -3l-26 19l-32 10l5 -5l-2 -4l8 -6l-6 -5l-20 10l-6 6l-10 1l-5 5l6 6l8 2l0 5l8 2l11 -7l16 4l1 6l-14 2l-14 11l-5 7l10 5l4 10l13 17l0 8l-6 2l2 6l6 3l-4 16l-6 1l-24 36l-28 17l-11 1l-6 5l-4 -3l-6 4l-24 7l-4 11l-5 0l-3 -7l3 -4l-29 -4l-4 -4l1 -6l-14 -6l-8 6l-18 1l-10 4l1 11l-5 0l-1 -6l-8 2l-12 -5l3 -8l-6 -2l-2 -10l-11 2l1 -12l10 -8l0 -16l-8 -8l-17 -1l4 -4l-5 -7l-7 5l-8 -3l-21 14l-8 1l-17 -5l-12 10l-1 -8l-6 2l-23 -3l-16 -6l-3 -5l-16 -8l-8 -3l-4 2l-24 -13l-2 -11l7 1l0 -5l-4 -5l1 -8l-11 -12l-16 -4l-3 -8l-9 -7l-1 -10l-10 -1l-2 -9l3 -3l-2 -2l17 -7l10 2l4 -7l13 -1l3 -4l16 -5l1 -8l7 -3l-9 -17l25 -6l7 -18l20 3l5 -5l1 -10l8 0l8 -7l4 -1l2 7l9 5l14 4l7 8l-4 12l3 4l26 3l18 8l10 15l45 0l25 8l12 0l5 3l11 -5l43 -8l14 -8l-5 -8l6 -6l16 3l25 -9l14 -10l23 0l1 -3l-17 -11l-8 4l-16 0l-2 -4l12 -18l12 4l14 -6l0 -5l14 -14l0 -5l-5 -3l8 -5l26 -2l15 3l8 4l14 21zM1771 850l-17 -2l-31 8l1 -13l-10 -8l3 -18l5 -3l-5 -12l4 -5l10 2l7 -4l1 4l7 -3l11 8l8 -3l7 3l2 14l-6 19l4 9zM1931 877l-35 0l2 -8l-13 -17l7 -16l9 -6l10 4l6 -4l19 -38l8 -8l2 -5l-4 -4l3 -4l4 7l0 13l6 9l-13 0l-2 5l10 7l4 11l-9 15l0 15l14 17l1 7l-1 6l-16 -5zM2108 865l0 12l4 1l-13 16l-9 34l3 5l1 26l13 24l-17 1l-6 8l3 4l-3 22l9 6l3 -2l1 11l-8 -1l-7 -9l-8 -2l-2 -5l-6 3l-8 -1l-4 -5l-11 0l0 -3l-21 1l0 -12l-3 -4l-2 -22l-12 0l1 -4l-5 0l-7 3l-4 8l-15 1l-12 -22l-40 2l-1 -3l4 -8l7 -1l3 -4l5 0l5 5l14 -15l0 -8l4 -10l12 -13l9 -46l10 -8l14 7l15 3l4 -7l5 1l11 -5l4 2l9 -4l17 1l6 8l17 -2l3 4zM1930 948l-4 -4l-7 6l-8 -10l8 -6l-4 -6l10 -4l1 -5l5 5l9 1l3 -5l0 -14l-5 -6l5 -12l-10 -1l-2 -10l12 1l16 5l6 -15l6 -5l14 2l-6 18l-3 21l-12 13l-4 10l0 8l-14 15l-5 -5l-5 0l-3 4zM1046 902l-9 -6l-11 0l-16 -13l4 -1l2 -8l5 -1l8 -11l-4 -3l2 -6l-2 -9l2 -2l-6 -14l1 -5l4 1l2 -3l-2 -8l6 1l11 -8l2 -12l6 -5l15 -1l16 -12l7 3l-2 3l-7 2l-9 11l-4 13l5 1l4 7l0 10l4 4l19 0l7 9l21 0l-5 16l5 12l-5 5l6 5l3 10l-2 2l-4 -9l-4 3l-19 0l0 6l6 1l-1 4l-7 1l0 7l6 9l-5 32l-8 -6l7 -10l-8 -4l-23 0l-6 -10l-14 -12zM970 818l-5 -2l-1 -7l-14 -10l-1 5l-6 -3l0 -9l-2 -1l3 -3l17 5l2 -2l12 13l-4 1l2 6l-2 5zM977 668l17 1l13 7l10 -1l18 13l9 2l-1 3l15 4l-1 2l-35 2l7 -5l-10 -3l-6 -9l-31 -6l-4 -2l4 -2l-10 -1l-13 8l-9 0l12 -9l13 -3zM2127 549l19 -6l-7 5l1 1l-11 0zM2140 549l-10 5l-5 -1l-2 -4l16 0zM1970 414l-17 -4l-10 4l-18 -9l-3 -8l21 -8l19 4l0 3l5 2l2 -3l7 1l0 4l8 0l5 5l-10 6l-8 1zM1899 350l0 4l11 2l-1 4l16 -5l11 4l8 9l-3 2l9 19l-7 0l-21 8l3 8l11 6l-7 6l0 8l-8 -2l-16 1l-1 3l-19 -5l-10 2l6 -14l-19 -5l-2 -24l6 0l2 -3l3 -9l-2 -4l10 -2l2 2l7 -5l-3 -10l8 2zM2231 773l2 7l-6 3l4 2l-3 6l-10 -2l-1 -5l7 -9l4 0zM1927 344l-6 8l-11 -6l-1 -4l15 -3zM1909 335l-13 10l3 5l-14 0l-4 -5l0 -10l4 -6l9 -1l12 -5l-2 11zM1083 703l9 -2l8 3l2 3l6 0l-1 3l10 4l-4 4l-13 -2l-5 2l-2 -2l-7 8l-5 -10l3 -6zM1920 665l-63 39l-25 5l-1 -6l-10 -4l-3 -5l-105 -68l0 -14l16 -8l19 -4l3 -5l12 -4l1 -7l23 -7l2 -4l-11 -25l10 -5l27 -9l38 -1l10 -4l21 2l-3 22l-6 6l1 8l15 12l7 27l-1 29l-4 4l10 17l5 -2l8 5zM997 934l5 -7l-2 -5l-4 5l-6 -5l2 -2l-1 -9l3 -2l6 -13l-1 -4l12 -6l12 6l3 4l11 0l9 6l2 7l-3 7l-11 10l-12 4l-8 15l-6 5l-4 -5l-8 -1l2 -6zM2149 605l-10 19l-16 -22l18 37l16 22l-2 8l14 11l-119 0l0 -72l-3 -8l3 -7l-2 -4l4 -5l13 0l24 7l12 -6l9 -1l7 2l3 5l2 -4l16 3l5 -2zM2224 775l-15 -16l-9 -4l-9 -2l-6 2l-6 -5l-3 8l-12 -2l5 -26l10 -4l5 -6l9 21l38 32l-3 2zM1710 481l0 -7l-4 -4l14 -7l61 3l4 4l18 4l4 -2l11 5l12 -2l0 6l-9 7l-13 2l-7 9l-4 8l4 6l-6 4l-2 7l-7 2l-7 7l-23 0l-10 8l-5 -1l-6 -9l-10 -2l0 -3l5 -7l-4 -3l3 -6l-4 -6l4 -1l2 -14l5 -3l-3 -5l-13 1l-3 -5l-4 2zM2043 322l1 -6l-3 1l-7 -3l-1 -6l13 -3l13 -1l22 3l-7 6l3 9l-4 3l-8 0l-13 -5zM2179 750l6 5l6 -2l9 2l16 10l8 10l-7 9l1 5l10 2l-2 3l11 14l32 12l9 0l-28 30l-13 0l-18 11l-7 0l-4 -4l-12 9l-15 -2l-12 -8l-7 0l-4 -4l0 -5l-5 -2l-6 -11l-11 -11l-6 -1l3 -6l5 0l5 -22l4 -3l6 -12l6 -5l5 -18l12 2zM2086 209l-2 7l16 7l-9 8l11 11l-7 9l9 7l-4 6l15 7l-4 5l-30 19l-52 7l-6 -6l-10 -3l2 -10l-4 -9l13 -12l30 -13l-1 -4l-14 -5l-3 -4l-1 -15l-29 -12l6 -3l12 6l23 2l10 -5l5 -7l15 -4l13 4zM3584 1073l3 3l-1 6l-12 0l-1 -5l4 -3l4 1zM3594 1068l-7 2l-1 -4l14 -5l0 5zM1188 1418l12 -6l8 3l6 -4l8 5l-2 3l-14 3l-4 -4l-9 5zM1896 478l-4 8l-4 -2l-3 -7l9 -7zM1836 396l7 5l5 -1l19 8l14 2l-6 14l-8 1l1 2l-8 6l0 4l5 -1l3 4l3 7l-4 3l3 7l5 2l-1 4l-9 6l-19 -3l-15 3l-1 6l-12 2l-11 -5l-4 2l-18 -4l-4 -4l5 -6l2 -20l-18 -16l-15 -4l-1 -7l13 -2l17 3l-3 -12l9 5l23 -8l3 -8l9 -2l2 3l4 0zM1911 940l-23 -29l7 -21l18 -1l0 -12l5 0l13 0l2 10l10 1l-5 12l5 6l0 14l-3 5l-9 -1l-5 -5l-1 5l-10 4l4 6zM1743 354l-5 7l-14 -2l2 -5l-2 -5l9 -1zM1770 314l-11 10l21 -1l-2 8l-9 9l10 1l10 13l7 1l9 16l12 2l-1 6l-5 3l3 5l-8 5l-31 3l-5 -2l-6 5l-9 -1l-7 3l-6 -2l15 -10l9 -2l-16 -2l-3 -4l11 -3l-6 -5l2 -7l15 1l2 -6l-7 -6l-12 -2l-3 -3l4 -4l-3 -3l-6 5l0 -10l-5 -5l3 -10l8 -8l8 0zM2216 485l1 -5l-2 -6l-12 -5l-2 -5l23 4l15 6l16 1l9 6l-3 2l4 6l-13 -3l-16 3l-10 -5zM1811 841l-31 12l-9 -3l-3 -13l6 -19l-3 -28l29 0l7 27l-2 9l3 11zM1716 823l-8 4l-6 -12l-7 2l-1 -10l-5 -7l-13 2l-8 9l-19 -21l4 -5l10 -3l0 -8l22 2l0 3l5 -1l8 4l11 -5l7 9l-2 6l3 0l3 6l-3 4l5 12l-5 3l0 6zM1632 768l1 -4l16 -3l4 3l7 -2l2 3l-5 2l-8 -2l-8 4zM1649 790l-10 -5l-6 -9l30 -2l0 8l-10 3zM1895 890l-2 -2l3 -11l17 0l0 12l-15 0zM2037 543l5 3l21 1l-1 3l-15 1l-12 -4zM2066 484l-5 8l-12 -1l-12 2l7 6l-5 1l-6 0l-5 -5l-2 2l2 6l6 5l-4 2l10 8l0 5l-9 -2l3 5l-6 1l4 9l-7 0l-8 -4l-6 -15l-9 -13l8 -12l35 -8l7 4l9 -1l0 -5zM1332 74l34 -6l35 0l13 -3l115 0l63 8l-19 4l-92 1l5 2l35 -1l31 3l19 -3l8 4l-11 5l74 -7l30 2l6 4l-46 10l-32 1l23 1l-20 13l0 12l12 6l-32 4l19 5l2 9l-11 0l13 9l-22 1l12 4l-4 3l-28 2l13 7l0 4l-20 -4l-5 3l27 8l3 8l-17 2l-20 -9l3 6l-12 6l41 1l-54 16l-41 4l-10 4l-14 10l-22 7l-34 5l-9 7l0 7l-5 6l-16 8l4 8l-10 18l-14 1l-15 -9l-20 0l-9 -5l-7 -10l-17 -12l-5 -7l-2 -9l-14 -9l4 -7l-7 -4l10 -12l15 -3l6 -12l-26 6l-12 -3l-1 -7l4 -5l30 2l-26 -9l-10 1l-8 -3l11 -9l-26 -21l-13 -4l0 -4l-27 -6l-72 0l-29 -9l46 -4l-65 -6l1 -4l75 -10l4 -4l-27 -3l8 -4l50 -8l-5 -5l55 -4l31 0l11 3l26 -5l59 7l-24 -5zM899 763l-16 -4l-5 -4l0 -8l5 -8l12 0l1 -3l-11 -9l5 0l0 -5l19 0l-1 19l10 2l-10 6l1 4l-10 8zM1274 875l-8 4l-2 -2l-5 2l-4 -2l5 -13l-5 -13l5 -9l11 4l12 12l-5 10zM1202 816l13 11l0 5l4 0l10 8l-2 9l-6 3l-1 7l4 8l3 0l8 14l-8 0l-12 6l-11 -5l-4 -10l5 -12l-6 -6l1 -4l-7 -2l-7 -8l2 -7l9 -3l-3 -4l0 -4zM927 770l-5 -4l-1 -5l-6 1l-9 -6l2 -7l13 -8l29 -1l19 10l-13 4l-5 -2l-9 10l-3 -2l-7 2l1 5l-3 3zM1988 441l6 7l-4 3l-20 -3l-7 2l-3 -2l-2 4l19 18l9 4l-1 1l-25 -10l-8 -7l2 -1l-5 -8l-6 -1l-3 4l-3 -3l0 -4l16 0l5 -7l8 -3l19 7zM1068 701l15 2l0 9l-2 2l2 6l-18 -2l-4 2l-6 -3l1 -4l17 3l4 -3l-5 -4l0 -4l-6 -1zM1962 431l3 -6l-2 -2l6 0l1 -4l9 3l29 -8l13 2l6 5l-6 2l-11 14l-25 5l-19 -7l-2 -3zM3007 1002l-17 -6l9 -2l9 6zM3044 1001l-9 1l5 -9l10 -4l1 5zM2979 981l4 3l6 -1l2 4l-24 3l4 -5l5 -1zM3029 981l-1 5l-15 3l-14 -1l0 -4l8 -2l6 3l7 0zM2886 968l19 1l3 -4l18 4l4 7l15 2l12 6l-11 4l-11 -5l-20 0l-50 -9l-2 -5l-9 0l7 -10l12 1l12 4zM3147 962l-5 7l-1 -8l4 -7l2 3zM3072 935l-3 3l-7 -2l-2 -4l10 -1zM3105 931l3 8l-8 -5l-21 0l2 -6l13 0zM3141 912l3 16l11 6l8 -11l11 -6l9 0l27 9l0 65l-9 -8l-10 -2l-2 3l-13 0l4 -8l7 -3l-8 -19l-19 -9l-8 0l-15 -10l-3 5l-4 1l-2 -8l-8 -5l18 -3l-1 -3l-15 0l-4 -6l-9 -2l-4 -5l19 -5l16 4zM3052 886l-8 10l-7 2l-10 -2l-25 2l-2 7l9 9l6 -4l18 -4l0 5l-5 -2l-4 6l-9 4l10 13l-2 3l9 12l0 6l-6 3l-4 -3l5 -8l-10 4l-2 -3l1 -4l-7 -6l1 -10l-7 3l1 26l-6 2l-4 -3l3 -9l-2 -10l-4 0l-3 -7l12 -34l9 -7l8 3l24 1l10 -7zM3087 889l-1 8l-5 -1l-1 7l4 5l-3 1l-7 -19l5 -12l1 6l6 1zM2979 882l11 9l-12 1l-3 7l0 9l-9 7l-5 25l-1 -3l-11 4l-4 -6l-12 -4l-12 4l-4 -5l-15 -1l-1 -13l-5 -3l-5 -8l0 -18l6 -7l1 7l7 5l13 -1l11 -6l9 3l8 -2l13 -29l20 2l-6 9l7 9zM2858 959l-11 0l-21 -17l-25 -35l-8 -9l-7 -16l-32 -32l-1 -5l22 3l31 31l11 0l8 7l6 8l7 5l-4 8l10 4l5 12l7 1l5 7l-2 12zM2578 545l11 12l-1 8l4 5l0 5l-7 -1l2 11l24 13l-6 5l-4 9l32 14l14 2l6 5l28 3l0 -15l6 -2l1 10l9 4l23 -1l1 -7l-4 -3l8 -1l21 -14l8 3l7 -5l5 7l-4 4l11 1l1 4l-3 2l0 6l-7 -2l-13 7l1 6l-11 21l-8 -2l-1 18l-5 3l-6 -16l-2 0l-2 6l-5 -5l3 -6l4 0l5 -9l-25 -3l-1 -7l-12 -4l-4 6l7 6l-8 7l6 3l-2 6l5 15l-1 4l-19 2l0 8l-5 5l-14 7l-29 25l0 4l-19 7l-3 8l3 21l-4 9l0 17l-6 1l-4 8l3 3l-9 3l-8 9l-9 -9l-9 -24l-8 -14l-5 -19l-9 -14l-9 -54l-14 6l-7 -1l-13 -12l4 -4l-3 -3l-11 -9l6 -7l22 0l-2 -8l-5 -5l-1 -8l-7 -4l11 -11l12 1l26 -31l0 -7l9 -6l-8 -5l-8 -15l5 -4l16 2l11 -2zM1738 361l2 7l-8 9l-18 6l-14 -1l8 -11l-5 -10l21 -12l2 5l-2 5l6 0zM2339 528l9 -2l7 -6l11 -1l26 7l12 9l7 0l1 8l-7 20l5 2l-5 5l4 15l8 1l1 7l-9 9l9 11l9 4l1 9l4 2l1 4l-14 6l-4 11l-41 -6l-4 -13l-5 -1l-18 6l-12 -3l-10 -8l-10 -3l-14 -22l-5 1l-7 -3l-3 4l-6 -6l0 -5l-3 0l1 -7l-5 -8l-12 -5l-7 -10l2 -7l6 -4l-1 -6l-7 -3l-12 -20l2 -3l-3 -11l7 -3l7 8l6 2l20 -9l3 3l-4 5l9 5l3 7l9 2l7 5l15 2l15 -3zM2254 540l7 3l1 6l-6 4l-2 7l7 10l12 5l5 8l-1 7l3 0l0 5l6 6l-13 -2l-7 10l-19 -1l-28 -20l-27 -10l-4 -12l22 -10l4 -12l-1 -8l15 -10l15 4l5 -2zM1655 235l-2 7l11 7l-13 7l-38 9l-41 -5l10 -4l-22 -5l18 -2l0 -3l-21 -2l6 -7l16 -1l15 7l15 -6l13 3l16 -5zM2157 573l-2 3l-3 -1l-2 6l2 1l-3 4l5 -1l0 4l-5 16l-6 -17l8 -19l7 -2l-1 6zM1955 518l-4 16l-27 -10l2 -5l22 0zM1892 488l6 7l-1 13l-5 0l-4 3l-4 -3l-2 -18l5 1zM1924 432l14 3l1 9l-8 -1l-8 3l0 8l3 5l9 5l5 8l11 8l8 0l3 3l-3 2l26 13l-2 4l-6 -5l-8 -1l-5 6l8 4l-1 5l-5 1l-5 8l-4 1l4 -11l-7 -10l-42 -24l-7 -5l-3 -10l-13 -5l-15 7l1 -4l-5 -2l-3 -7l4 -3l-3 -7l5 2l10 -4l7 2l2 -4l12 -1l0 -4l6 1l12 -3zM1024 715l7 1l7 5l-10 2l-11 -5l5 -3zM2155 576l2 -3l11 4l20 -11l4 12l-22 7l10 10l-19 13l-12 -3l6 -23zM3146 559l2 3l-6 6l-4 -3l-5 2l-3 6l-6 -3l0 -5l5 -6l6 2l4 -5zM3210 529l-4 8l2 5l-5 7l-13 4l-18 1l-14 11l-7 -3l0 -8l-18 2l-11 5l-12 0l10 8l-7 16l-6 5l-5 -4l2 -9l-6 -3l-4 -7l10 -3l22 -18l20 -3l11 2l10 -18l7 5l20 -14l7 -12l-2 -12l4 -6l11 -2l5 14l0 8l-9 10zM3239 458l7 2l7 -4l2 11l-14 3l-9 10l-16 -7l-5 11l-11 0l-2 -10l5 -7l11 -1l6 -22l11 11zM2510 477l-19 9l-5 7l-3 0l-3 -4l-13 -1l-2 -8l-5 0l1 -10l-12 -7l-29 2l-9 -9l-26 -12l-26 6l1 37l-5 0l-7 -7l-7 -3l-16 5l2 -6l-2 -4l-12 -3l-10 -15l10 1l0 -7l17 -1l0 -16l-18 -1l-21 6l-5 -2l1 -5l-6 -6l-8 0l-8 -7l5 -8l-2 -2l7 -11l11 6l1 -7l21 -11l15 0l34 11l11 -4l16 -1l12 6l3 -3l14 0l3 -5l-16 -7l9 -4l-2 -3l10 -3l-7 -7l4 -3l38 -4l39 -10l18 2l3 11l10 -3l13 4l-1 5l10 0l25 -10l-4 3l13 8l22 25l6 -5l13 6l15 -3l21 14l13 -1l6 6l-8 7l-8 0l-1 10l-5 5l-20 -3l-7 18l-25 6l9 17l-7 3l1 6l-12 -6l-35 0l-14 -4l-6 2l-1 6l-17 -3l-6 1zM2210 909l6 8l-13 9l-7 17l-4 4l-14 -10l-1 -6l-38 -21l0 -11l11 -18l-10 -23l13 -13l5 2l0 5l4 4l7 0l12 8l15 2l12 -9l4 4l7 0l-9 11zM2510 477l2 -4l6 -1l17 3l1 -6l6 -2l14 4l35 0l12 6l-2 2l-16 5l-3 4l-13 1l-4 7l-17 0l-10 5l2 2l-3 3l-19 1l-13 -3l-10 1l1 -6l10 2l4 -3l8 1l13 -8l-12 -5l-7 3l-8 -4l9 -7zM2835 794l-9 -16l-3 -12l7 -8l13 -2l17 5l5 -7l9 4l2 7l-1 12l-17 7l4 6l-10 1l-9 4zM3083 514l12 18l0 12l-4 5l-26 7l1 -13l-5 -10l8 -2l-7 -8l5 -1l4 -5l11 -1zM2008 479l-2 2l-5 -7l7 -7l10 6l-4 5zM2280 600l4 14l-7 1l-2 -5l-9 -1l7 -10zM2852 757l3 -4l1 -9l-8 -8l-1 -10l-7 -8l-8 -1l-2 3l-9 -1l-10 6l2 -20l-7 0l-1 -6l-4 -3l11 -10l1 2l5 0l-1 -11l5 -2l10 17l12 0l4 9l-9 6l12 6l22 28l3 7l-2 10l-9 -4l-5 7zM2158 567l-7 2l4 -8l5 -7l4 0l2 4l-5 4zM1723 856l-13 -4l-24 -20l7 -11l9 -6l6 12l8 -4l-2 12l10 8l0 5zM1949 671l-8 4l-5 -5l-16 -5l-12 -11l-5 2l-10 -17l4 -4l2 -25l-4 -13l5 -2l0 -9l14 -10l1 -7l37 8l5 9l34 11l10 -7l-3 -8l11 -9l20 1l3 4l17 3l3 3l-4 5l2 4l-3 7l3 8l0 92l-12 0l0 4l-79 -38zM2618 825l-2 10l-4 3l-9 2l-4 -8l-2 -14l4 -16l12 12zM2090 1190l3 3l-5 8l-11 5l-7 -7l15 -13zM2027 357l1 -6l-15 -3l-2 -8l11 -3l27 -1l16 8l1 4l-8 4l-3 5l-10 4l-10 0l-3 -3zM1860 399l2 6l-5 0l1 -6zM2011 340l0 -8l5 -6l9 -4l8 8l8 0l2 -8l9 -2l26 8l4 10l-17 6l-16 -8l-27 1zM1748 542l6 5l24 1l11 25l-2 4l-23 7l-1 7l-12 4l-3 5l-19 4l-16 8l-1 17l-26 2l-11 21l-14 11l-3 14l-6 8l-22 1l10 -23l9 -8l7 -18l6 -3l12 -14l9 -1l21 -18l-2 -13l5 -14l6 -6l18 -9l10 -17zM2066 418l9 -3l12 4l12 14l1 3l-2 1l-9 -1l-7 9l-1 -13l-12 -13zM2295 1025l10 27l-3 8l-3 -6l-2 3l1 12l-3 2l-1 9l-23 69l-17 7l-14 -6l-7 -29l1 -8l5 -1l5 -11l1 -7l-5 -20l4 -12l19 -4l14 -12l3 -5l-1 -4l4 1l9 -18zM829 641l-6 16l0 24l5 13l13 18l11 2l4 5l30 -8l6 -4l5 -17l18 -5l14 0l3 2l-8 17l2 1l-4 12l-7 -2l-3 6l-22 1l0 5l-5 0l11 9l-1 3l-12 0l-5 8l0 8l-17 -14l-8 -3l-19 5l-42 -15l-11 -7l-16 -4l-15 -10l-7 -11l3 -1l1 -9l-7 -14l-24 -24l-9 -4l0 -8l-11 -8l-2 -7l-6 0l-10 -11l-9 -22l-17 -6l-1 4l2 12l31 35l9 24l5 0l8 11l-6 4l-3 -6l-19 -13l-1 -13l-22 -11l-6 -6l5 0l4 -9l-13 -10l-16 -29l24 -2l-1 2l38 12l28 0l0 -5l17 0l15 12l5 10l6 3l8 3l6 -8l8 0l7 4l15 19l5 11l15 6zM2006 481l18 -4l5 3l1 7l-20 5l-5 -7zM1678 754l4 -2l1 -6l10 3l11 -4l41 0l2 -7l-12 -88l16 0l67 44l3 5l10 4l1 6l11 -1l0 23l-6 7l-1 6l-22 3l-4 3l-21 0l-9 4l-11 11l-9 0l-4 10l-8 8l-2 13l-7 3l-1 -4l-7 4l-11 -1l-3 -6l-3 0l2 -6l-7 -9l-11 5l-8 -4l-5 1l-1 -10l-5 -9zM2795 698l-5 4l-7 1l-5 11l-4 2l15 22l-4 9l-3 2l9 13l5 19l-10 20l-1 -8l3 -7l-4 -6l1 -11l-4 -5l-5 -25l-4 -8l-18 12l-12 -3l3 -13l-2 -9l-8 -12l2 -3l-6 -2l-7 -8l-1 -8l4 2l0 -7l5 -3l1 -18l8 2l11 -21l-1 -6l13 -7l7 2l0 -6l3 -2l-1 -4l6 0l8 8l0 16l-10 8l-1 12l11 -2l2 10l6 2l-3 8l12 5l8 -2l0 4l-11 10zM1998 475l-1 -2l-4 5l1 3l-10 -6l3 -7l5 -3l11 6l-2 3zM2678 407l44 -15l19 3l7 5l25 3l9 -7l-4 -6l11 -10l32 7l2 8l14 4l22 -3l10 1l16 10l22 2l22 -4l15 -7l11 4l12 -1l-12 18l2 4l16 0l8 -4l17 11l-1 3l-23 0l-14 10l-25 9l-16 -3l-6 6l5 8l-14 8l-43 8l-11 5l-5 -3l-12 0l-25 -8l-45 0l-10 -15l-18 -8l-26 -3l-3 -4l4 -12l-7 -8l-14 -4l-9 -5zM2146 1015l29 1l20 -7l8 -6l5 44l-7 14l-6 6l-21 9l-26 22l-1 7l9 16l-1 20l-25 13l-4 3l3 5l-1 5l-7 0l-3 -12l1 -11l-7 -21l15 -20l1 -36l-16 -8l-9 0l-1 -11l30 -8l13 6l-1 16l6 6l3 -7l5 -2l-1 -13l-4 -7l-7 -3l-3 -13zM1678 754l-12 -14l-12 -6l-15 1l-4 4l4 -20l-2 -20l-8 -9l3 -3l39 0l-2 -15l2 -5l10 -1l-1 -25l33 0l0 -15l38 24l-16 0l12 88l-2 7l-41 0l-11 4l-10 -3l-1 6zM2146 1015l-3 8l3 13l7 3l4 7l1 13l-5 2l-3 7l-6 -6l1 -16l-18 -9l6 -13l-2 -8l4 -11l-3 -8l-4 -5l9 2l6 8zM2811 838l1 5l12 -4l10 12l1 21l7 12l0 3l-7 1l-21 -16l-12 -25l1 -13zM2986 855l-7 4l-20 -2l-13 29l-8 2l-9 -3l-11 6l-13 1l-7 -5l-1 -7l7 3l8 -2l2 -8l16 -4l12 -14l5 5l2 -3l4 0l2 -11l12 -15l4 0l5 5l1 4l15 6l-1 4l-7 0zM1963 1186l-11 -15l-9 -50l-9 -12l-8 -19l-8 -9l-1 -8l18 -3l6 4l42 -1l7 5l24 1l26 -6l11 3l-15 7l-4 -4l-23 4l0 35l-10 0l0 67l-14 5l-11 -2l-6 -7zM3458 1111l13 11l-4 2l-19 -13l-8 -10l15 7zM1822 781l0 -7l-12 -3l0 -4l-6 -7l0 -9l6 -1l4 -3l22 -3l1 -6l6 -7l0 -23l14 -4l63 -39l16 5l5 5l8 -4l2 16l8 9l-7 38l-12 9l-5 13l5 4l0 6l6 1l-4 8l-11 -11l-8 6l-13 -4l-20 6l-12 -5l-10 2l-14 -8l-13 4l-5 18l-11 -5zM1885 852l-26 5l-16 -20l-16 0l0 -22l10 -16l0 -25l7 -11l10 -2l14 8l10 -2l12 5l20 -6l13 4l8 -6l15 15l-2 5l-8 8l-19 38l-6 4l-10 -4l-9 6l-4 9zM943 789l-20 -18l10 -4l-1 -5l7 -2l3 2l9 -10l5 2l13 -4l-8 36l2 5l-2 2l-17 -5zM1861 365l8 0l2 4l-5 12l-6 0l2 11l-12 -7l-17 2l5 -3l9 -15zM2082 188l31 7l-13 3l11 6l-25 5l4 -7l-13 -4l-15 4l-5 7l-10 5l-23 -2l-12 -6l-12 3l-1 7l-19 -2l-3 6l-9 0l-32 32l3 4l-3 4l-10 -1l-7 10l1 13l6 5l-3 12l-13 12l-6 -6l-20 12l-14 2l-13 -5l-4 -11l-3 -23l9 -6l27 -9l19 -10l43 -33l44 -20l22 -5l16 1l15 -8l19 0zM2047 121l-22 5l-18 -3l7 -2l-6 -4l21 -2l4 4zM1983 103l32 7l-25 4l-5 8l-9 2l-5 8l-12 0l-21 -6l9 -3l-15 -3l-20 -9l-8 -8l28 -3l5 3l14 0l4 -3l15 -1zM2054 96l20 3l-15 6l-58 -1l-2 -2l-14 -1l-11 -4l31 -3l14 2l10 -3zM2681 621l0 15l-28 -3l-6 -5l-14 -2l-32 -14l4 -9l10 -7l24 11l3 5l28 8zM3530 1309l2 4l8 -4l2 4l0 5l-15 16l4 5l-16 3l-9 17l-13 7l-26 -4l-2 -3l5 -8l13 -10l22 -11l14 -15l2 -5l7 -5zM3546 1262l7 10l1 -7l4 3l2 8l8 3l17 -2l-5 15l-8 -1l-3 3l1 5l-10 14l-8 4l-5 -4l5 -8l-3 -6l-11 -4l1 -4l7 -3l1 -14l-4 -9l-17 -20l4 0l6 5l7 3zM2389 689l-4 7l-7 2l-1 13l-11 3l-3 7l-6 0l-9 9l-6 0l-11 3l-11 -23l30 -10l7 -20l-5 -11l3 -8l5 -2l-1 -8l5 0l10 10l13 3l11 11l-5 11zM2552 529l7 4l3 8l16 4l-9 8l-11 2l-16 -2l-5 4l8 15l8 5l-9 6l0 7l-26 31l-12 -1l-11 11l7 4l1 8l5 5l2 8l-22 0l-6 7l-8 -2l-10 -15l-49 3l4 -11l14 -6l-1 -4l-4 -2l-1 -9l-9 -4l-9 -11l16 5l25 -2l13 -4l1 -8l5 -6l8 0l1 -3l11 0l4 -3l0 -6l4 -6l6 -3l-4 -6l10 0l2 -7l5 -5l-3 -9l5 -4l28 -5zM1021 828l-5 -9l2 -2l-9 -7l-13 7l-1 2l5 6l-4 2l-5 1l-2 -6l-4 1l-2 -4l-11 -2l-1 2l2 -8l-2 -6l4 -1l3 6l8 2l18 -8l11 2l11 7l2 8l-2 3l-4 -1zM1104 1076l-8 7l-10 -5l-1 -4l-45 -28l-4 -8l1 -3l-35 -63l-14 -11l3 -4l-5 -10l3 -7l8 -6l-1 10l8 1l4 5l6 -5l8 -15l12 -4l11 -10l3 -7l-2 -7l3 -1l14 12l6 10l23 0l8 4l-7 10l8 6l-9 0l-21 10l-3 8l1 5l-6 3l-3 6l10 15l-2 5l6 0l4 6l9 0l8 -6l0 15l10 0l8 16l-2 19l-4 5l1 3l-2 4l4 8zM3064 816l1 12l-3 9l-4 -10l-4 5l3 8l-3 4l-12 -6l-3 -7l3 -5l-6 -4l-3 4l-5 -1l-7 6l-2 -3l4 -8l12 -7l3 5l8 -3l2 -5l7 0l-1 -8l8 5l1 5zM3040 797l-10 13l-6 -7l5 -12l6 0l-2 6l8 -9zM2985 807l-13 9l5 -7l13 -13l5 -10l2 8l-7 6zM3019 781l12 3l0 4l-11 8l0 -10zM3055 778l3 12l-8 -3l3 9l-5 3l0 -7l-3 -1l-2 -6l6 1l0 -4l-6 -8l9 1zM3015 769l-2 9l-10 -13l9 1zM3013 715l6 3l3 -3l0 7l3 7l-2 8l-6 4l-2 8l2 8l10 0l13 5l1 13l-12 -11l-2 4l-7 -6l-9 2l-5 -3l4 -6l-3 -3l-1 4l-5 -6l-2 -14l4 4l4 -25zM3359 968l-3 1l-4 -4l-7 -14l15 14zM3320 955l-18 8l-5 0l-14 -6l1 -3l14 1l3 -5l1 5l6 0l8 -7l-1 -6l8 1l0 6zM3272 974l9 6l6 11l6 0l0 4l7 2l-3 2l11 4l-1 3l-28 -5l-13 -12l-6 -8l-13 -5l-14 6l1 8l-8 3l-16 -2l0 -65l36 13l12 10l2 6l16 6l3 5l-9 1zM3331 945l-3 3l-4 -10l-17 -11l2 -2l6 3l15 12zM1950 389l-9 -19l3 -2l-3 -6l7 -3l28 -8l10 2l1 3l45 2l6 15l-6 2l8 18l-15 12l3 5l-12 -5l-18 3l-5 -4l-4 2l-5 -6l-8 0l0 -4l-7 -1l-2 3l-5 -2l0 -3l-7 -1zM1137 715l7 3l-2 2l-14 1l1 -6zM3106 476l2 2l-4 -1l-7 7l0 7l-22 11l-1 6l9 6l-1 2l-11 1l-4 5l-10 -1l-4 2l-6 -4l5 -6l2 -7l-11 -5l26 -19l4 3l9 0l-1 -5l15 -4l4 -6zM1710 481l7 -4l3 5l13 -1l3 5l-5 3l-2 14l-4 1l4 6l-3 6l4 3l-5 7l0 3l-4 3l-10 -1l1 -14l-7 -4l7 -21l-2 -7zM1173 1122l9 -26l27 -2l9 5l3 8l0 14l10 2l4 -2l7 3l4 16l11 0l-5 26l-9 8l-8 1l-21 -4l10 -15l-2 -4l-30 -13zM2308 652l-1 -7l6 -6l3 9l-5 6zM2027 421l4 -2l18 4l13 -5l7 1l12 13l1 13l14 2l0 3l-8 1l-2 12l-14 -5l-16 5l-27 -1l-4 -6l2 -2l-6 1l-5 -3l-1 -4l-13 -9l8 -2l11 -14zM3236 393l11 17l-15 -3l-6 14l9 11l0 7l-8 -6l-6 7l-2 -29l3 -21l-6 -9l1 -14l9 -5l-4 -4l5 -2l6 17l-1 9zM2027 357l-30 -1l2 -5l14 -3l15 3l-1 3zM50 234l7 3l-3 -8l27 2l20 9l-10 5l-16 1l-1 9l-4 2l-30 -6l-2 -5l-22 0l-5 -3l2 -4l-12 2l5 5l-6 4l0 -40l51 18zM3600 192l-11 0l-2 -3l13 -4zM13 191l-13 1l1 -8l22 5zM3236 168l-37 -2l9 -4l13 -1l14 4zM3307 149l-11 4l-16 -1l-19 -4l3 -3l18 2zM3251 144l-8 8l-53 2l-20 -7l5 -6l40 -2zM2375 193l-38 -1l-3 -4l-18 -3l-1 -5l10 -2l-1 -6l20 -8l-9 -1l24 -9l-3 -5l56 -12l70 -6l7 4l-7 3l-66 9l-31 10l-31 19l2 9zM2870 130l2 5l10 -2l29 0l30 9l-2 5l-45 11l27 4l9 -2l5 7l21 -5l32 2l2 5l42 1l1 -7l37 1l16 6l5 6l-6 4l12 8l16 4l10 -10l16 4l17 -3l19 4l7 -3l17 1l-8 -9l14 -4l90 6l9 6l26 8l60 -1l8 4l-1 8l12 3l69 -2l18 9l12 -3l-8 -7l5 -4l52 2l29 5l14 4l0 40l-13 5l-13 -1l20 16l1 4l-3 3l-18 -2l-37 8l-30 14l-4 4l-14 -7l-26 8l-5 -4l-9 5l-14 -2l-3 7l-12 10l1 4l11 2l-1 14l-10 1l-4 8l4 4l-17 6l-4 11l-15 2l-3 11l-14 9l-14 -44l5 -14l9 -6l0 -4l16 -3l35 -22l18 -8l8 -15l-12 1l-6 9l-26 11l-8 -13l-26 4l-25 16l8 7l-37 3l0 -7l-15 -2l-13 5l-30 -1l-33 3l-71 43l16 1l5 6l10 2l6 -5l11 1l14 11l1 9l-8 10l-5 28l-15 14l-4 7l-33 29l-14 6l-6 0l-6 -5l-14 7l-1 4l-2 -7l5 0l2 -12l-3 -9l9 -3l12 2l19 -34l-25 7l-15 0l-4 -9l-12 -7l-17 -4l-18 -30l-8 -4l-15 -3l-26 2l-8 5l5 3l0 5l-14 14l0 5l-14 6l-12 -4l-12 1l-11 -4l-15 7l-22 4l-22 -2l-16 -10l-10 -1l-22 3l-14 -4l-2 -8l-32 -7l-11 10l4 6l-9 7l-25 -3l-7 -5l-19 -3l-34 13l-14 3l-6 -6l-13 1l-21 -14l-15 3l-13 -6l-6 5l-22 -25l-13 -8l4 -3l-25 10l-10 0l1 -5l-13 -4l-10 3l-3 -11l-18 -2l-39 10l-38 4l-4 3l7 7l-10 3l2 3l-9 4l16 7l-3 5l-14 0l-3 3l-12 -6l-16 1l-11 4l-34 -11l-15 0l-21 11l-1 7l-11 -6l-7 11l2 2l-5 8l8 7l8 0l6 6l-1 5l5 2l-5 6l-9 2l-10 10l9 9l-1 7l11 12l-8 6l-20 -9l-3 -4l-16 -1l-15 -6l-24 -2l-33 -18l7 -2l8 -8l-5 -4l14 -4l0 -3l-9 2l1 -4l14 -4l2 -3l-2 -6l4 -8l-21 -3l-6 -5l-8 2l-12 -4l-4 -6l-8 -1l2 -5l-6 -5l-20 2l-5 -10l14 -3l-10 -4l-9 -10l1 -8l-15 -1l-12 -5l-4 -10l-5 -3l4 -3l-3 -9l7 -6l-1 -2l11 -5l-10 -5l30 -19l4 -5l-15 -7l4 -6l-9 -7l7 -9l-11 -11l9 -8l-16 -7l2 -7l35 -8l17 6l27 2l38 12l8 4l0 7l-11 5l-16 3l-45 -8l-7 2l16 7l1 15l21 6l1 -5l-6 -5l7 -3l24 6l8 -3l-6 -7l23 -10l18 4l6 -7l-8 -6l5 -6l-7 -6l27 4l6 5l-12 1l0 6l7 3l16 -2l2 -6l56 -14l8 1l-10 6l12 1l7 -3l19 -1l15 -4l11 6l12 -6l-11 -6l6 -3l29 3l50 14l7 -5l-11 -8l-12 -1l4 -4l-6 -11l18 -9l7 -9l7 -2l27 2l2 6l-10 8l7 3l3 7l-2 14l11 6l-5 7l-19 14l11 1l4 -3l11 -3l3 -5l9 -5l-6 -5l4 -7l-11 -1l-2 -5l8 -10l-13 -8l18 -7l-2 -7l5 -1l5 6l-4 10l11 1l-5 -7l17 -4l21 0l18 5l-9 -8l-1 -10l63 -3l-8 -6l12 -6l57 -7l3 -2l27 -1l8 2l22 -5l19 0l2 -5l10 -4l24 -4l17 3l-14 3zM2851 117l-57 4l19 -13l8 -1l33 6zM2311 95l-35 5l-11 -2l6 -4l-23 0l35 -2l2 3l15 -4l15 2zM2799 111l-21 1l-28 -2l-17 -4l-8 -7l-13 -2l26 -7l21 -3l43 15zM2104 911l4 6l0 6l-9 0l-3 6l-6 -1l3 -12l5 -2zM1712 629l1 12l-33 0l1 25l-10 1l-2 5l2 15l-39 0l-3 3l1 -4l22 -1l6 -8l3 -14l14 -11l11 -21l17 0l3 -2zM2228 737l-19 -32l-11 -8l-7 -10l0 -13l-6 -11l-10 -6l-6 -13l-18 -25l-5 0l4 -13l11 2l19 -13l-10 -10l22 -7l12 3l15 7l28 20l28 2l2 5l7 -1l4 9l14 10l0 11l6 8l6 2l6 16l30 5l2 -2l5 7l-7 20l-30 10l-29 4l-9 4l-7 11l-5 2l-3 -4l-29 0l-4 -3l-2 9zM2140 805l-3 -8l-5 -4l0 -15l-5 0l0 2l-6 0l3 9l-10 13l-6 1l-8 -6l-10 9l-19 -2l-3 1l-10 -9l-7 1l-6 14l-6 3l-4 -4l1 -11l-6 -6l-5 -16l-2 -3l-4 0l4 -8l-1 -4l3 -3l-2 -2l7 -14l9 1l-1 -44l12 0l0 -20l119 0l6 34l9 6l-5 6l-10 4l-6 34l-16 27l-4 3l-3 10zM2140 805l-2 11l-5 0l-3 6l6 1l5 5l12 17l-19 17l-15 2l-7 -2l-4 3l-11 -11l-17 2l-8 -12l-7 -3l-3 -6l-11 -10l0 -3l-12 -8l6 -3l6 -14l7 -1l10 9l3 -1l19 2l10 -9l8 6l6 -1l10 -13l-3 -9l6 0l0 -2l5 0l0 15l5 4l1 8zM1633 764l-9 -11l4 -2l11 -16l10 -1l5 0l12 6l12 14l7 22l-40 -2l-12 2l-1 -8l30 -3l-2 -3l-7 2l-4 -3l-5 3zM3421 1005l3 3l-7 0l-4 -6l6 2zM3409 999l-13 -3l1 -4l10 4zM3417 996l-2 2l-7 -9l-2 -6l3 0l4 8zM1686 832l-15 -10l-3 -11l8 -9l13 -2l5 7l1 10l3 -1l-10 13zM922 766l-1 3l-6 -1l-16 -5l7 -7l9 6l8 0zM2289 805l-11 15l-9 0l-32 -12l-11 -14l5 -9l10 11l48 -10l0 14zM2297 784l14 -4l-1 14l-9 25l-15 28l-20 24l-35 26l-15 20l-6 -8l0 -37l11 -14l7 -1l9 -7l13 0l39 -45l0 -19l4 0zM2009 446l12 9l6 -1l-3 6l6 8l-5 7l-9 3l2 -5l-10 -6l-5 5l-11 -7l4 -5l-5 -4l3 -5l-4 0l4 -3l-6 -7l14 -2l6 4zM1229 840l12 2l9 -2l10 2l-5 9l5 13l-5 13l-15 -2l0 7l-5 -1l-8 -14l-3 0l-4 -8l1 -7l6 -3zM1989 405l4 -1l5 4l18 -3l10 4l-7 8l-11 -3l-29 8l-9 -3l-1 -4l2 -3l8 -1l7 -6zM1938 435l8 1l16 -5l4 4l-8 3l-5 7l-16 0l2 -1l-2 -4zM2022 243l-10 7l2 6l-36 17l-7 14l17 12l-9 11l-11 3l-4 17l-5 9l-12 -1l-6 8l-12 0l-19 -35l13 -12l3 -12l-6 -5l-1 -13l7 -10l10 1l3 -4l-3 -4l32 -32l9 0l3 -6l19 2l1 -7l6 0l29 12l1 15l3 4zM1994 320l-11 11l-2 0l0 -6l13 -5zM2121 1167l-2 5l-6 1l-6 -6l3 -10l8 1l2 5zM2188 566l-20 11l-11 -4l4 -11l5 -4l-2 -4l-4 0l-1 -8l8 -9l0 -5l4 2l11 -3l13 2l28 -5l-10 8l1 8l-4 12zM1945 771l1 -4l-6 -1l0 -6l-5 -4l5 -13l12 -9l7 -38l-8 -9l-2 -16l10 -5l79 38l1 40l-9 -1l-7 14l2 2l-3 3l1 4l-4 8l4 0l6 15l-12 5l-7 11l-9 5l-13 0l1 4l-9 7l-27 5l1 -3l-4 -11l-10 -7l2 -5l13 0l-6 -9l0 -13zM1819 839l-8 2l-5 -10l1 -14l-2 -4l-1 -15l-4 -5l0 -3l9 0l-1 5l6 7l3 7l-1 23zM2826 778l-9 -4l-9 0l2 -8l-9 0l-1 11l-8 23l0 8l7 0l6 18l16 12l-3 4l-6 1l-1 -5l-8 -4l-2 1l-16 -19l-2 6l-1 -6l4 -15l10 -20l-5 -19l-9 -13l3 -2l4 -9l-15 -22l4 -2l5 -11l7 -1l11 -6l4 3l1 6l7 0l-2 20l10 -6l9 1l2 -3l8 1l7 8l1 10l8 8l-1 9l-3 4l-22 1l-7 8zM2510 498l-4 3l-10 -2l-1 6l10 -1l13 3l19 -1l2 9l10 1l1 10l-17 -1l-15 8l-4 -4l-1 -12l-5 -2l-7 9l-6 0l-3 4l-3 -1l-11 2l6 -11l-2 -7l-8 -2l3 -5l8 1l8 -12l14 -3l-1 8zM2412 543l-1 -8l-7 0l-12 -9l-19 -6l-18 0l-7 6l-9 2l0 -18l-8 -3l3 -7l-7 0l2 -9l10 3l8 -4l-10 -11l-8 2l-1 8l-3 -7l4 -3l12 -2l7 3l7 7l16 0l-2 -5l17 -10l14 6l1 8l4 2l14 1l5 10l18 12l23 9l0 6l-8 -3l-1 4l-9 2l-2 8l-13 4l-2 5l-8 1zM3050 989l9 -5l14 0l-22 10l0 -3zM1183 792l8 -1l0 8l-9 1l-2 -1l3 -3zM1895 597l-4 -18l-15 -12l-1 -8l6 -6l3 -8l-2 -9l2 -5l11 -4l7 1l0 5l8 -4l1 2l-5 5l0 5l3 2l-1 9l-7 5l2 5l6 0l6 7l-1 7l-14 10l0 9zM2169 487l14 4l21 -1l12 -5l10 -1l10 5l1 8l11 6l-7 3l3 11l-2 3l6 8l-5 2l-15 -4l-33 7l-13 -2l-11 3l-4 -2l0 5l-6 5l-3 -5l4 -4l-15 -1l-7 6l-15 1l-8 -5l-11 -1l-2 4l-7 2l-10 -6l-11 0l-6 -10l-7 -5l5 -8l-6 -5l11 -9l15 -1l4 -7l19 1l24 -9l17 0zM2072 493l-8 5l-3 -6l5 -8l-5 -2l10 -3l9 1l1 4l9 3l-2 2l-12 1zM3018 656l-11 24l-6 -16l14 -17l5 3zM2139 910l38 21l1 6l14 10l-5 12l1 6l6 3l-2 17l7 16l4 2l-8 6l-30 8l-19 -2l-3 -13l-6 -8l-30 -11l-5 -12l-6 -6l-3 -20l5 0l10 -11l-3 -10l3 -1l0 -6l-4 -6l15 -1zM2119 910l-23 3l3 -19l13 -16l-4 -1l0 -12l4 -3l7 2l15 -2l6 -4l10 23l-11 18l0 11zM2118 379l20 -2l6 5l-2 5l8 1l4 6l12 4l8 -2l6 5l21 3l-4 8l2 6l-2 3l-9 1l-5 3l-1 4l-32 8l0 6l5 3l10 -1l-2 4l-24 7l-6 -2l2 -4l-10 -3l11 -6l-19 -4l0 -4l-10 1l-11 13l-14 -2l7 -9l11 0l-9 -11l0 -3l-4 -3l-12 -4l-26 8l-18 -4l-4 2l-6 -5l5 -7l2 1l-3 -5l9 -8l5 -1l1 -3l-5 -9l18 -3l53 6l3 -7zM1224 1202l6 -1l32 19l6 7l-5 5l3 6l-4 6l-11 6l-29 -5l-6 -6l5 -29zM245 709l-4 0l0 -12l11 8l-4 3zM852 406l5 7l27 6l23 1l9 -3l35 14l3 5l5 -1l6 5l-1 2l10 5l5 17l-10 15l4 4l38 -12l-3 -6l5 -1l19 0l19 -14l34 0l8 -5l7 -12l8 -7l14 3l0 14l8 9l-31 11l-7 8l0 6l3 5l4 0l-1 -3l3 2l-1 3l-37 7l15 -2l3 2l-21 1l-3 3l3 1l-2 7l-7 8l-6 -6l4 11l-8 12l2 -7l-5 -4l-2 -9l-1 5l2 6l-7 -1l7 3l0 9l3 1l3 13l-7 8l-10 3l-17 10l-22 21l0 14l12 31l0 11l-6 7l-5 -1l-5 -7l-12 -20l3 -7l-11 -13l-4 -2l-10 5l-13 -8l-32 2l4 9l-2 1l-15 1l-7 -6l-9 1l-7 -2l-15 3l-24 17l-3 11l3 8l-11 -2l-8 -3l-5 -11l-15 -19l-7 -4l-8 0l-6 8l-8 -3l-6 -3l-5 -10l-15 -12l-17 0l0 5l-28 0l-38 -12l1 -2l-24 2l-2 -5l-12 -10l-21 -6l-19 -32l-12 -12l-2 -8l-5 -5l2 -17l-3 -8l6 -27l-7 -29l15 4l5 9l3 -3l-5 -16l276 0l0 -4zM270 329l-10 4l-5 -3l-2 -5l15 -5l11 4zM144 301l-6 1l-13 -4l18 -1zM83 262l30 5l-8 3l-23 -4zM249 189l8 4l21 -1l-1 2l16 2l58 4l13 -2l26 5l0 94l20 3l15 11l20 -9l21 14l17 18l17 7l0 6l-5 5l-15 -7l-3 -9l-12 -8l-6 -9l-25 -1l-33 -13l-27 -6l-14 1l-31 -9l-11 2l2 7l-37 8l-2 -5l5 -10l11 -3l-3 -3l-34 19l7 5l-9 8l-21 7l-3 4l-15 5l-3 5l-64 16l-1 -2l31 -13l12 -1l29 -16l1 -7l6 -6l-12 3l-3 -2l-6 4l-6 -5l-3 3l-4 -5l-16 4l1 -9l-6 -4l-13 2l-15 -7l-1 -6l-7 -4l15 -16l15 0l8 -4l8 0l7 -3l-2 -4l-5 -2l7 -4l-20 5l-7 -3l-15 2l-14 -3l-17 -10l36 -9l8 0l-1 5l21 0l-37 -19l-14 -4l6 -5l18 0l12 -5l3 -5l10 -4l29 -6l9 1l15 -6zM2465 526l0 -6l-23 -9l-18 -12l-5 -10l-14 -1l-4 -2l-1 -8l-14 -6l-17 10l2 5l-11 0l-1 -37l26 -6l26 12l9 9l29 -2l12 7l-1 10l5 0l2 8l13 1l3 4l3 0l5 -7l19 -9l3 1l-9 7l8 4l7 -3l12 5l-13 8l-12 -1l1 -8l-14 3l-8 12l-8 -1l-3 5l8 2l2 7l-6 11l-7 -3zM1087 782l-1 3l-5 1l3 10l-5 5l4 8l4 0l3 -8l-4 -3l0 -8l12 -4l-1 -4l4 -4l3 7l7 1l7 8l20 0l5 4l8 1l6 -5l24 -1l-8 3l3 5l8 0l8 5l1 8l9 2l-8 6l0 4l3 4l-9 3l-2 7l8 11l-4 4l-21 7l-17 -3l4 3l1 13l9 1l0 2l-21 14l-8 1l-6 -6l-3 -10l-6 -5l5 -5l-5 -12l5 -16l-21 0l-7 -9l-19 0l-4 -4l0 -10l-4 -7l-5 -1l4 -13l9 -11zM2881 684l-14 9l-8 9l-2 7l17 24l15 14l4 19l-1 17l-40 31l-4 -6l3 -7l-8 -6l9 -4l10 -1l-4 -6l17 -7l1 -29l-3 -7l-22 -28l-12 -6l9 -6l-4 -9l-12 0l-10 -17l23 -3l8 -6l14 6l-1 6l4 4zM3471 1049l2 8l-5 0l-2 -11zM2155 576l-1 9l-5 1l3 -4l-2 -1l2 -6zM2331 733l-7 3l-2 8l-26 9l-9 7l-31 7l-6 6l-15 1l-9 -26l2 -1l0 -10l4 -4l2 -9l4 3l29 0l3 4l5 -2l7 -11l9 -4l29 -4l8 17zM2115 1193l-14 18l-26 21l-16 5l-1 2l-32 0l-30 9l-12 -7l-5 -15l3 -2l0 -7l-19 -31l5 -5l6 7l11 2l14 -5l0 -37l9 11l1 9l7 -1l17 -14l9 4l15 -2l2 -8l6 -1l6 -10l23 -15l18 2l7 21l-1 14l-8 -1l-3 10l6 6l6 -1l2 -5l7 0l-6 21zM2128 992l4 5l3 8l-4 11l2 8l-6 13l5 3l-30 8l1 7l-14 5l-19 19l-17 -2l-6 -3l-15 1l-13 -14l0 -32l21 0l-1 -20l4 1l0 3l11 0l4 5l8 1l6 -3l2 5l8 2l7 9l8 1l-1 -11l-3 2l-9 -6l3 -22l-3 -4l3 -7l16 -3l19 7zM2112 1123l-18 -2l-14 -6l-3 -10l-15 -12l-9 -16l17 2l25 -23l8 -1l0 4l9 0l11 5l5 3l0 13l-1 23l-5 8z";
+        const WM_ZONES = "Europe/Andorra|42.50|1.52|AD;Asia/Dubai|25.30|55.30|AE;Asia/Kabul|34.52|69.20|AF;America/Antigua|17.05|-61.80|AG;America/Anguilla|18.20|-63.07|AI;Europe/Tirane|41.33|19.83|AL;Asia/Yerevan|40.18|44.50|AM;Africa/Luanda|-8.80|13.23|AO;Antarctica/McMurdo|-77.83|166.60|AQ;Antarctica/Casey|-66.28|110.52|AQ;Antarctica/Davis|-68.58|77.97|AQ;Antarctica/DumontDUrville|-66.67|140.02|AQ;Antarctica/Mawson|-67.60|62.88|AQ;Antarctica/Palmer|-64.80|-64.10|AQ;Antarctica/Rothera|-67.57|-68.13|AQ;Antarctica/Syowa|-69.01|39.59|AQ;Antarctica/Troll|-72.01|2.53|AQ;Antarctica/Vostok|-78.40|106.90|AQ;America/Argentina/Buenos_Aires|-34.60|-58.45|AR;America/Argentina/Cordoba|-31.40|-64.18|AR;America/Argentina/Salta|-24.78|-65.42|AR;America/Argentina/Jujuy|-24.18|-65.30|AR;America/Argentina/Tucuman|-26.82|-65.22|AR;America/Argentina/Catamarca|-28.47|-65.78|AR;America/Argentina/La_Rioja|-29.43|-66.85|AR;America/Argentina/San_Juan|-31.53|-68.52|AR;America/Argentina/Mendoza|-32.88|-68.82|AR;America/Argentina/San_Luis|-33.32|-66.35|AR;America/Argentina/Rio_Gallegos|-51.63|-69.22|AR;America/Argentina/Ushuaia|-54.80|-68.30|AR;Pacific/Pago_Pago|-14.27|-170.70|AS;Europe/Vienna|48.22|16.33|AT;Australia/Lord_Howe|-31.55|159.08|AU;Antarctica/Macquarie|-54.50|158.95|AU;Australia/Hobart|-42.88|147.32|AU;Australia/Melbourne|-37.82|144.97|AU;Australia/Sydney|-33.87|151.22|AU;Australia/Broken_Hill|-31.95|141.45|AU;Australia/Brisbane|-27.47|153.03|AU;Australia/Lindeman|-20.27|149.00|AU;Australia/Adelaide|-34.92|138.58|AU;Australia/Darwin|-12.47|130.83|AU;Australia/Perth|-31.95|115.85|AU;Australia/Eucla|-31.72|128.87|AU;America/Aruba|12.50|-69.97|AW;Europe/Mariehamn|60.10|19.95|AX;Asia/Baku|40.38|49.85|AZ;Europe/Sarajevo|43.87|18.42|BA;America/Barbados|13.10|-59.62|BB;Asia/Dhaka|23.72|90.42|BD;Europe/Brussels|50.83|4.33|BE;Africa/Ouagadougou|12.37|-1.52|BF;Europe/Sofia|42.68|23.32|BG;Asia/Bahrain|26.38|50.58|BH;Africa/Bujumbura|-3.38|29.37|BI;Africa/Porto-Novo|6.48|2.62|BJ;America/St_Barthelemy|17.88|-62.85|BL;Atlantic/Bermuda|32.28|-64.77|BM;Asia/Brunei|4.93|114.92|BN;America/La_Paz|-16.50|-68.15|BO;America/Kralendijk|12.15|-68.28|BQ;America/Noronha|-3.85|-32.42|BR;America/Belem|-1.45|-48.48|BR;America/Fortaleza|-3.72|-38.50|BR;America/Recife|-8.05|-34.90|BR;America/Araguaina|-7.20|-48.20|BR;America/Maceio|-9.67|-35.72|BR;America/Bahia|-12.98|-38.52|BR;America/Sao_Paulo|-23.53|-46.62|BR;America/Campo_Grande|-20.45|-54.62|BR;America/Cuiaba|-15.58|-56.08|BR;America/Santarem|-2.43|-54.87|BR;America/Porto_Velho|-8.77|-63.90|BR;America/Boa_Vista|2.82|-60.67|BR;America/Manaus|-3.13|-60.02|BR;America/Eirunepe|-6.67|-69.87|BR;America/Rio_Branco|-9.97|-67.80|BR;America/Nassau|25.08|-77.35|BS;Asia/Thimphu|27.47|89.65|BT;Africa/Gaborone|-24.65|25.92|BW;Europe/Minsk|53.90|27.57|BY;America/Belize|17.50|-88.20|BZ;America/St_Johns|47.57|-52.72|CA;America/Halifax|44.65|-63.60|CA;America/Glace_Bay|46.20|-59.95|CA;America/Moncton|46.10|-64.78|CA;America/Goose_Bay|53.33|-60.42|CA;America/Blanc-Sablon|51.42|-57.12|CA;America/Toronto|43.65|-79.38|CA;America/Iqaluit|63.73|-68.47|CA;America/Atikokan|48.76|-91.62|CA;America/Winnipeg|49.88|-97.15|CA;America/Resolute|74.70|-94.83|CA;America/Rankin_Inlet|62.82|-92.08|CA;America/Regina|50.40|-104.65|CA;America/Swift_Current|50.28|-107.83|CA;America/Edmonton|53.55|-113.47|CA;America/Cambridge_Bay|69.11|-105.05|CA;America/Inuvik|68.35|-133.72|CA;America/Vancouver|49.27|-123.12|CA;America/Creston|49.10|-116.52|CA;America/Dawson_Creek|55.77|-120.23|CA;America/Fort_Nelson|58.80|-122.70|CA;America/Whitehorse|60.72|-135.05|CA;America/Dawson|64.07|-139.42|CA;Indian/Cocos|-12.17|96.92|CC;Africa/Kinshasa|-4.30|15.30|CD;Africa/Lubumbashi|-11.67|27.47|CD;Africa/Bangui|4.37|18.58|CF;Africa/Brazzaville|-4.27|15.28|CG;Europe/Zurich|47.38|8.53|CH;Africa/Abidjan|5.32|-4.03|CI;Pacific/Rarotonga|-21.23|-159.77|CK;America/Santiago|-33.45|-70.67|CL;America/Coyhaique|-45.57|-72.07|CL;America/Punta_Arenas|-53.15|-70.92|CL;Pacific/Easter|-27.15|-109.43|CL;Africa/Douala|4.05|9.70|CM;Asia/Shanghai|31.23|121.47|CN;Asia/Urumqi|43.80|87.58|CN;America/Bogota|4.60|-74.08|CO;America/Costa_Rica|9.93|-84.08|CR;America/Havana|23.13|-82.37|CU;Atlantic/Cape_Verde|14.92|-23.52|CV;America/Curacao|12.18|-69.00|CW;Indian/Christmas|-10.42|105.72|CX;Asia/Nicosia|35.17|33.37|CY;Asia/Famagusta|35.12|33.95|CY;Europe/Prague|50.08|14.43|CZ;Europe/Berlin|52.50|13.37|DE;Europe/Busingen|47.70|8.68|DE;Africa/Djibouti|11.60|43.15|DJ;Europe/Copenhagen|55.67|12.58|DK;America/Dominica|15.30|-61.40|DM;America/Santo_Domingo|18.47|-69.90|DO;Africa/Algiers|36.78|3.05|DZ;America/Guayaquil|-2.17|-79.83|EC;Pacific/Galapagos|-0.90|-89.60|EC;Europe/Tallinn|59.42|24.75|EE;Africa/Cairo|30.05|31.25|EG;Africa/El_Aaiun|27.15|-13.20|EH;Africa/Asmara|15.33|38.88|ER;Europe/Madrid|40.40|-3.68|ES;Africa/Ceuta|35.88|-5.32|ES;Atlantic/Canary|28.10|-15.40|ES;Africa/Addis_Ababa|9.03|38.70|ET;Europe/Helsinki|60.17|24.97|FI;Pacific/Fiji|-18.13|178.42|FJ;Atlantic/Stanley|-51.70|-57.85|FK;Pacific/Chuuk|7.42|151.78|FM;Pacific/Pohnpei|6.97|158.22|FM;Pacific/Kosrae|5.32|162.98|FM;Atlantic/Faroe|62.02|-6.77|FO;Europe/Paris|48.87|2.33|FR;Africa/Libreville|0.38|9.45|GA;Europe/London|51.51|-0.13|GB;America/Grenada|12.05|-61.75|GD;Asia/Tbilisi|41.72|44.82|GE;America/Cayenne|4.93|-52.33|GF;Europe/Guernsey|49.45|-2.54|GG;Africa/Accra|5.55|-0.22|GH;Europe/Gibraltar|36.13|-5.35|GI;America/Nuuk|64.18|-51.73|GL;America/Danmarkshavn|76.77|-18.67|GL;America/Scoresbysund|70.48|-21.97|GL;America/Thule|76.57|-68.78|GL;Africa/Banjul|13.47|-16.65|GM;Africa/Conakry|9.52|-13.72|GN;America/Guadeloupe|16.23|-61.53|GP;Africa/Malabo|3.75|8.78|GQ;Europe/Athens|37.97|23.72|GR;Atlantic/South_Georgia|-54.27|-36.53|GS;America/Guatemala|14.63|-90.52|GT;Pacific/Guam|13.47|144.75|GU;Africa/Bissau|11.85|-15.58|GW;America/Guyana|6.80|-58.17|GY;Asia/Hong_Kong|22.28|114.15|HK;America/Tegucigalpa|14.10|-87.22|HN;Europe/Zagreb|45.80|15.97|HR;America/Port-au-Prince|18.53|-72.33|HT;Europe/Budapest|47.50|19.08|HU;Asia/Jakarta|-6.17|106.80|ID;Asia/Pontianak|-0.03|109.33|ID;Asia/Makassar|-5.12|119.40|ID;Asia/Jayapura|-2.53|140.70|ID;Europe/Dublin|53.33|-6.25|IE;Asia/Jerusalem|31.78|35.22|IL;Europe/Isle_of_Man|54.15|-4.47|IM;Asia/Kolkata|22.53|88.37|IN;Indian/Chagos|-7.33|72.42|IO;Asia/Baghdad|33.35|44.42|IQ;Asia/Tehran|35.67|51.43|IR;Atlantic/Reykjavik|64.15|-21.85|IS;Europe/Rome|41.90|12.48|IT;Europe/Jersey|49.18|-2.11|JE;America/Jamaica|17.97|-76.79|JM;Asia/Amman|31.95|35.93|JO;Asia/Tokyo|35.65|139.74|JP;Africa/Nairobi|-1.28|36.82|KE;Asia/Bishkek|42.90|74.60|KG;Asia/Phnom_Penh|11.55|104.92|KH;Pacific/Tarawa|1.42|173.00|KI;Pacific/Kanton|-2.78|-171.72|KI;Pacific/Kiritimati|1.87|-157.33|KI;Indian/Comoro|-11.68|43.27|KM;America/St_Kitts|17.30|-62.72|KN;Asia/Pyongyang|39.02|125.75|KP;Asia/Seoul|37.55|126.97|KR;Asia/Kuwait|29.33|47.98|KW;America/Cayman|19.30|-81.38|KY;Asia/Almaty|43.25|76.95|KZ;Asia/Qyzylorda|44.80|65.47|KZ;Asia/Qostanay|53.20|63.62|KZ;Asia/Aqtobe|50.28|57.17|KZ;Asia/Aqtau|44.52|50.27|KZ;Asia/Atyrau|47.12|51.93|KZ;Asia/Oral|51.22|51.35|KZ;Asia/Vientiane|17.97|102.60|LA;Asia/Beirut|33.88|35.50|LB;America/St_Lucia|14.02|-61.00|LC;Europe/Vaduz|47.15|9.52|LI;Asia/Colombo|6.93|79.85|LK;Africa/Monrovia|6.30|-10.78|LR;Africa/Maseru|-29.47|27.50|LS;Europe/Vilnius|54.68|25.32|LT;Europe/Luxembourg|49.60|6.15|LU;Europe/Riga|56.95|24.10|LV;Africa/Tripoli|32.90|13.18|LY;Africa/Casablanca|33.65|-7.58|MA;Europe/Monaco|43.70|7.38|MC;Europe/Chisinau|47.00|28.83|MD;Europe/Podgorica|42.43|19.27|ME;America/Marigot|18.07|-63.08|MF;Indian/Antananarivo|-18.92|47.52|MG;Pacific/Majuro|7.15|171.20|MH;Pacific/Kwajalein|9.08|167.33|MH;Europe/Skopje|41.98|21.43|MK;Africa/Bamako|12.65|-8.00|ML;Asia/Yangon|16.78|96.17|MM;Asia/Ulaanbaatar|47.92|106.88|MN;Asia/Hovd|48.02|91.65|MN;Asia/Macau|22.20|113.54|MO;Pacific/Saipan|15.20|145.75|MP;America/Martinique|14.60|-61.08|MQ;Africa/Nouakchott|18.10|-15.95|MR;America/Montserrat|16.72|-62.22|MS;Europe/Malta|35.90|14.52|MT;Indian/Mauritius|-20.17|57.50|MU;Indian/Maldives|4.17|73.50|MV;Africa/Blantyre|-15.78|35.00|MW;America/Mexico_City|19.40|-99.15|MX;America/Cancun|21.08|-86.77|MX;America/Merida|20.97|-89.62|MX;America/Monterrey|25.67|-100.32|MX;America/Matamoros|25.83|-97.50|MX;America/Chihuahua|28.63|-106.08|MX;America/Ciudad_Juarez|31.73|-106.48|MX;America/Ojinaga|29.57|-104.42|MX;America/Mazatlan|23.22|-106.42|MX;America/Bahia_Banderas|20.80|-105.25|MX;America/Hermosillo|29.07|-110.97|MX;America/Tijuana|32.53|-117.02|MX;Asia/Kuala_Lumpur|3.17|101.70|MY;Asia/Kuching|1.55|110.33|MY;Africa/Maputo|-25.97|32.58|MZ;Africa/Windhoek|-22.57|17.10|NA;Pacific/Noumea|-22.27|166.45|NC;Africa/Niamey|13.52|2.12|NE;Pacific/Norfolk|-29.05|167.97|NF;Africa/Lagos|6.45|3.40|NG;America/Managua|12.15|-86.28|NI;Europe/Amsterdam|52.37|4.90|NL;Europe/Oslo|59.92|10.75|NO;Asia/Kathmandu|27.72|85.32|NP;Pacific/Nauru|-0.52|166.92|NR;Pacific/Niue|-19.02|-169.92|NU;Pacific/Auckland|-36.87|174.77|NZ;Pacific/Chatham|-43.95|-176.55|NZ;Asia/Muscat|23.60|58.58|OM;America/Panama|8.97|-79.53|PA;America/Lima|-12.05|-77.05|PE;Pacific/Tahiti|-17.53|-149.57|PF;Pacific/Marquesas|-9.00|-139.50|PF;Pacific/Gambier|-23.13|-134.95|PF;Pacific/Port_Moresby|-9.50|147.17|PG;Pacific/Bougainville|-6.22|155.57|PG;Asia/Manila|14.59|120.97|PH;Asia/Karachi|24.87|67.05|PK;Europe/Warsaw|52.25|21.00|PL;America/Miquelon|47.05|-56.33|PM;Pacific/Pitcairn|-25.07|-130.08|PN;America/Puerto_Rico|18.47|-66.11|PR;Asia/Gaza|31.50|34.47|PS;Asia/Hebron|31.53|35.09|PS;Europe/Lisbon|38.72|-9.13|PT;Atlantic/Madeira|32.63|-16.90|PT;Atlantic/Azores|37.73|-25.67|PT;Pacific/Palau|7.33|134.48|PW;America/Asuncion|-25.27|-57.67|PY;Asia/Qatar|25.28|51.53|QA;Indian/Reunion|-20.87|55.47|RE;Europe/Bucharest|44.43|26.10|RO;Europe/Belgrade|44.83|20.50|RS;Europe/Kaliningrad|54.72|20.50|RU;Europe/Moscow|55.76|37.62|RU;Europe/Simferopol|44.95|34.10|UA;Europe/Kirov|58.60|49.65|RU;Europe/Volgograd|48.73|44.42|RU;Europe/Astrakhan|46.35|48.05|RU;Europe/Saratov|51.57|46.03|RU;Europe/Ulyanovsk|54.33|48.40|RU;Europe/Samara|53.20|50.15|RU;Asia/Yekaterinburg|56.85|60.60|RU;Asia/Omsk|55.00|73.40|RU;Asia/Novosibirsk|55.03|82.92|RU;Asia/Barnaul|53.37|83.75|RU;Asia/Tomsk|56.50|84.97|RU;Asia/Novokuznetsk|53.75|87.12|RU;Asia/Krasnoyarsk|56.02|92.83|RU;Asia/Irkutsk|52.27|104.33|RU;Asia/Chita|52.05|113.47|RU;Asia/Yakutsk|62.00|129.67|RU;Asia/Khandyga|62.66|135.55|RU;Asia/Vladivostok|43.17|131.93|RU;Asia/Ust-Nera|64.56|143.23|RU;Asia/Magadan|59.57|150.80|RU;Asia/Sakhalin|46.97|142.70|RU;Asia/Srednekolymsk|67.47|153.72|RU;Asia/Kamchatka|53.02|158.65|RU;Asia/Anadyr|64.75|177.48|RU;Africa/Kigali|-1.95|30.07|RW;Asia/Riyadh|24.63|46.72|SA;Pacific/Guadalcanal|-9.53|160.20|SB;Indian/Mahe|-4.67|55.47|SC;Africa/Khartoum|15.60|32.53|SD;Europe/Stockholm|59.33|18.05|SE;Asia/Singapore|1.28|103.85|SG;Atlantic/St_Helena|-15.92|-5.70|SH;Europe/Ljubljana|46.05|14.52|SI;Arctic/Longyearbyen|78.00|16.00|SJ;Europe/Bratislava|48.15|17.12|SK;Africa/Freetown|8.50|-13.25|SL;Europe/San_Marino|43.92|12.47|SM;Africa/Dakar|14.67|-17.43|SN;Africa/Mogadishu|2.07|45.37|SO;America/Paramaribo|5.83|-55.17|SR;Africa/Juba|4.85|31.62|SS;Africa/Sao_Tome|0.33|6.73|ST;America/El_Salvador|13.70|-89.20|SV;America/Lower_Princes|18.05|-63.05|SX;Asia/Damascus|33.50|36.30|SY;Africa/Mbabane|-26.30|31.10|SZ;America/Grand_Turk|21.47|-71.13|TC;Africa/Ndjamena|12.12|15.05|TD;Indian/Kerguelen|-49.35|70.22|TF;Africa/Lome|6.13|1.22|TG;Asia/Bangkok|13.75|100.52|TH;Asia/Dushanbe|38.58|68.80|TJ;Pacific/Fakaofo|-9.37|-171.23|TK;Asia/Dili|-8.55|125.58|TL;Asia/Ashgabat|37.95|58.38|TM;Africa/Tunis|36.80|10.18|TN;Pacific/Tongatapu|-21.13|-175.20|TO;Europe/Istanbul|41.02|28.97|TR;America/Port_of_Spain|10.65|-61.52|TT;Pacific/Funafuti|-8.52|179.22|TV;Asia/Taipei|25.05|121.50|TW;Africa/Dar_es_Salaam|-6.80|39.28|TZ;Europe/Kyiv|50.43|30.52|UA;Africa/Kampala|0.32|32.42|UG;Pacific/Midway|28.22|-177.37|UM;Pacific/Wake|19.28|166.62|UM;America/New_York|40.71|-74.01|US;America/Detroit|42.33|-83.05|US;America/Kentucky/Louisville|38.25|-85.76|US;America/Kentucky/Monticello|36.83|-84.85|US;America/Indiana/Indianapolis|39.77|-86.16|US;America/Indiana/Vincennes|38.68|-87.53|US;America/Indiana/Winamac|41.05|-86.60|US;America/Indiana/Marengo|38.38|-86.34|US;America/Indiana/Petersburg|38.49|-87.28|US;America/Indiana/Vevay|38.75|-85.07|US;America/Chicago|41.85|-87.65|US;America/Indiana/Tell_City|37.95|-86.76|US;America/Indiana/Knox|41.30|-86.62|US;America/Menominee|45.11|-87.61|US;America/North_Dakota/Center|47.12|-101.30|US;America/North_Dakota/New_Salem|46.84|-101.41|US;America/North_Dakota/Beulah|47.26|-101.78|US;America/Denver|39.74|-104.98|US;America/Boise|43.61|-116.20|US;America/Phoenix|33.45|-112.07|US;America/Los_Angeles|34.05|-118.24|US;America/Anchorage|61.22|-149.90|US;America/Juneau|58.30|-134.42|US;America/Sitka|57.18|-135.30|US;America/Metlakatla|55.13|-131.58|US;America/Yakutat|59.55|-139.73|US;America/Nome|64.50|-165.41|US;America/Adak|51.88|-176.66|US;Pacific/Honolulu|21.31|-157.86|US;America/Montevideo|-34.91|-56.21|UY;Asia/Samarkand|39.67|66.80|UZ;Asia/Tashkent|41.33|69.30|UZ;Europe/Vatican|41.90|12.45|VA;America/St_Vincent|13.15|-61.23|VC;America/Caracas|10.50|-66.93|VE;America/Tortola|18.45|-64.62|VG;America/St_Thomas|18.35|-64.93|VI;Asia/Ho_Chi_Minh|10.75|106.67|VN;Pacific/Efate|-17.67|168.42|VU;Pacific/Wallis|-13.30|-176.17|WF;Pacific/Apia|-13.83|-171.73|WS;Asia/Aden|12.75|45.20|YE;Indian/Mayotte|-12.78|45.23|YT;Africa/Johannesburg|-26.25|28.00|ZA;Africa/Lusaka|-15.42|28.28|ZM;Africa/Harare|-17.83|31.05|ZW".split(';').map((s) => { const p = s.split('|'); return { id: p[0], lat: +p[1], lon: +p[2], cc: p[3], city: p[0].split('/').pop().replace(/_/g, ' ') }; });
+        const WM_BY = {}; WM_ZONES.forEach((z) => { WM_BY[z.id] = z; });
+        const LL = (function () {
+    // zone catalogue. kind: 'T' tropical zone, 'STA' seasonal tropical area, 'WIN' winter seasonal, 'SUM' summer
+    // p = periods in which the SEASONAL mark applies (Tropical for STA, Winter for WIN), as [m1,d1,m2,d2]
+    const Z = {
+        1: { name: 'Summer Zone', kind: 'SUM', short: 'Summer' },
+        2: { name: 'Tropical Zone', kind: 'T', short: 'Tropical' },
+        3: { name: 'Seasonal Tropical Area: North Atlantic', kind: 'STA', p: [[11, 1, 7, 15]], short: 'N Atlantic (a)' },
+        4: { name: 'Seasonal Tropical Area: Arabian Sea', kind: 'STA', p: [[9, 1, 5, 31]], short: 'Arabian Sea (b)' },
+        5: { name: 'Seasonal Tropical Area: Bay of Bengal', kind: 'STA', p: [[12, 1, 4, 30]], short: 'Bay of Bengal (c)' },
+        6: { name: 'Seasonal Tropical Area: South Indian Ocean (west)', kind: 'STA', p: [[4, 1, 11, 30]], short: 'S Indian W (d1)' },
+        7: { name: 'Seasonal Tropical Area: South Indian Ocean (east)', kind: 'STA', p: [[5, 1, 11, 30]], short: 'S Indian E (d2)' },
+        8: { name: 'Seasonal Tropical Area: China Sea', kind: 'STA', p: [[1, 21, 4, 30]], short: 'China Sea (e)' },
+        9: { name: 'Seasonal Tropical Area: North Pacific (central)', kind: 'STA', p: [[4, 1, 10, 31]], short: 'N Pacific C (f1)' },
+        10: { name: 'Seasonal Tropical Area: North Pacific (eastern)', kind: 'STA', p: [[3, 1, 6, 30], [11, 1, 11, 30]], short: 'N Pacific E (f2)' },
+        11: { name: 'Seasonal Tropical Area: Gulf of Carpentaria', kind: 'STA', p: [[4, 1, 11, 30]], short: 'G. of Carpentaria (g1)' },
+        12: { name: 'Seasonal Tropical Area: South Pacific', kind: 'STA', p: [[4, 1, 11, 30]], short: 'S Pacific (g2)' },
+        13: { name: 'North Atlantic Winter Seasonal Zone I', kind: 'WIN', p: [[10, 16, 4, 15]], short: 'N Atlantic I' },
+        14: { name: 'North Atlantic Winter Seasonal Zone II', kind: 'WIN', p: [[11, 1, 3, 31]], short: 'N Atlantic II' },
+        15: { name: 'North Atlantic Winter Seasonal Area', kind: 'WIN', p: [[12, 16, 2, 15]], pSmall: [[11, 1, 3, 31]], short: 'N Atlantic Area' },
+        16: { name: 'North Pacific Winter Seasonal Zone', kind: 'WIN', p: [[10, 16, 4, 15]], short: 'N Pacific' },
+        17: { name: 'Southern Winter Seasonal Zone', kind: 'WIN', p: [[4, 16, 10, 15]], short: 'Southern' },
+        18: { name: 'Baltic Sea (vessels of 100 m and under)', kind: 'WIN', p: [[11, 1, 3, 31]], small: true, short: 'Baltic' },
+        19: { name: 'Black Sea north of 44°N (vessels of 100 m and under)', kind: 'WIN', p: [[12, 1, 2, 29]], small: true, short: 'Black Sea' },
+        20: { name: 'Mediterranean north-west area (vessels of 100 m and under)', kind: 'WIN', p: [[12, 16, 3, 15]], small: true, short: 'Med NW' },
+        21: { name: 'Sea of Japan north area (vessels of 100 m and under)', kind: 'WIN', p: [[12, 1, 2, 29]], small: true, short: 'Sea of Japan' }
+    };
+    // polygons, painted in this order (later wins). lon may exceed 180 (Pacific); lon/lat degrees.
+    const P = [
+        // Southern Winter Seasonal Zone (unwrapped -66.7 .. 293.3)
+        [17, [[-66.7, -47.1], [-50, -34], [17, -34], [20, -35.17], [28, -34], [118, -35.5], [144.7, -40.7], [147.3, -43.5], [167.5, -47.1], [170, -47], [190, -33], [288.4, -33], [288.4, -50], [293.3, -50], [293.3, -90], [-66.7, -90]]],
+        // North Pacific Winter Seasonal Zone
+        [16, [[130, 50], [142, 50], [142, 45.9], [141.7, 45.4], [145, 43], [145, 35], [210, 35], [226.8, 54.7], [226.8, 66], [190, 66], [130, 66]]],
+        // N Atlantic Zone II (painted first, Zone I over it)
+        [14, [[-72, 62], [-15, 62], [0, 62], [0, 71], [17, 69.5], [13, 64], [12.7, 59.9], [12.3, 58.0], [10.6, 57.8], [9.8, 57.0], [9.3, 55.5], [9.0, 54.6], [8.7, 53.9], [7.5, 53.0], [5.5, 52.2], [4, 51.2], [2.5, 50.7], [1.7, 50.4], [0.5, 49.5], [-0.8, 49.1], [-1.3, 49.2], [-1.7, 48.4], [-3, 48.3], [-4.1, 48.2], [-3, 47.8], [-1.5, 47.2], [-1.4, 46.5], [-0.8, 46.1], [-0.5, 45.6], [-0.7, 44.4], [-1.0, 43.4], [-2.0, 42.8], [-3.8, 42.9], [-5.7, 43.0], [-8.2, 42.7], [-9.3, 43.05], [-25, 36], [-73, 36], [-68.5, 40], [-68.5, 45.5]]],
+        // N Atlantic Zone I
+        [13, [[-50, 61.7], [-50, 45], [-15, 45], [-15, 60], [0, 60], [0, 80], [-20, 81], [-50, 81]]],
+        // small-vessel winter areas
+        [18, [[10.6, 53.3], [31, 53.3], [31, 66.5], [10.6, 66.5]]],
+        [19, [[27, 44], [42, 44], [42, 47.5], [27, 47.5]]],
+        [20, [[3, 40], [9, 40], [9, 42.8], [9.4, 43.0], [5.9, 43.1], [5.9, 44], [3, 44]]],
+        [21, [[128.4, 38.2], [140.3, 43.2], [144, 43.2], [143, 50], [130, 50], [126.5, 38.2]]],
+        // N Atlantic Winter Seasonal Area
+        [15, [[-68.5, 45.5], [-68.5, 40], [-61, 45.2], [-62.5, 45.6], [-65.5, 46.5]]],
+        // Seasonal tropical areas
+        [3, [[-87.05, 21.6], [-84.95, 21.9], [-82.4, 22.95], [-80.5, 22.7], [-79, 22.4], [-78, 22.3], [-76.3, 21.1], [-74.2, 20.2], [-20, 20], [-20, 10], [-58, 10], [-60, 13], [-86, 13], [-89, 15.5], [-89, 17.8], [-89, 20.5]]],
+        [4, [[45, 8], [45, 15], [52, 18.5], [59, 22.6], [59, 25.6], [60, 28], [68, 27], [77, 27], [77, 13], [70, 13], [70, 8], [50.3, 8]]],
+        [5, [[79.9, 10.4], [82, 9], [82, 8], [98.4, 8], [98.8, 12], [98.2, 16.5], [95, 23], [90, 25], [85, 23], [80, 19], [79.3, 13], [79.5, 11.5], [79.5, 10.6]]],
+        [6, [[50, -10], [51.5, -10], [51.5, -15], [50, -20], [47.5, -20], [47.5, -13.5], [49.3, -12.4]]],
+        [7, [[51.5, -10], [98, -10], [130.85, -12.47], [131, -13], [125, -17], [121, -20.5], [120, -20.5], [120, -15], [51.5, -15]]],
+        [8, [[106.7, 10], [124.7, 10], [124.6, 10.8], [123.5, 11.5], [121.6, 12.6], [120.6, 13.7], [120, 14.5], [120.1, 16.1], [114.2, 22.3], [112.5, 21.9], [110.3, 21.6], [109.6, 21.9], [108.5, 22.0], [107.9, 21.8], [106.4, 21.3], [105.6, 20.2], [105.4, 19.5], [106.3, 17.6], [107.4, 16.3], [108.4, 14.3], [108.6, 12.3], [107.5, 11], [106.9, 10.5]]],
+        [9, [[160, 13], [160, 25], [230, 25], [230, 13]]],
+        [10, [[237, 38.3], [237, 33], [255, 13], [272.2, 13], [271, 14.2], [268, 15.5], [265, 17.2], [257, 21], [254, 27], [250, 33.5], [245, 36], [240, 38.3]]],
+        [11, [[136.8, -11], [142.2, -11], [142.2, -18], [136.8, -18]]],
+        [12, [[143.5, -11], [210, -11], [255, -20], [210, -20], [210, -23.44], [150, -23.44], [150, -22], [152.6, -22], [151, -20], [149, -18], [147, -16], [145.6, -14], [144.2, -12]]],
+        // Tropical Zone (painted last, wins)
+        [2, [[-86, 13], [-60, 13], [-58, 10], [-20, 10], [-20, 20], [-5, 20], [20, 20], [20, -23.44], [-40, -23.44], [-46.3, -24], [-66, -24], [-66, 2], [-86, 13]]],
+        [2, [[30, 8], [70, 8], [70, 13], [76.5, 13], [76.6, 9.5], [79.9, 10.4], [82, 9], [82, 8], [98.3, 8], [99.5, 8.5], [99.7, 12], [101.5, 13.7], [105.5, 13.7], [106.2, 10.6], [106.7, 10], [145, 10], [145, -11], [142, -11], [136.8, -11], [136.6, -12.8], [131, -13], [130.85, -12.47], [98, -10], [50, -10], [50, -12], [49.3, -12.4], [48.2, -13.8], [47, -15.8], [44.8, -17.5], [44.9, -20], [35.2, -20], [30, -20]]],
+        [2, [[142.2, -11], [210, -11], [285, -26], [288.4, -30], [290, -30], [290, 9], [272.2, 13], [145, 13], [145, -11]]],
+        [2, [[142.2, -11], [143.5, -11], [144.2, -12], [145.6, -14], [147, -16], [149, -18], [151, -20], [152.6, -22], [142.2, -22]]],
+        [2, [[30, 31.1], [45, 31.1], [45, 8], [30, 8]]],
+        [2, [[47, 31], [59, 31], [59, 22.6], [51, 22], [47, 22]]]
+    ];
+    function inPoly(x, y, v) {
+        let c = false;
+        for (let i = 0, j = v.length - 1; i < v.length; j = i++) {
+            const xi = v[i][0], yi = v[i][1], xj = v[j][0], yj = v[j][1];
+            if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c;
+        }
+        return c;
+    }
+    function classify(lat, lon) {
+        while (lon < -180) lon += 360; while (lon > 180) lon -= 360;
+        let id = 1;
+        for (let k = 0; k < P.length; k++) {
+            const v = P[k][1];
+            if (inPoly(lon, lat, v) || inPoly(lon + 360, lat, v)) id = P[k][0];
+        }
+        return id;
+    }
+    const md = (m, d) => m * 100 + d;
+    function inPeriod(date, p) {
+        const v = md(date.getUTCMonth() + 1, date.getUTCDate());
+        for (const q of p) {
+            const a = md(q[0], q[1]), b = md(q[2], q[3]);
+            if (a <= b ? (v >= a && v <= b) : (v >= a || v <= b)) return true;
+        }
+        return false;
+    }
+    // vessel: { small: length <= 100 m }
+    function markFor(id, date, small) {
+        const z = Z[id];
+        if (z.kind === 'T') return 'T';
+        if (z.kind === 'SUM') return 'S';
+        if (z.kind === 'STA') return inPeriod(date, z.p) ? 'T' : 'S';
+        if (z.small && !small) return 'S';
+        const p = id === 15 && small ? z.pSmall : z.p;
+        if (!inPeriod(date, p)) return 'S';
+        if (small && (id === 13 || (id === 14))) return 'W';
+        return 'W';
+    }
+    function isWNA(id, lon, small) { return small && (id === 13 || (id === 14 && lon >= -50 && lon <= -15)); }
+    function fullMark(id, lon, date, small) {
+        const m = markFor(id, date, small);
+        return m === 'W' && isWNA(id, lon, small) ? 'WNA' : m;
+    }
+    function nextChange(id, lon, date, small) {
+        const cur = fullMark(id, lon, date, small);
+        for (let i = 1; i <= 370; i++) {
+            const d = new Date(date.getTime() + i * 86400000);
+            const m = fullMark(id, lon, d, small);
+            if (m !== cur) return { date: d, mark: m };
+        }
+        return null;
+    }
+    const fmtP = (p) => { const M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']; return p.map((q) => q[1] + ' ' + M[q[0] - 1] + ' to ' + q[3] + ' ' + M[q[2] - 1]).join(' and '); };
+    return { Z, P, classify, markFor, fullMark, isWNA, nextChange, fmtP, inPeriod };
+})();
+        const wp2 = (n) => String(n).padStart(2, '0');
+        const WM_DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const WM_MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        let WM_RN = null;
+        const wtCountry = (cc) => { try { WM_RN = WM_RN || new Intl.DisplayNames(['en'], { type: 'region' }); return WM_RN.of(cc) || cc; } catch (e) { return cc; } };
+
+        /* --- time zone maths (browser tz database, works offline) --- */
+        const WT_DTF = {};
+        function wtDtf(tz) { return WT_DTF[tz] || (WT_DTF[tz] = new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' })); }
+        function wtOff(tz, ms) {
+            const o = {};
+            for (const x of wtDtf(tz).formatToParts(new Date(ms))) o[x.type] = x.value;
+            const u = Date.UTC(+o.year, +o.month - 1, +o.day, (+o.hour) % 24, +o.minute, +o.second);
+            return Math.round((u - Math.floor(ms / 1000) * 1000) / 60000);
+        }
+        function wtLocalToUtc(tz, y, mo, d, h, mi) {
+            const naive = Date.UTC(y, mo - 1, d, h, mi);
+            let t = naive - wtOff(tz, naive) * 60000;
+            t = naive - wtOff(tz, t) * 60000;
+            return t;
+        }
+        const WT_J = {};
+        function wtDst(tz, ms) {
+            const y = new Date(ms).getUTCFullYear(), k = tz + y;
+            const j = WT_J[k] || (WT_J[k] = [wtOff(tz, Date.UTC(y, 0, 15)), wtOff(tz, Date.UTC(y, 6, 15))]);
+            const o = wtOff(tz, ms);
+            return { off: o, observes: j[0] !== j[1], dst: j[0] !== j[1] && o > Math.min(j[0], j[1]) };
+        }
+        function wtTransitions(tz, a, b) {
+            const out = []; const STEP = 3 * 86400000;
+            let t0 = a, o0 = wtOff(tz, a);
+            for (;;) {
+                const t1 = Math.min(t0 + STEP, b), o1 = wtOff(tz, t1);
+                if (o1 !== o0) {
+                    let lo = t0, hi = t1;
+                    while (hi - lo > 1000) { const m = Math.floor((lo + hi) / 2); if (wtOff(tz, m) === o0) lo = m; else hi = m; }
+                    out.push({ t: Math.ceil(hi / 60000) * 60000, from: o0, to: o1 });
+                }
+                t0 = t1; o0 = o1;
+                if (t1 >= b) break;
+            }
+            return out;
+        }
+        const wtFmtOff = (m) => { const a = Math.abs(m); return 'UTC' + (m < 0 ? '-' : '+') + wp2(Math.floor(a / 60)) + ':' + wp2(a % 60); };
+        const wtParts = (ms, off) => { const d = new Date(ms + off * 60000); return { d: wp2(d.getUTCDate()) + '/' + wp2(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear(), t: wp2(d.getUTCHours()) + ':' + wp2(d.getUTCMinutes()), s: wp2(d.getUTCSeconds()), dow: WM_DOW[d.getUTCDay()] }; };
+        const wtDiff = (m) => { if (m === 0) return 'same time'; const a = Math.abs(m); return (m > 0 ? '+' : '-') + Math.floor(a / 60) + 'h' + (a % 60 ? ' ' + (a % 60) + 'm' : ''); };
+        const wtInput = (ms, off) => { const d = new Date(ms + off * 60000); return d.getUTCFullYear() + '-' + wp2(d.getUTCMonth() + 1) + '-' + wp2(d.getUTCDate()) + 'T' + wp2(d.getUTCHours()) + ':' + wp2(d.getUTCMinutes()); };
+        const WT_OFFSETS = (() => { const a = []; for (let h = -12; h <= 14; h++) a.push(h * 60); [-570, -210, 210, 270, 330, 345, 390, 525, 570, 630, 765, 825].forEach((m) => a.push(m)); return a.sort((x, y) => x - y); })();
+        const wtOkZone = (id) => { try { wtDtf(id); return true; } catch (e) { return false; } };
+        const WT_ZLIST = WM_ZONES.filter((z) => wtOkZone(z.id));
+        const wtNauticalOff = (lon) => Math.max(-12, Math.min(12, Math.round(lon / 15))) * 60;
+
+        /* --- shared interactive map --- */
+        const WM_W = 3600, WM_H = 1440, WM_Y0 = 60;
+        function WorldMap({ under, over, onPick, label }) {
+            const [v, setV] = useState({ z: 1, cx: WM_W / 2, cy: WM_Y0 + WM_H / 2 });
+            const ref = useRef(null), drag = useRef(null);
+            const w = WM_W / v.z, h = WM_H / v.z;
+            const x0 = Math.min(Math.max(v.cx - w / 2, 0), WM_W - w), y0 = Math.min(Math.max(v.cy - h / 2, WM_Y0), WM_Y0 + WM_H - h);
+            const zoom = (f) => setV({ z: Math.min(10, Math.max(1, v.z * f)), cx: x0 + w / 2, cy: y0 + h / 2 });
+            const down = (e) => { drag.current = { x: e.clientX, y: e.clientY, cx: x0 + w / 2, cy: y0 + h / 2, moved: false }; try { e.currentTarget.setPointerCapture(e.pointerId); } catch (er) {} };
+            const move = (e) => {
+                const d = drag.current; if (!d || !ref.current) return;
+                const dx = e.clientX - d.x, dy = e.clientY - d.y;
+                if (!d.moved && Math.abs(dx) + Math.abs(dy) < 6) return;
+                if (v.z <= 1) return;
+                d.moved = true;
+                const r = ref.current.getBoundingClientRect();
+                setV({ z: v.z, cx: d.cx - dx * w / r.width, cy: d.cy - dy * h / r.height });
+            };
+            const up = (e) => {
+                const d = drag.current; drag.current = null;
+                if (d && !d.moved && onPick && ref.current) {
+                    const r = ref.current.getBoundingClientRect();
+                    const px = x0 + (e.clientX - r.left) / r.width * w, py = y0 + (e.clientY - r.top) / r.height * h;
+                    onPick(90 - py / 10, px / 10 - 180, v.z);
+                }
+            };
+            return (
+                <div className="wm-wrap">
+                    <svg ref={ref} className="wm-svg" viewBox={x0 + ' ' + y0 + ' ' + w + ' ' + h} style={{ aspectRatio: WM_W + '/' + WM_H, touchAction: v.z > 1 ? 'none' : 'pan-y' }}
+                        onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={() => { drag.current = null; }} role="img" aria-label={label}>
+                        <rect x="0" y={WM_Y0} width={WM_W} height={WM_H} className="wm-sea" />
+                        {under && under(v.z)}
+                        <path d={WM_LAND} className="wm-land" />
+                        {over && over(v.z)}
+                    </svg>
+                    <div className="wm-ctl">
+                        <button onClick={() => zoom(1.6)} aria-label="Zoom in">+</button>
+                        <button onClick={() => zoom(1 / 1.6)} aria-label="Zoom out">&minus;</button>
+                        <button onClick={() => setV({ z: 1, cx: WM_W / 2, cy: WM_Y0 + WM_H / 2 })} aria-label="Reset map">&#8634;</button>
+                    </div>
+                </div>
+            );
+        }
+
+        /* ================= Time Zones tab ================= */
+        const WT_KEY = 'tfm_wt_v1';
+        function wtLoad() { try { const s = JSON.parse(localStorage.getItem(WT_KEY) || 'null'); if (s && Array.isArray(s.pins)) return s; } catch (e) {} return null; }
+        function TimeTab() {
+            const saved = useMemo(wtLoad, []);
+            const [shipOff, setShipOff] = useState(saved && typeof saved.shipOff === 'number' ? saved.shipOff : -new Date().getTimezoneOffset());
+            const [pins, setPins] = useState(saved ? saved.pins.filter((id) => WM_BY[id] && wtOkZone(id)) : ['Europe/Oslo', 'Asia/Singapore', 'America/Chicago', 'Europe/Amsterdam', 'Asia/Kolkata']);
+            const [mode, setMode] = useState('now');
+            const [cust, setCust] = useState('');
+            const [custSrc, setCustSrc] = useState('ship');
+            const [now, setNow] = useState(Date.now());
+            const [mapDate, setMapDate] = useState(() => new Date().toISOString().slice(0, 10));
+            const [sel, setSel] = useState(null);
+            const [click, setClick] = useState(null);
+            const [q, setQ] = useState('');
+            const yr = new Date().getUTCFullYear();
+            const [from, setFrom] = useState(yr + '-01-01');
+            const [to, setTo] = useState(yr + '-12-31');
+            const [scope, setScope] = useState('pinned');
+            const [evSel, setEvSel] = useState(-1);
+
+            useEffect(() => { const i = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(i); }, []);
+            useEffect(() => { try { localStorage.setItem(WT_KEY, JSON.stringify({ shipOff, pins })); } catch (e) {} }, [shipOff, pins]);
+
+            const base = useMemo(() => {
+                if (mode !== 'custom' || !cust) return null;
+                const m = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)/.exec(cust); if (!m) return null;
+                const [y, mo, d, h, mi] = m.slice(1).map(Number);
+                if (custSrc === 'ship') return Date.UTC(y, mo - 1, d, h, mi) - shipOff * 60000;
+                if (custSrc === 'utc') return Date.UTC(y, mo - 1, d, h, mi);
+                return WM_BY[custSrc] ? wtLocalToUtc(custSrc, y, mo, d, h, mi) : Date.UTC(y, mo - 1, d, h, mi);
+            }, [mode, cust, custSrc, shipOff]);
+            const t = base != null ? base : now;
+            const live = base == null;
+            const ship = wtParts(t, shipOff), utc = wtParts(t, 0);
+            const zdv = -shipOff / 60;
+
+            const setCustom = () => { setCust(wtInput(now, shipOff)); setCustSrc('ship'); setMode('custom'); };
+            const pinned = pins.map((id) => WM_BY[id]).filter(Boolean);
+            const addPin = (id) => { if (!pins.includes(id)) setPins([...pins, id]); setQ(''); };
+            const rmPin = (id) => { setPins(pins.filter((p) => p !== id)); if (custSrc === id) setCustSrc('ship'); };
+            const results = useMemo(() => {
+                const s = q.trim().toLowerCase(); if (s.length < 2) return [];
+                return WT_ZLIST.filter((z) => !pins.includes(z.id) && (z.city.toLowerCase().includes(s) || z.id.toLowerCase().includes(s) || wtCountry(z.cc).toLowerCase().includes(s))).slice(0, 8);
+            }, [q, pins]);
+
+            /* map */
+            const mapMs = Date.parse(mapDate + 'T12:00:00Z') || now;
+            const mapYear = new Date(mapMs).getUTCFullYear();
+            const doy = Math.round((mapMs - Date.UTC(mapYear, 0, 1, 12)) / 86400000) + 1;
+            const status = useMemo(() => WT_ZLIST.map((z) => wtDst(z.id, mapMs)), [mapMs]);
+            const setDoy = (n) => setMapDate(new Date(Date.UTC(mapYear, 0, n)).toISOString().slice(0, 10));
+
+            const evData = useMemo(() => {
+                const a = Date.parse(from + 'T00:00:00Z'), b = Date.parse(to + 'T23:59:59Z');
+                if (isNaN(a) || isNaN(b) || b <= a) return { err: 'Choose a valid range: the From date must be before the To date.' };
+                if (b - a > 3 * 366 * 86400000) return { err: 'The range is limited to 3 years.' };
+                const ids = scope === 'all' ? WT_ZLIST.map((z) => z.id) : pins;
+                const map = new Map();
+                for (const id of ids) for (const tr of wtTransitions(id, a, b)) {
+                    const key = tr.t + '|' + (tr.to - tr.from);
+                    let e = map.get(key); if (!e) { e = { t: tr.t, delta: tr.to - tr.from, rows: [] }; map.set(key, e); }
+                    e.rows.push({ id, from: tr.from, to: tr.to });
+                }
+                const evs = [...map.values()].sort((x, y) => x.t - y.t);
+                const changed = new Set(); evs.forEach((e) => e.rows.forEach((r) => changed.add(r.id)));
+                return { evs, ids, changed };
+            }, [from, to, scope, pins]);
+            const evs = evData.evs || [];
+            const evIds = new Set(evSel >= 0 && evs[evSel] ? evs[evSel].rows.map((r) => r.id) : []);
+
+            const selZ = sel ? WM_BY[sel] : null;
+            const selNext = useMemo(() => selZ ? wtTransitions(selZ.id, mapMs, mapMs + 800 * 86400000)[0] || null : null, [sel, mapMs]);
+            const selSt = selZ ? wtDst(selZ.id, mapMs) : null;
+            const onPick = (lat, lon, z) => {
+                let best = null, bd = Infinity;
+                for (const zz of WT_ZLIST) {
+                    let dx = Math.abs(zz.lon - lon); if (dx > 180) dx = 360 - dx;
+                    const dy = zz.lat - lat, d = Math.sqrt((dx * Math.cos(lat * Math.PI / 180)) ** 2 + dy * dy);
+                    if (d < bd) { bd = d; best = zz; }
+                }
+                setClick({ lat, lon });
+                setSel(best && bd < 7 / Math.pow(z, 0.8) ? best.id : null);
+            };
+            const fmtLL = (lat, lon) => Math.abs(lat).toFixed(1) + '°' + (lat >= 0 ? 'N' : 'S') + ' ' + Math.abs(lon).toFixed(1) + '°' + (lon >= 0 ? 'E' : 'W');
+
+            const under = (z) => {
+                const els = [];
+                for (let k = -12; k <= 12; k++) {
+                    const bl = (k * 15 - 7.5 + 180) * 10;
+                    if (bl > 0 && bl < 3600) els.push(<line key={'l' + k} x1={bl} x2={bl} y1={WM_Y0} y2={WM_Y0 + WM_H} className="wm-nl" />);
+                    const cl = (k * 15 + 180) * 10;
+                    els.push(<text key={'t' + k} x={cl} y={WM_Y0 + 34 / Math.pow(z, 0.8)} className="wm-nt" style={{ fontSize: 26 / Math.pow(z, 0.8) }} textAnchor="middle">{k > 0 ? '+' + k : k}</text>);
+                }
+                return <g>{els}</g>;
+            };
+            const over = (z) => {
+                const r = 16 / Math.pow(z, 0.75);
+                return (
+                    <g>
+                        {WT_ZLIST.map((zz, i) => {
+                            const st = status[i], x = (zz.lon + 180) * 10, y = (90 - zz.lat) * 10;
+                            const cls = 'wm-dot ' + (st.dst ? 'dst' : st.observes ? 'std' : 'none') + (pins.includes(zz.id) ? ' pin' : '');
+                            return <circle key={zz.id} cx={x} cy={y} r={pins.includes(zz.id) ? r * 1.35 : r} className={cls} />;
+                        })}
+                        {WT_ZLIST.map((zz) => {
+                            const isEv = evIds.has(zz.id), isCh = evData.changed && evData.changed.has(zz.id);
+                            if (!isEv && !isCh && zz.id !== sel) return null;
+                            return <circle key={'r' + zz.id} cx={(zz.lon + 180) * 10} cy={(90 - zz.lat) * 10} r={r * (isEv || zz.id === sel ? 2.3 : 1.8)} className={'wm-ring' + (isEv ? ' ev' : zz.id === sel ? ' sel' : '')} />;
+                        })}
+                    </g>
+                );
+            };
+
+            return (
+                <div className="tab-pane">
+                    <div className="wt-grid">
+                        <div className="wt-left">
+                            <div className="wt-clocks">
+                                <div className="wt-clock">
+                                    <div className="wt-cl-h">Ship's time {live ? '' : <span className="wt-chip">converted</span>}</div>
+                                    <div className="wt-big"><span className="t">{ship.t}</span><span className="s">:{ship.s}</span></div>
+                                    <div className="wt-date">{ship.dow} {ship.d}</div>
+                                    <select className="input-field wt-sel" value={shipOff} onChange={(e) => setShipOff(+e.target.value)} aria-label="Ship's time zone">
+                                        {WT_OFFSETS.map((m) => <option key={m} value={m}>{wtFmtOff(m)}{m === 0 ? '' : '  (ZD ' + (m > 0 ? '-' : '+') + (Math.abs(m) % 60 ? (Math.abs(m) / 60).toFixed(2).replace(/0$/, '') : Math.abs(m) / 60) + ')'}</option>)}
+                                    </select>
+                                </div>
+                                <div className="wt-clock">
+                                    <div className="wt-cl-h">UTC / GMT {live ? '' : <span className="wt-chip">converted</span>}</div>
+                                    <div className="wt-big"><span className="t">{utc.t}</span><span className="s">:{utc.s}</span></div>
+                                    <div className="wt-date">{utc.dow} {utc.d}</div>
+                                    <div className="wt-sub">Ship is UTC {shipOff === 0 ? '±0' : (shipOff > 0 ? '+' : '-') + Math.floor(Math.abs(shipOff) / 60) + (Math.abs(shipOff) % 60 ? ':' + wp2(Math.abs(shipOff) % 60) : '')} h{zdv !== 0 ? ' · ZD ' + (zdv > 0 ? '+' : '') + zdv : ''}</div>
+                                    <button className="btn-ghost wt-small" onClick={() => setShipOff(-new Date().getTimezoneOffset())}>Use this device's zone</button>
+                                </div>
+                            </div>
+
+                            <div className="card dwt-card" style={{ marginBottom: 14 }}>
+                                <div className="card-title">Converter</div>
+                                <div className="wt-conv">
+                                    <div className="seg" role="group" aria-label="Time source">
+                                        <button aria-pressed={mode === 'now'} onClick={() => setMode('now')}>Now</button>
+                                        <button aria-pressed={mode === 'custom'} onClick={() => mode === 'custom' ? null : setCustom()}>Set a time</button>
+                                    </div>
+                                    {mode === 'custom' && (
+                                        <div className="wt-conv-in">
+                                            <input type="datetime-local" className="input-field" value={cust} onChange={(e) => setCust(e.target.value)} aria-label="Date and time to convert" />
+                                            <select className="input-field" value={custSrc} onChange={(e) => setCustSrc(e.target.value)} aria-label="This time is in">
+                                                <option value="ship">in ship's time</option>
+                                                <option value="utc">in UTC</option>
+                                                {pinned.map((z) => <option key={z.id} value={z.id}>in {z.city} time</option>)}
+                                            </select>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="card dwt-card">
+                                <div className="card-title">Places <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(compared with ship's time)</span></div>
+                                <div className="wt-tw"><table className="wt-table">
+                                    <thead><tr><th>Place</th><th>Local time</th><th>Offset</th><th>vs ship</th><th></th></tr></thead>
+                                    <tbody>
+                                        {pinned.length === 0 && <tr><td colSpan="5" style={{ color: 'var(--muted)' }}>No places yet. Search below or click the map.</td></tr>}
+                                        {pinned.map((z) => {
+                                            const st = wtDst(z.id, t), p = wtParts(t, st.off);
+                                            return (
+                                                <tr key={z.id} className={sel === z.id ? 'on' : ''}>
+                                                    <td><button className="wt-link" onClick={() => setSel(z.id)}><b>{z.city}</b><small>{wtCountry(z.cc)}</small></button></td>
+                                                    <td><div className="wt-lt"><span className="d">{p.d}</span> <span className="t">{p.t}</span></div></td>
+                                                    <td>{wtFmtOff(st.off)}{st.dst && <span className="wt-badge">DST</span>}</td>
+                                                    <td>{wtDiff(st.off - shipOff)}</td>
+                                                    <td><button className="wt-x" onClick={() => rmPin(z.id)} aria-label={'Remove ' + z.city}>&times;</button></td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table></div>
+                                <input className="input-field" style={{ marginTop: 8 }} placeholder="Add a place: city, country or zone name" value={q} onChange={(e) => setQ(e.target.value)} />
+                                {results.length > 0 && <div className="pf-chips">{results.map((z) => <button key={z.id} className="pf-chip on" onClick={() => addPin(z.id)}>+ {z.city}<b style={{ fontWeight: 400, color: 'var(--muted)' }}>{wtCountry(z.cc)}</b></button>)}</div>}
+                            </div>
+                        </div>
+
+                        <div className="wt-right">
+                            <div className="card dwt-card">
+                                <div className="card-title">World map: daylight saving on {mapDate.split('-').reverse().join('/')}</div>
+                                <div className="wt-mapctl">
+                                    <input type="date" className="input-field" value={mapDate} onChange={(e) => e.target.value && setMapDate(e.target.value)} aria-label="Map date" />
+                                    <input type="range" min="1" max="366" value={doy} onChange={(e) => setDoy(+e.target.value)} aria-label="Day of year" />
+                                    <button className="btn-ghost wt-small" onClick={() => setMapDate(new Date().toISOString().slice(0, 10))}>Today</button>
+                                </div>
+                                <WorldMap under={under} over={over} onPick={onPick} label="World map of time zones and daylight saving" />
+                                <div className="wm-legend">
+                                    <span><i className="wm-sw dst"></i>DST in force</span>
+                                    <span><i className="wm-sw std"></i>Standard time (zone uses DST)</span>
+                                    <span><i className="wm-sw none"></i>No DST</span>
+                                    <span><i className="wm-sw ring"></i>Changes in range below</span>
+                                    <span className="wm-hint">Numbers along the top are nautical zones (UTC offset). Click the map to inspect a place.</span>
+                                </div>
+                                {(selZ || click) && (
+                                    <div className="wt-info">
+                                        {selZ && selSt && (
+                                            <div>
+                                                <div className="wt-info-h"><b>{selZ.city}</b>, {wtCountry(selZ.cc)} <small>{selZ.id}</small></div>
+                                                <div>{(() => { const p = wtParts(t, wtDst(selZ.id, t).off); return <span className="wt-lt">Now there: <span className="d">{p.d}</span> <span className="t">{p.t}</span></span>; })()} &middot; {wtFmtOff(selSt.off)} on {mapDate.split('-').reverse().join('/')}: {selSt.dst ? 'daylight saving time' : selSt.observes ? 'standard time' : 'no daylight saving'}</div>
+                                                {selNext ? (() => { const p = wtParts(selNext.t, selNext.to), q2 = wtParts(selNext.t, 0); return <div>Next change: <b>{q2.d} {q2.t} UTC</b> ({p.d} {p.t} local after), clocks go {selNext.to > selNext.from ? 'forward' : 'back'} {wtDiff(Math.abs(selNext.to - selNext.from)).replace('+', '')}</div>; })() : <div>No clock change in the next 2 years.</div>}
+                                                <div className="wt-actions">
+                                                    {pins.includes(selZ.id) ? <button className="btn-ghost wt-small" onClick={() => rmPin(selZ.id)}>Remove from places</button> : <button className="btn-ghost wt-small" onClick={() => addPin(selZ.id)}>Add to places</button>}
+                                                    <button className="btn-ghost wt-small" onClick={() => setShipOff(wtDst(selZ.id, t).off)}>Set ship's time to {wtFmtOff(wtDst(selZ.id, t).off)}</button>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {click && (
+                                            <div className="wt-clickrow">
+                                                {fmtLL(click.lat, click.lon)}: nautical zone {wtFmtOff(wtNauticalOff(click.lon))}
+                                                <button className="btn-ghost wt-small" onClick={() => setShipOff(wtNauticalOff(click.lon))}>Set ship's time to this</button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card dwt-card">
+                        <div className="card-title">Daylight saving changes between two dates</div>
+                        <div className="wt-range">
+                            <div><label className="input-label">From</label><input type="date" className="input-field" value={from} onChange={(e) => setFrom(e.target.value)} /></div>
+                            <div><label className="input-label">To</label><input type="date" className="input-field" value={to} onChange={(e) => setTo(e.target.value)} /></div>
+                            <div><label className="input-label">Places</label>
+                                <div className="seg" role="group" aria-label="Which places">
+                                    <button aria-pressed={scope === 'pinned'} onClick={() => { setScope('pinned'); setEvSel(-1); }}>My places</button>
+                                    <button aria-pressed={scope === 'all'} onClick={() => { setScope('all'); setEvSel(-1); }}>Whole world</button>
+                                </div>
+                            </div>
+                        </div>
+                        {evData.err ? <div className="dwt-note bad">{evData.err}</div> : (
+                            <div>
+                                <div className="wt-evsum">{evs.length === 0 ? 'No clock changes in this range.' : evs.length + ' clock change' + (evs.length === 1 ? '' : 's') + ' (times shown in UTC, local times inside each change). Click one to light up the map.'}</div>
+                                {scope === 'pinned' && evData.ids && evData.ids.filter((id) => !evData.changed.has(id)).length > 0 && <div className="wt-evsum">No change in range: {evData.ids.filter((id) => !evData.changed.has(id)).map((id) => WM_BY[id].city).join(', ')}.</div>}
+                                <div className="wt-evlist">
+                                    {evs.map((e, i) => {
+                                        const u = wtParts(e.t, 0), fwd = e.delta > 0;
+                                        const names = e.rows.slice(0, 4).map((r) => WM_BY[r.id].city).join(', ') + (e.rows.length > 4 ? ' +' + (e.rows.length - 4) + ' more' : '');
+                                        return (
+                                            <div key={i} className={'wt-ev' + (evSel === i ? ' on' : '')}>
+                                                <button className="wt-ev-h" onClick={() => setEvSel(evSel === i ? -1 : i)} aria-expanded={evSel === i}>
+                                                    <span className="wt-lt"><span className="d">{u.dow} {u.d}</span> <span className="t">{u.t}</span> <small>UTC</small></span>
+                                                    <span className={'wt-delta ' + (fwd ? 'fwd' : 'back')}>{fwd ? 'Forward ' : 'Back '}{wtDiff(Math.abs(e.delta)).replace('+', '')}</span>
+                                                    <span className="wt-names">{e.rows.length} zone{e.rows.length === 1 ? '' : 's'}: {names}</span>
+                                                </button>
+                                                {evSel === i && (
+                                                    <div className="wt-evrows">
+                                                        {e.rows.slice(0, 60).map((r) => { const a = wtParts(e.t, r.from), b = wtParts(e.t, r.to); return <div key={r.id}><b>{WM_BY[r.id].city}</b> <small>{wtCountry(WM_BY[r.id].cc)}</small><span>{a.d} {a.t} &rarr; {b.t} local &middot; now {wtFmtOff(r.to)}</span></div>; })}
+                                                        {e.rows.length > 60 && <div><small>and {e.rows.length - 60} more zones</small></div>}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        /* ================= Load Line tab ================= */
+        const LL_KEY = 'tfm_ll_v1';
+        const LL_PORTS = [['Rotterdam', 51.95, 4.1], ['Antwerp', 51.3, 4.3], ['Hamburg', 53.5, 9.9], ['Gdansk', 54.4, 18.7], ['St Petersburg', 59.9, 30.2], ['Oslo', 59.9, 10.7], ['Murmansk', 69, 33], ['Reykjavik', 64.1, -21.9], ['Halifax', 44.6, -63.5], ['New York', 40.6, -74], ['Houston', 29.7, -95], ['Santos', -23.95, -46.3], ['Buenos Aires', -34.6, -58.4], ['Callao', -12, -77.1], ['Valparaiso', -33, -71.6], ['Vancouver', 49.3, -123.1], ['Los Angeles', 33.7, -118.2], ['Anchorage', 61.2, -149.9], ['Honolulu', 21.3, -157.9], ['Tokyo', 35.6, 139.8], ['Vladivostok', 43.1, 131.9], ['Shanghai', 31.2, 121.5], ['Hong Kong', 22.3, 114.2], ['Singapore', 1.3, 103.8], ['Colombo', 6.9, 79.8], ['Mumbai', 18.9, 72.8], ['Kolkata', 22, 88.1], ['Dubai', 25.2, 55.3], ['Durban', -29.9, 31], ['Cape Town', -34, 18.4], ['Lagos', 6.4, 3.4], ['Marseille', 43.3, 5.3], ['Novorossiysk', 44.7, 37.8], ['Fremantle', -32, 115.7], ['Sydney', -33.9, 151.2], ['Auckland', -36.8, 174.8]];
+        function llParse(s, isLat) {
+            s = String(s || '').trim().toUpperCase(); if (!s) return null;
+            const nums = s.match(/\d+(?:\.\d+)?/g); if (!nums) return null;
+            const h = /[NSEW]/.exec(s);
+            if (h && (isLat ? !/[NS]/.test(h[0]) : !/[EW]/.test(h[0]))) return null;
+            let v = (+nums[0]) + (nums[1] ? +nums[1] / 60 : 0) + (nums[2] ? +nums[2] / 3600 : 0);
+            if (nums.length > 1 && +nums[1] >= 60) return null;
+            if ((h && /[SW]/.test(h[0])) || /^\s*-/.test(s)) v = -v;
+            return Math.abs(v) <= (isLat ? 90 : 180) ? v : null;
+        }
+        function llFmt(v, isLat) {
+            const a = Math.abs(v), d = Math.floor(a), m = Math.round((a - d) * 600) / 10;
+            const dd = m >= 60 ? d + 1 : d, mm = m >= 60 ? 0 : m;
+            return (isLat ? wp2(dd) : String(dd).padStart(3, '0')) + ' ' + mm.toFixed(1).padStart(4, '0') + ' ' + (isLat ? (v >= 0 ? 'N' : 'S') : (v >= 0 ? 'E' : 'W'));
+        }
+        const LL_PATHS = LL.P.map((p) => ({ id: p[0], d: 'M' + p[1].map((q) => ((q[0] + 180) * 10).toFixed(0) + ' ' + ((90 - q[1]) * 10).toFixed(0)).join('L') + 'Z' }));
+        const LL_MARKNAME = { T: 'Tropical', S: 'Summer', W: 'Winter', WNA: 'Winter North Atlantic' };
+        function llZoneMark(zid, small, d) { const zz = LL.Z[zid]; if (zz.small && !small) return 'S'; const m = LL.markFor(zid, d, small); return m === 'W' && small && zid === 13 ? 'WNA' : m; }
+        const LL_ORDER = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+        function llLoad() { try { const s = JSON.parse(localStorage.getItem(LL_KEY) || 'null'); if (s && s.lat !== undefined) return s; } catch (e) {} return null; }
+        function LoadLineTab() {
+            const sv = useMemo(llLoad, []);
+            const today = new Date().toISOString().slice(0, 10);
+            const [st, setSt] = useState(() => ({ lat: '51 57.0 N', lon: '004 06.0 E', len: 'L', S: '', disp: '', tpc: '', rho: '1.025', ...(sv || {}) }));
+            const [date, setDate] = useState(today);
+            const [hl, setHl] = useState(0);
+            const [msg, setMsg] = useState('');
+            useEffect(() => { try { localStorage.setItem(LL_KEY, JSON.stringify(st)); } catch (e) {} }, [st]);
+            const set = (k) => (v) => setSt({ ...st, [k]: v });
+            const small = st.len === 'S';
+            const la = llParse(st.lat, true), lo = llParse(st.lon, false);
+            const valid = la !== null && lo !== null;
+            const dt = Date.parse(date + 'T12:00:00Z') || Date.now();
+            const dDate = new Date(dt);
+            const id = valid ? LL.classify(la, lo) : null;
+            const zone = id ? LL.Z[id] : null;
+            const mark = valid ? LL.fullMark(id, lo, dDate, small) : null;
+            const next = valid ? LL.nextChange(id, lo, dDate, small) : null;
+            const fmtD = (d) => wp2(d.getUTCDate()) + '/' + wp2(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear();
+            const periodTxt = zone && (zone.kind === 'STA' || zone.kind === 'WIN') ? (zone.kind === 'STA' ? 'Tropical' : (mark === 'WNA' || (small && (id === 13 || id === 14)) ? 'Winter North Atlantic' : 'Winter')) + ' mark applies ' + LL.fmtP(id === 15 && small ? zone.pSmall : zone.p) + '; Summer mark at other times.' : null;
+
+            const S = pn(st.S), disp = pn(st.disp), tpc = pn(st.tpc), rho = pn(st.rho);
+            const hasS = S > 0;
+            const dr = hasS ? { T: S * 49 / 48, S: S, W: S * 47 / 48, WNA: S * 47 / 48 - 0.05 } : null;
+            const fwa = disp > 0 && tpc > 0 ? disp / (4 * tpc) : NaN;
+            const allow = isFinite(fwa) && rho > 0 && rho < 1.025 ? fwa * (1.025 - rho) / 0.025 : 0;
+            const applic = dr && mark ? dr[mark] : NaN;
+            const maxDraft = isFinite(applic) ? applic + allow / 1000 : NaN;
+
+            const pickPort = (e) => { const p = LL_PORTS[+e.target.value]; if (p) setSt({ ...st, lat: llFmt(p[1], true), lon: llFmt(p[2], false) }); };
+            const onPick = (lat, lon) => setSt({ ...st, lat: llFmt(lat, true), lon: llFmt(lon, false) });
+            const toDwt = () => {
+                try {
+                    const s = { ...DWT_DEFAULT, ...(JSON.parse(localStorage.getItem(DWT_KEY) || 'null') || {}) };
+                    s.draft = String(Math.round(maxDraft * 1000) / 1000);
+                    if (rho > 0) s.density = String(rho);
+                    localStorage.setItem(DWT_KEY, JSON.stringify(s));
+                    setMsg('Sent: maximum draft ' + s.draft + ' m' + (rho > 0 ? ' and density ' + rho : '') + ' are now in the Deadweight tab.');
+                } catch (e) { setMsg('Could not write to the Deadweight tab.'); }
+            };
+
+            const under = (z) => (
+                <g>
+                    {LL_PATHS.map((p, i) => {
+                        const zz = LL.Z[p.id], eff = llZoneMark(p.id, small, dDate);
+                        const cls = 'll-poly ' + eff + (p.id === hl ? ' hl' : '') + (zz.kind === 'SUM' ? '' : ' seas');
+                        return <g key={i}><path d={p.d} className={cls} /><path d={p.d} className={cls} transform="translate(-3600 0)" /></g>;
+                    })}
+                </g>
+            );
+            const over = (z) => {
+                const out = [];
+                [[0, 'wm-eq'], [23.44, 'wm-tr'], [-23.44, 'wm-tr']].forEach(([lat, c], i) => { out.push(<line key={'g' + i} x1="0" x2="3600" y1={(90 - lat) * 10} y2={(90 - lat) * 10} className={c} />); });
+                if (valid) {
+                    const x = (lo + 180) * 10, y = (90 - la) * 10, r = 16 / Math.pow(z, 0.7);
+                    out.push(<g key="pos"><circle cx={x} cy={y} r={r * 1.8} className="ll-pos-ring" /><circle cx={x} cy={y} r={r * 0.55} className="ll-pos-dot" /></g>);
+                }
+                return <g>{out}</g>;
+            };
+
+            return (
+                <div className="tab-pane">
+                    <div className="wt-grid ll-grid">
+                        <div className="wt-left">
+                            <div className="card dwt-card" style={{ marginBottom: 14 }}>
+                                <div className="card-title">Position, date and ship</div>
+                                <div className="ll-row">
+                                    <div><label className="input-label">Latitude</label><input className="input-field" value={st.lat} onChange={(e) => set('lat')(e.target.value)} placeholder="51 57.0 N" aria-invalid={la === null} /></div>
+                                    <div><label className="input-label">Longitude</label><input className="input-field" value={st.lon} onChange={(e) => set('lon')(e.target.value)} placeholder="004 06.0 E" aria-invalid={lo === null} /></div>
+                                </div>
+                                <div className="ll-row">
+                                    <div><label className="input-label">Port or place</label>
+                                        <select className="input-field" value="" onChange={pickPort}><option value="">Choose a port...</option>{LL_PORTS.map((p, i) => <option key={p[0]} value={i}>{p[0]}</option>)}</select></div>
+                                    <div><label className="input-label">Date</label><input type="date" className="input-field" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} /></div>
+                                </div>
+                                <label className="input-label">Ship's load line length</label>
+                                <div className="seg" role="group" aria-label="Ship length">
+                                    <button aria-pressed={!small} onClick={() => set('len')('L')}>Over 100 m (328 ft)</button>
+                                    <button aria-pressed={small} onClick={() => set('len')('S')}>100 m and under</button>
+                                </div>
+                                {!valid && <div className="dwt-note bad" style={{ marginTop: 8 }}>Enter the position as degrees and minutes (51 57.0 N) or decimal degrees (51.95, -4.1), or click the map.</div>}
+                            </div>
+
+                            <div className="card dwt-card ll-result" style={{ marginBottom: 14 }}>
+                                <div className="card-title">Load line in force</div>
+                                {valid && zone ? (
+                                    <div>
+                                        <div className="ll-big"><span className={'ll-chip ' + mark}>{mark === 'WNA' ? 'WNA' : mark === 'T' ? 'T' : mark === 'S' ? 'S' : 'W'}</span><div><div className="ll-mark">{LL_MARKNAME[mark]} load line</div><div className="ll-zone">{zone.name}</div></div></div>
+                                        {periodTxt && <div className="ll-line">{periodTxt}</div>}
+                                        {zone.small && !small && <div className="ll-line">This area only has a winter season for ships of 100 m and under, so the Summer mark applies to your ship.</div>}
+                                        {next ? <div className="ll-line">Next change here: <b>{LL_MARKNAME[next.mark]}</b> from <b>{fmtD(next.date)}</b> ({Math.round((next.date.getTime() - dt) / 86400000)} days).</div> : <div className="ll-line">No seasonal change here during the next year.</div>}
+                                        <div className="ll-line" style={{ color: 'var(--muted)' }}>Position {llFmt(la, true)}, {llFmt(lo, false)} &middot; {date.split('-').reverse().join('/')}</div>
+                                    </div>
+                                ) : <div className="ll-line" style={{ color: 'var(--muted)' }}>Waiting for a valid position.</div>}
+                            </div>
+
+                            <div className="card dwt-card">
+                                <div className="card-title">Allowed draft</div>
+                                <div className="ll-row">
+                                    <div><label className="input-label">Summer draft (m)</label><input className="input-field" inputMode="decimal" value={st.S} onChange={(e) => set('S')(e.target.value)} placeholder="from load line certificate" /></div>
+                                    <div><label className="input-label">Port water density (t/m&sup3;)</label><input className="input-field" inputMode="decimal" value={st.rho} onChange={(e) => set('rho')(e.target.value)} /></div>
+                                </div>
+                                <div className="ll-row">
+                                    <div><label className="input-label">Summer displacement (t)</label><input className="input-field" inputMode="decimal" value={st.disp} onChange={(e) => set('disp')(e.target.value)} placeholder="for FWA" /></div>
+                                    <div><label className="input-label">TPC at Summer draft (t/cm)</label><input className="input-field" inputMode="decimal" value={st.tpc} onChange={(e) => set('tpc')(e.target.value)} placeholder="for FWA" /></div>
+                                </div>
+                                {dr ? (
+                                    <div>
+                                        <table className="wt-table ll-table">
+                                            <thead><tr><th>Mark</th><th>Draft (m)</th><th>vs Summer</th></tr></thead>
+                                            <tbody>
+                                                {['T', 'S', 'W', 'WNA'].map((m) => (
+                                                    <tr key={m} className={mark === m ? 'on' : ''}><td><span className={'ll-chip sm ' + m}>{m === 'WNA' ? 'WNA' : m}</span> {LL_MARKNAME[m]}</td><td><b>{dr[m].toFixed(3)}</b></td><td>{m === 'S' ? '-' : ((dr[m] - S) * 1000 >= 0 ? '+' : '') + Math.round((dr[m] - S) * 1000) + ' mm'}</td></tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                        {isFinite(fwa) && <div className="ll-line">Fresh water allowance <b>{Math.round(fwa)} mm</b> (&Delta; / 4 &times; TPC).{rho > 0 && rho < 1.025 ? <span> In density {rho} the ship may be loaded <b>{Math.round(allow)} mm</b> deeper than the mark.</span> : rho >= 1.025 ? <span> Density is 1.025 or more, so no dock water allowance.</span> : null}</div>}
+                                        {isFinite(maxDraft) && (
+                                            <div className="ll-maxbox">
+                                                <div><span>Maximum draft here and now</span><b>{maxDraft.toFixed(3)} m</b></div>
+                                                <button className="btn-ghost" onClick={toDwt}>Use in Deadweight tab</button>
+                                            </div>
+                                        )}
+                                        {msg && <div className="dwt-note">{msg}</div>}
+                                    </div>
+                                ) : <div className="ll-line" style={{ color: 'var(--muted)' }}>Enter the Summer draft to see the drafts for every mark.</div>}
+                            </div>
+                        </div>
+
+                        <div className="wt-right">
+                            <div className="card dwt-card">
+                                <div className="card-title">Load line zone chart for {date.split('-').reverse().join('/')} ({small ? '100 m and under' : 'over 100 m'})</div>
+                                <WorldMap under={under} over={over} onPick={onPick} label="Load line zones and seasonal areas world map" />
+                                <div className="wm-legend">
+                                    <span><i className="ll-sw T"></i>Tropical</span>
+                                    <span><i className="ll-sw S"></i>Summer</span>
+                                    <span><i className="ll-sw W"></i>Winter</span>
+                                    <span><i className="ll-sw WNA"></i>Winter North Atlantic</span>
+                                    <span className="wm-hint">Dashed outlines are seasonal areas. Click the map to set the position.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card dwt-card">
+                        <div className="card-title">Zones and seasonal areas on {date.split('-').reverse().join('/')}</div>
+                        <div className="wt-tw"><table className="wt-table ll-zones">
+                            <thead><tr><th>Zone or area</th><th>Season dates for the other mark</th><th>Mark</th></tr></thead>
+                            <tbody>
+                                {LL_ORDER.map((zid) => {
+                                    const zz = LL.Z[zid], skip = zz.small && !small, m = llZoneMark(zid, small, dDate);
+                                    const per = zz.kind === 'T' ? 'All year' : (zz.kind === 'STA' ? 'Tropical ' : zz.small || zid >= 13 ? (small && (zid === 13 || zid === 14) ? 'WNA ' : 'Winter ') : '') + (zz.p ? LL.fmtP(zid === 15 && small ? zz.pSmall : zz.p) : '');
+                                    return (
+                                        <tr key={zid} className={(zid === id ? 'on ' : '') + (skip ? 'dim' : '')} onClick={() => setHl(hl === zid ? 0 : zid)} style={{ cursor: 'pointer' }}>
+                                            <td>{zz.name}{skip && <span className="wt-badge">100 m and under only</span>}{zid === hl && <span className="wt-badge">on map</span>}</td>
+                                            <td>{per}</td>
+                                            <td><span className={'ll-chip sm ' + m}>{m}</span></td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table></div>
+                    </div>
+
+                    <div className="info-section" style={{ marginTop: 14 }}>
+                        <h3>Please check before relying on this</h3>
+                        <p>Indicative guide only. Zone boundaries are simplified from Annex II of the International Convention on Load Lines 1966 (as amended), so near a boundary read the Convention chart or ask your flag state or class. The International Load Line Certificate and the Master's judgement always decide.</p>
+                        <p>Crossing between zones or seasons on one voyage has its own rules. A ship usually has to be at the mark of the area ahead before entering it, and may use the more favourable mark when leaving a port on a boundary line. The Winter North Atlantic mark here is for ships of 100 m and under in the North Atlantic winter zones.</p>
+                        <p>Tropical = Summer + Summer draft/48. Winter = Summer &minus; Summer draft/48. WNA = Winter &minus; 50 mm. Use the moulded Summer draft from the load line certificate.</p>
+                    </div>
+                </div>
+            );
+        }
+// @@NEWTABS-END
+
         const TABS = [
             { key: 'rob', label: 'ROB', c: '#0369a1', cd: '#38bdf8' },
             { key: 'eta', label: 'ETA', c: '#4f46e5', cd: '#a5b4fc' },
@@ -1531,7 +2302,9 @@ const Proof = (function () {
             { key: 'conv', label: 'Converter', c: '#15803d', cd: '#4ade80' },
             { key: 'hydro', label: 'Hydrostatics', c: '#be123c', cd: '#fb7185' },
             { key: 'dwt', label: 'Deadweight', c: '#c2410c', cd: '#fb923c' },
-            { key: 'proof', label: 'Proofread', c: '#a21caf', cd: '#e879f9' }
+            { key: 'proof', label: 'Proofread', c: '#a21caf', cd: '#e879f9' },
+            { key: 'time', label: 'Time Zones', c: '#4d7c0f', cd: '#a3e635' },
+            { key: 'load', label: 'Load Line', c: '#0e7490', cd: '#22d3ee' }
         ];
         const ICON_PATHS = {
             rob: <><path d="M12 2.7s6 6.2 6 10.8a6 6 0 0 1-12 0C6 8.9 12 2.7 12 2.7z" /></>,
@@ -1542,6 +2315,8 @@ const Proof = (function () {
             hydro: <><path d="M2 20c2 0 2-1.5 5-1.5S9 20 12 20s3-1.5 5-1.5S20 20 22 20" /><path d="M4 14l1.5 3.5h13L20 14z" /><path d="M12 14V7h4v7" /></>,
             dwt: <><path d="M21 8l-9-5-9 5 9 5 9-5z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></>,
             proof: <><path d="m6 16 6-12 6 12" /><path d="M8 12h8" /><path d="m16 20 2 2 4-4" /></>,
+            time: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z" /></>,
+            load: <><circle cx="10" cy="12" r="6" /><path d="M2 12h16" /><path d="M18 7v10" /><path d="M18 8h4M18 12h4M18 16h4" /></>,
             sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></>,
             moon: <><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></>
         };
@@ -2235,6 +3010,8 @@ const Proof = (function () {
                             {activeTab === 5 && <HydroTab />}
                             {activeTab === 6 && <DwtTab />}
                             {activeTab === 7 && <ProofTab />}
+                            {activeTab === 8 && <TimeTab />}
+                            {activeTab === 9 && <LoadLineTab />}
                         </div>
                     </div>
                 </>
