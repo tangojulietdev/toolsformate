@@ -1211,7 +1211,7 @@ const Proof = (function () {
     simple('whether3', 'grammar', /\bwhether (conditions|forecast|report|permitting|routing|window|data|deck|criteria|limits|warning|warnings|delay|delays)\b/gi, "Use “weather”.", (m) => m[0].replace(/^whether/i, 'weather'));
     simple('too1', 'grammar', /\b(is|are|was|were|be|been|get|gets|very|way|not|so) to (much|many|late|early|long|big|small|high|low|far|slow|fast|soon|heavy|hot|cold|expensive|busy|tight|loose|deep|shallow|wide|narrow)\b/gi, "Use “too”.", (m) => m[0].replace(/ to /i, ' too '));
     simple('too2', 'grammar', /\b(want|wants|need|needs|going|able|try|tries|trying|ready|asked|requested|required|ordered|instructed|supposed|have|has|had|continue|continues|plan|plans) too (go|do|be|see|get|make|take|have|send|check|call|keep|ensure|find|inform|advise|confirm|arrange|load|discharge|proceed|use|start|stop|inspect|arrive|sail|depart|complete|submit|report)\b/gi, "Use “to”.", (m) => m[0].replace(/ too /i, ' to '));
-    simple('alot', 'grammar', /\balot\b/gi, "Two words: “a lot”.", (m) => (m[0][0] === 'A' ? 'A lot' : 'a lot'), { auto: true });
+    simple('alot', 'grammar', /\b(?:a\s+)?alot\b/gi, "Two words: “a lot”.", (m) => (m[0][0] === 'A' ? 'A lot' : 'a lot'), { auto: true });
     simple('regards', 'style', /\bin regards? to\b/gi, "Say “with regard to” or “regarding”.", () => 'regarding');
     simple('irreg', 'grammar', /\birregardless\b/gi, "Use “regardless”.", () => 'regardless', { auto: true });
     simple('betweenI', 'grammar', /\bbetween you and I\b/gi, "After “between” use “me”.", () => 'between you and me');
@@ -1243,6 +1243,7 @@ const Proof = (function () {
     simple('aan', 'grammar', /\b(a|an)\s+([A-Za-z][A-Za-z'-]*)/gi, "a / an.", (m) => {
         const art = m[1], w = m[2];
         if (w === w.toUpperCase() && w.length > 1) return null;
+        if (/^alot$/i.test(w)) return null;
         const vowel = /^[aeiou]/i.test(w) && !VOWEL_SOUND_EXC.test(w) || SILENT_H.test(w);
         const need = vowel ? 'an' : 'a';
         if (art.toLowerCase() === need) return null;
