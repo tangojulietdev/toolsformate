@@ -1,4 +1,4 @@
-const VERSION = 'tools-for-mate-v8';
+const VERSION = 'tools-for-mate-v9';
 const CORE = ['./', 'index.html', 'app.js?v=7', 'manifest.webmanifest', 'dict-en.txt', 'dict-common.txt', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'];
 
 self.addEventListener('install', (e) => {
@@ -7,7 +7,7 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
+    caches.keys().then((keys) => Promise.all(keys.filter((k) => k.startsWith('tools-for-mate-') && k !== VERSION).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
