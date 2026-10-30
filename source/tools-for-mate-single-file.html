@@ -111,7 +111,7 @@
         .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
 
         /* ===== Top tiles: the only place with per-tool colour ===== */
-        .tabs { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; margin-bottom: 24px; }
+        .tabs { display: grid; grid-template-columns: repeat(11, 1fr); gap: 8px; margin-bottom: 24px; }
         .tab {
             --tc: var(--accent);
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
@@ -546,9 +546,82 @@
         .ll-maxbox span { display: block; font-size: 12px; color: var(--text-2); } .ll-maxbox b { font-size: 22px; color: var(--accent); font-variant-numeric: tabular-nums; }
         .ll-maxbox .btn-ghost { margin: 0 !important; }
 
+        /* ===== Garbage Stowage Board ===== */
+        .gb .card { margin-bottom: 14px; }
+        .gb-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+        .gb-seg { margin-bottom: 14px; display: flex; width: 100%; max-width: 560px; }
+        .gb-seg button { flex: 1; padding: 8px 6px; }
+        .gb-mut { color: var(--muted); }
+        .gb-hint { font-size: 12px; margin: 0 0 8px; }
+        .gb-fig { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+        .gb-fig b { color: var(--text); }
+        .gb-note { font-size: 13px; color: var(--text-2); background: var(--warn-soft); border-radius: var(--r-sm); padding: 8px 12px; margin-bottom: 12px; }
+        .gb-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+        .gb-kpi { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .gb-kpi .input-label { margin: 0; }
+        .gb-kpi b { font-size: 24px; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1.15; }
+        .gb-kpi small { font-size: 12px; color: var(--muted); }
+        .gb-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+        .gb-rows { display: grid; gap: 12px; }
+        .gb-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; }
+        .gb-row .gb-gauge { grid-column: 1 / -1; }
+        .gb-nm { font-weight: 600; font-size: 14px; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .gb-cr { display: flex; align-items: center; gap: 8px; }
+        .gb-gauge { height: 9px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+        .gb-gauge i { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .3s; }
+        .gb-gauge i.warn { background: var(--warn); } .gb-gauge i.crit { background: var(--bad); }
+        .gb-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 5px; font-size: 12px; font-weight: 700; flex: none; }
+        .gb-alerts { display: grid; gap: 6px; }
+        .gb-alert { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: var(--surface-2); border: 1px solid transparent; border-radius: var(--r-sm); padding: 6px 8px; font-size: 13px; color: var(--text-2); cursor: pointer; }
+        .gb-alert:hover { border-color: var(--accent); }
+        .gb-al-t { flex: 1; min-width: 0; }
+        .gb-pill { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+        .gb-pill.crit { background: var(--bad-soft); color: var(--bad); } .gb-pill.warn { background: var(--warn-soft); color: var(--warn); }
+        .gb-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--text-2); }
+        .gb-legend span { display: inline-flex; align-items: center; gap: 6px; }
+        .gb-deck-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+        .gb-deck .gb-gauge { margin-bottom: 12px; }
+        .gb-rack { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; }
+        .gb-drum { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; padding: 8px 6px 6px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text); cursor: pointer; text-align: center; }
+        .gb-drum:hover { border-color: var(--accent); background: var(--accent-soft); }
+        .gb-drum:focus-visible, .gb-alert:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .gb-svg { width: 58px; height: 74px; display: block; flex: none; }
+        .gb-svg rect, .gb-svg ellipse { transition: y .3s, height .3s; }
+        .gb-dl { font-size: 12px; font-weight: 600; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .gb-df { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+        .gb-add { border-style: dashed; color: var(--muted); justify-content: center; min-height: 132px; font-weight: 600; font-size: 13px; }
+        .gb-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0 12px; }
+        .gb-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+        .gb-bar .btn-ghost { margin: 0 !important; }
+        .gb-sm { min-height: 32px !important; padding: 3px 10px !important; font-size: 12px !important; margin: 0 !important; }
+        .gb-danger { color: var(--bad) !important; }
+        .gb-danger:hover { border-color: var(--bad) !important; background: var(--bad-soft) !important; }
+        .gb-nowrap { white-space: nowrap; }
+        .gb-nowrap .btn-ghost { margin-right: 4px !important; }
+        .gb-table input { width: 100%; min-width: 90px; }
+        .gb-color { width: 44px; height: 34px; padding: 2px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); }
+        .gb-ta { width: 100%; min-height: 130px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; padding: 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface-2); color: var(--text); }
+        .gb-file { cursor: pointer; display: inline-flex; align-items: center; }
+        .gb-confirm { padding: 8px 10px; background: var(--bad-soft); border-radius: var(--r-sm); color: var(--text); font-size: 13px; }
+        .gb-scrim { position: fixed; inset: 0; z-index: 50; background: rgba(5, 12, 20, .55); display: flex; align-items: flex-end; justify-content: center; }
+        .gb-sheet { width: 100%; max-width: 540px; max-height: 92vh; overflow: auto; background: var(--surface); color: var(--text); border-radius: 14px 14px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px)); box-shadow: var(--shadow); }
+        @media (min-width: 700px) { .gb-scrim { align-items: center; } .gb-sheet { border-radius: 14px; } }
+        .gb-sheet-top { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+        .gb-sheet-name { font-size: 20px; font-weight: 700; color: var(--text); line-height: 1.2; }
+        .gb-range { width: 100%; accent-color: var(--accent); margin: 4px 0 8px; }
+        .gb-quick { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 10px; }
+        .gb-sheet-bar { justify-content: space-between; }
+        .gb-sheet-bar > .gb-bar { margin-top: 0; }
+        .gb-toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 60; background: var(--text); color: var(--bg); padding: 8px 14px; border-radius: var(--r-sm); font-size: 13px; font-weight: 600; box-shadow: var(--shadow); }
+        @media (max-width: 760px) { .gb-two { grid-template-columns: minmax(0, 1fr); } }
+        @media (max-width: 640px) { .gb-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .gb-kpi b { font-size: 20px; } .gb-row { grid-template-columns: minmax(0, 1fr); } .gb-row .gb-fig { text-align: left; } }
+
         /* ===== Responsive ===== */
         @media (max-width: 1000px) {
-            .tabs { grid-template-columns: repeat(5, 1fr); }
+            .tabs { grid-template-columns: repeat(6, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .tabs { grid-template-columns: repeat(4, 1fr); }
         }
         @media (max-width: 640px) {
             .header { padding: 10px 16px; }
@@ -2292,6 +2365,323 @@ const Proof = (function () {
                 </div>
             );
         }
+        // ===== Garbage Stowage Board (MARPOL Annex V, GMP 0602.05.01) =====
+        const GB_KEY = 'gmp-garbage-board-v2';
+        const GB_CATS = [
+            { id: 'A', name: 'Plastics', color: '#d63a3a' },
+            { id: 'B', name: 'Food wastes', color: '#2f9e44' },
+            { id: 'C', name: 'Domestic wastes', color: '#1c7ed6' },
+            { id: 'D', name: 'Cooking oil', color: '#a0612b' },
+            { id: 'E', name: 'Incinerator ashes', color: '#7a8590' },
+            { id: 'F', name: 'Operational wastes', color: '#e6b800' },
+            { id: 'G', name: 'Animal carcass(es)', color: '#7048e8' },
+            { id: 'H', name: 'Fishing gear', color: '#0c8599' },
+            { id: 'I', name: 'E-waste', color: '#ae3ec9' },
+            { id: 'J', name: 'Cargo residues (non-HME)', color: '#5c940d' },
+            { id: 'K', name: 'Cargo residues (HME)', color: '#a61e4d' },
+            { id: 'S', name: 'Special (medical, pyro) land ashore', color: '#343a40' }
+        ];
+        let gbUid = 0;
+        const gbId = (p) => p + Date.now().toString(36) + (gbUid++).toString(36);
+        const gbD = (label, cat, cap) => ({ id: gbId('d'), label, cat, cap, fill: 0 });
+        const gbRep = (n, label, cat, cap) => Array.from({ length: n }, (_, i) => gbD(n > 1 ? label + ' ' + (i + 1) : label, cat, cap));
+        const gbArea = (name, note, drums) => ({ id: gbId('a'), name, note, drums: drums.flat() });
+        function gbSample() {
+            return {
+                vessel: { name: 'M.V. KITE ARROW', imo: 'IMO 9077082 · Bahamas', gmp: 'SMS 0602.05.01 GMP · Dec 2025 rev.', unit: 'm3' },
+                categories: JSON.parse(JSON.stringify(GB_CATS)),
+                areas: [
+                    gbArea('Poop Deck', 'Final storage · Bosun', [gbRep(3, 'Food waste', 'B', 200), gbRep(5, 'Plastic', 'A', 200), gbRep(3, 'Bottle / Cans', 'C', 200), gbRep(2, 'Paper', 'C', 200)]),
+                    gbArea('C Deck (Outside)', 'Final storage · Bosun', [gbRep(4, 'Plastic', 'A', 200), gbRep(2, 'Bottle / Cans', 'C', 200), gbRep(4, 'Paper', 'C', 200)]),
+                    gbArea('B Deck', 'Port: E-waste · Stbd: Plastics · Bosun', [gbRep(2, 'E-waste (P)', 'I', 200), gbRep(1, 'Plastics (S)', 'A', 400)]),
+                    gbArea("Fo'c'sle Store Port", 'Entrance area · Bosun', [gbRep(1, 'Cargo res. HME', 'K', 200), gbRep(1, 'Cargo res. non-HME', 'J', 200), gbRep(1, 'Rust / paint flakes', 'F', 200)]),
+                    gbArea('Paint Locker', 'Empty paint drums · Bosun', [gbRep(1, 'Empty paint drums', 'F', 200)]),
+                    gbArea('Galley & Pantry', 'Chief Cook / Galley Boy', [gbD('Food waste', 'B', 50), gbD('Food waste (small)', 'B', 20), gbRep(2, 'Plastic', 'A', 100), gbD('Bottle / Cans', 'C', 100), gbRep(2, 'Glass / Cans', 'C', 20), gbD('Paper', 'C', 100), gbD('Paper (small)', 'C', 20), gbD('Cooking oil can', 'D', 18)]),
+                    gbArea('Bridge', 'Galley Boy', [gbD('Paper', 'C', 20), gbD('Bottle & Cans', 'C', 20), gbD('Plastic', 'A', 20)]),
+                    gbArea("Ship's Office", 'Chief Officer · land ashore', [gbD('Used batteries', 'I', 20), gbD('Used cartridges', 'I', 20)]),
+                    gbArea('Hospital', '2nd Officer · land ashore', [gbD('Medical waste', 'S', 20)]),
+                    gbArea('F Deck Locker', '2nd Officer · expired medicine, sealed with list', [gbD('Expired medicine', 'S', 20)]),
+                    gbArea('Pyrotechnics Locker', '3rd Officer · kept locked with list', [gbD('Expired pyrotechnics', 'S', 20)]),
+                    gbArea('ER 2nd Deck', 'Chief Engineer / 2nd Engineer', [gbRep(2, 'Oily rags', 'F', 200), gbRep(2, 'Plastic', 'A', 200), gbD('Operational waste', 'F', 200)]),
+                    gbArea('Incinerator Room', 'Chief Engineer / 2nd Engineer', [gbRep(3, 'Incinerator ash', 'E', 200), gbD('Paper waste', 'C', 100)]),
+                    gbArea('ER Workshop', 'Chief Engineer / 2nd Engineer', [gbD('Metal waste', 'F', 100), gbRep(2, 'Plastic', 'A', 100)]),
+                    gbArea('Steering Gear Flat', 'Chief Engineer / 2nd Engineer · Chief Cook for freezer', [gbD('Tubes & bulbs', 'C', 200), gbD('Metal waste', 'F', 200), gbD('Freezer cabinet (food)', 'B', 525)])
+                ]
+            };
+        }
+        function gbLoad() {
+            try { const s = JSON.parse(localStorage.getItem(GB_KEY) || 'null'); if (s && s.areas && s.categories && s.vessel) return s; } catch (e) {}
+            return gbSample();
+        }
+        const gbInk = (hex) => { const h = (hex || '#888888').replace('#', ''); const r = parseInt(h.substr(0, 2), 16), g = parseInt(h.substr(2, 2), 16), b = parseInt(h.substr(4, 2), 16); return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? '#111' : '#fff'; };
+        const gbPct = (a, b) => (b > 0 ? Math.round(a / b * 100) : 0);
+        const gbLvl = (p) => (p >= 90 ? 'crit' : p >= 75 ? 'warn' : '');
+        const gbSum = (drums) => { let cap = 0, fill = 0; drums.forEach((x) => { cap += +x.cap || 0; fill += Math.min(+x.fill || 0, +x.cap || 0); }); return { cap, fill, rem: cap - fill }; };
+
+        function GbGauge({ p }) {
+            return <div className="gb-gauge" role="meter" aria-valuenow={p} aria-valuemin="0" aria-valuemax="100"><i className={gbLvl(p)} style={{ width: Math.min(100, p) + '%' }} /></div>;
+        }
+        function GbChip({ c }) {
+            return <span className="gb-chip" style={{ background: c.color, color: gbInk(c.color) }}>{c.id}</span>;
+        }
+        function GbDrum({ x, c }) {
+            const p = x.cap > 0 ? Math.min(1, x.fill / x.cap) : 0, top = 10, bot = 66, h = bot - top, lh = h * p;
+            return (
+                <svg viewBox="0 0 58 74" aria-hidden="true" className="gb-svg">
+                    <rect x="5" y={top} width="48" height={h} fill="var(--surface-2)" stroke={c.color} strokeWidth="2" />
+                    <rect x="6" y={bot - lh} width="46" height={lh} fill={c.color} opacity=".85" />
+                    <line x1="5" y1={top + h * 0.33} x2="53" y2={top + h * 0.33} stroke={c.color} strokeWidth="1.5" opacity=".6" />
+                    <line x1="5" y1={top + h * 0.66} x2="53" y2={top + h * 0.66} stroke={c.color} strokeWidth="1.5" opacity=".6" />
+                    <ellipse cx="29" cy={top} rx="24" ry="5" fill={c.color} />
+                    <text x="29" y={top + 3.5} textAnchor="middle" fontSize="9" fontWeight="700" fill={gbInk(c.color)}>{c.id}</text>
+                    <ellipse cx="29" cy={bot} rx="24" ry="4" fill="none" stroke={c.color} strokeWidth="2" />
+                </svg>
+            );
+        }
+
+        function GarbageTab() {
+            const [S, setS] = useState(gbLoad);
+            const [view, setView] = useState('dash');
+            const [edit, setEdit] = useState(null);
+            const [msg, setMsg] = useState('');
+            const [confirm, setConfirm] = useState(null);
+            const [imp, setImp] = useState('');
+            useEffect(() => { try { localStorage.setItem(GB_KEY, JSON.stringify(S)); } catch (e) {} }, [S]);
+            useEffect(() => { if (!msg) return; const t = setTimeout(() => setMsg(''), 2200); return () => clearTimeout(t); }, [msg]);
+            useEffect(() => { const k = (e) => { if (e.key === 'Escape') setEdit(null); }; document.addEventListener('keydown', k); return () => document.removeEventListener('keydown', k); }, []);
+
+            const up = (fn) => setS((prev) => { const n = JSON.parse(JSON.stringify(prev)); fn(n); return n; });
+            const cat = (id) => S.categories.find((c) => c.id === id) || { id: '?', name: 'Unassigned', color: '#888888' };
+            const fmt = (l) => (S.vessel.unit === 'L' ? Math.round(l).toLocaleString() + ' L' : (l / 1000).toFixed(2) + ' m³');
+            const all = S.areas.flatMap((a) => a.drums);
+            const t = gbSum(all), tp = gbPct(t.fill, t.cap);
+            const areaOf = (id) => S.areas.find((a) => a.drums.some((d) => d.id === id));
+            const withDrum = (id, fn) => up((n) => { for (const a of n.areas) { const d = a.drums.find((z) => z.id === id); if (d) { fn(d, a, n); return; } } });
+
+            const dash = () => {
+                const flagged = all.map((x) => [x, gbPct(x.fill, x.cap)]).filter(([, p]) => p >= 75).sort((a, b) => b[1] - a[1]);
+                return (
+                    <>
+                        {t.fill === 0 && <div className="gb-note">All receptacles are empty. Open Deck Plan and tap a drum to log its level.</div>}
+                        <div className="gb-kpis">
+                            <div className="dwt-tile gb-kpi"><span className="input-label">Total onboard</span><b>{fmt(t.fill)}</b><small>{all.length} drums · {S.areas.length} areas</small></div>
+                            <div className="dwt-tile gb-kpi"><span className="input-label">Remaining space</span><b>{fmt(t.rem)}</b><small>{100 - tp}% free</small></div>
+                            <div className="dwt-tile gb-kpi"><span className="input-label">Total capacity</span><b>{fmt(t.cap)}</b><small>all receptacles</small></div>
+                            <div className="dwt-tile gb-kpi"><span className="input-label">Fill level</span><b>{tp}%</b><GbGauge p={tp} /></div>
+                        </div>
+                        <div className="gb-two">
+                            <div className="card">
+                                <div className="card-title">By area</div>
+                                <div className="gb-rows">
+                                    {S.areas.map((a) => { const s = gbSum(a.drums), q = gbPct(s.fill, s.cap); return (
+                                        <div className="gb-row" key={a.id}><div className="gb-nm">{a.name} <span className="gb-mut">· {a.drums.length}</span></div><div className="gb-fig">{fmt(s.fill)} used · <b>{fmt(s.rem)}</b> free · {q}%</div><GbGauge p={q} /></div>
+                                    ); })}
+                                </div>
+                            </div>
+                            <div className="card">
+                                <div className="card-title">By category</div>
+                                <div className="gb-rows">
+                                    {S.categories.map((c) => { const ds = all.filter((x) => x.cat === c.id); if (!ds.length) return null; const s = gbSum(ds), q = gbPct(s.fill, s.cap); return (
+                                        <div className="gb-row" key={c.id}><div className="gb-nm gb-cr"><GbChip c={c} />{c.name}</div><div className="gb-fig">{fmt(s.fill)} / {fmt(s.cap)} · {fmt(s.rem)} free</div><GbGauge p={q} /></div>
+                                    ); })}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="card">
+                            <div className="card-title">Drums needing attention</div>
+                            {flagged.length ? <div className="gb-alerts">{flagged.map(([x, p]) => (
+                                <button className="gb-alert" key={x.id} onClick={() => setEdit(x.id)}><GbChip c={cat(x.cat)} /><span className="gb-al-t">{x.label} <span className="gb-mut">· {areaOf(x.id)?.name}</span></span><span className={'gb-pill ' + (p >= 90 ? 'crit' : 'warn')}>{p}%</span></button>
+                            ))}</div> : <p className="gb-mut" style={{ margin: 0 }}>All drums below 75%.</p>}
+                        </div>
+                    </>
+                );
+            };
+
+            const decks = () => (
+                <>
+                    <div className="card gb-legend">{S.categories.filter((c) => all.some((x) => x.cat === c.id)).map((c) => <span key={c.id}><GbChip c={c} />{c.name}</span>)}</div>
+                    <p className="gb-mut gb-hint">Tap a drum to update its level, label, category or capacity.</p>
+                    {S.areas.map((a) => { const s = gbSum(a.drums), q = gbPct(s.fill, s.cap); return (
+                        <div className="card gb-deck" key={a.id}>
+                            <div className="gb-deck-h"><div className="card-title" style={{ margin: 0 }}>{a.name}</div><span className="gb-fig">{fmt(s.fill)} / {fmt(s.cap)} · <b>{fmt(s.rem)} free</b></span></div>
+                            {a.note && <div className="gb-mut gb-hint">{a.note}</div>}
+                            <GbGauge p={q} />
+                            <div className="gb-rack">
+                                {a.drums.map((x) => (
+                                    <button className="gb-drum" key={x.id} onClick={() => setEdit(x.id)} aria-label={x.label + ', ' + gbPct(x.fill, x.cap) + ' percent'}>
+                                        <GbDrum x={x} c={cat(x.cat)} /><span className="gb-dl">{x.label}</span><span className="gb-df">{gbPct(x.fill, x.cap)}% · {Math.round(x.fill)}/{x.cap} L</span>
+                                    </button>
+                                ))}
+                                <button className="gb-drum gb-add" onClick={() => { const d = gbD('New drum', S.categories[0]?.id || 'A', 200); up((n) => n.areas.find((o) => o.id === a.id).drums.push(d)); setEdit(d.id); }}>+ Add drum</button>
+                            </div>
+                        </div>
+                    ); })}
+                </>
+            );
+
+            const setup = () => (
+                <>
+                    <div className="card">
+                        <div className="card-title">Vessel</div>
+                        <div className="gb-form">
+                            <div><label className="input-label" htmlFor="gb-vn">Vessel name</label><input id="gb-vn" className="input-field" value={S.vessel.name} onChange={(e) => up((n) => { n.vessel.name = e.target.value; })} /></div>
+                            <div><label className="input-label" htmlFor="gb-vi">IMO / flag</label><input id="gb-vi" className="input-field" value={S.vessel.imo} onChange={(e) => up((n) => { n.vessel.imo = e.target.value; })} /></div>
+                            <div><label className="input-label" htmlFor="gb-vg">GMP reference</label><input id="gb-vg" className="input-field" value={S.vessel.gmp} onChange={(e) => up((n) => { n.vessel.gmp = e.target.value; })} /></div>
+                            <div><label className="input-label" htmlFor="gb-vu">Display unit</label><select id="gb-vu" className="input-field" value={S.vessel.unit} onChange={(e) => up((n) => { n.vessel.unit = e.target.value; })}><option value="m3">m³</option><option value="L">Litres</option></select></div>
+                        </div>
+                    </div>
+                    <div className="card">
+                        <div className="card-title">Areas and decks</div>
+                        <div className="wt-tw"><table className="wt-table gb-table"><thead><tr><th>Area / deck</th><th>Note</th><th>Drums</th><th></th></tr></thead><tbody>
+                            {S.areas.map((a, i) => (
+                                <tr key={a.id}>
+                                    <td><input value={a.name} aria-label="Area name" onChange={(e) => up((n) => { n.areas[i].name = e.target.value; })} /></td>
+                                    <td><input value={a.note || ''} aria-label="Note" onChange={(e) => up((n) => { n.areas[i].note = e.target.value; })} /></td>
+                                    <td>{a.drums.length}</td>
+                                    <td className="gb-nowrap">
+                                        <button className="btn-ghost gb-sm" disabled={i === 0} aria-label="Move up" onClick={() => up((n) => { [n.areas[i - 1], n.areas[i]] = [n.areas[i], n.areas[i - 1]]; })}>↑</button>
+                                        <button className="btn-ghost gb-sm" disabled={i === S.areas.length - 1} aria-label="Move down" onClick={() => up((n) => { [n.areas[i + 1], n.areas[i]] = [n.areas[i], n.areas[i + 1]]; })}>↓</button>
+                                        {confirm === 'area:' + a.id
+                                            ? <button className="btn-ghost gb-sm gb-danger" onClick={() => { up((n) => { n.areas.splice(i, 1); }); setConfirm(null); setMsg('Area deleted'); }}>{a.drums.length ? 'Delete ' + a.drums.length + ' drums?' : 'Confirm'}</button>
+                                            : <button className="btn-ghost gb-sm gb-danger" onClick={() => setConfirm('area:' + a.id)}>Delete</button>}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody></table></div>
+                        <div className="gb-bar"><button className="btn-ghost" onClick={() => up((n) => { n.areas.push({ id: gbId('a'), name: 'New area', note: '', drums: [] }); })}>+ Add area</button><span className="gb-mut gb-hint">Add drums from Deck Plan.</span></div>
+                    </div>
+                    <div className="card">
+                        <div className="card-title">Categories and colour code</div>
+                        <div className="wt-tw"><table className="wt-table gb-table"><thead><tr><th>Code</th><th>Name</th><th>Colour</th><th></th></tr></thead><tbody>
+                            {S.categories.map((c, i) => (
+                                <tr key={c.id + '-' + i}>
+                                    <td style={{ width: 70 }}><input defaultValue={c.id} maxLength={3} aria-label="Code" onBlur={(e) => {
+                                        const nw = e.target.value.trim().toUpperCase();
+                                        if (!nw || nw === c.id) { e.target.value = c.id; return; }
+                                        if (S.categories.some((z) => z.id === nw)) { e.target.value = c.id; setMsg('Code must be unique'); return; }
+                                        up((n) => { n.areas.forEach((a) => a.drums.forEach((d) => { if (d.cat === c.id) d.cat = nw; })); n.categories[i].id = nw; });
+                                    }} /></td>
+                                    <td><input value={c.name} aria-label="Category name" onChange={(e) => up((n) => { n.categories[i].name = e.target.value; })} /></td>
+                                    <td style={{ width: 64 }}><input type="color" className="gb-color" value={c.color} aria-label="Colour" onChange={(e) => up((n) => { n.categories[i].color = e.target.value; })} /></td>
+                                    <td><button className="btn-ghost gb-sm gb-danger" onClick={() => { if (all.some((x) => x.cat === c.id)) { setMsg('Category is used by drums'); return; } up((n) => { n.categories.splice(i, 1); }); }}>Delete</button></td>
+                                </tr>
+                            ))}
+                        </tbody></table></div>
+                        <div className="gb-bar">
+                            <button className="btn-ghost" onClick={() => up((n) => { let k = 1; while (n.categories.some((c) => c.id === 'X' + k)) k++; n.categories.push({ id: 'X' + k, name: 'New category', color: '#495057' }); })}>+ Add category</button>
+                            <button className="btn-ghost" onClick={() => { up((n) => { const used = new Set(n.areas.flatMap((a) => a.drums.map((d) => d.cat))); n.categories = JSON.parse(JSON.stringify(GB_CATS)).concat(n.categories.filter((c) => used.has(c.id) && !GB_CATS.some((k) => k.id === c.id))); }); setMsg('Categories reset'); }}>Reset to MARPOL A to K</button>
+                        </div>
+                    </div>
+                </>
+            );
+
+            const doImport = (txt) => {
+                try { const o = JSON.parse(txt); if (!o.areas || !o.categories || !o.vessel) throw 0; setS(o); setImp(''); setView('dash'); setMsg('Imported ' + (o.vessel.name || 'vessel')); }
+                catch (e) { setMsg('Not a valid setup. Paste the full copied text.'); }
+            };
+            const exportTxt = JSON.stringify(S, null, 1);
+            const data = () => (
+                <>
+                    <div className="card">
+                        <div className="card-title">Export for another vessel</div>
+                        <p className="gb-mut gb-hint">Copy this setup and paste it into Tools for Mate on another vessel or device. Data stays on this device.</p>
+                        <textarea id="gb-exp" className="gb-ta" readOnly value={exportTxt} />
+                        <div className="gb-bar"><button className="btn btn-primary" style={{ margin: 0 }} onClick={() => {
+                            const ta = document.getElementById('gb-exp');
+                            const sel = () => { ta.select(); setMsg('Text selected. Copy it manually.'); };
+                            try { navigator.clipboard.writeText(exportTxt).then(() => setMsg('Setup copied'), sel); } catch (e) { sel(); }
+                        }}>Copy setup</button></div>
+                    </div>
+                    <div className="card">
+                        <div className="card-title">Import</div>
+                        <p className="gb-mut gb-hint">Paste a copied setup or choose a .json file. This replaces the current vessel.</p>
+                        <textarea id="gb-imp" className="gb-ta" value={imp} placeholder="Paste setup here" onChange={(e) => setImp(e.target.value)} />
+                        <div className="gb-bar">
+                            <button className="btn btn-primary" style={{ margin: 0 }} onClick={() => doImport(imp)}>Import pasted</button>
+                            <label className="btn-ghost gb-file">Choose file<input type="file" accept=".json,application/json" hidden onChange={(e) => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => doImport(r.result); r.readAsText(f); }} /></label>
+                        </div>
+                    </div>
+                    <div className="card">
+                        <div className="card-title">Reset</div>
+                        <div className="gb-bar">
+                            <button className="btn-ghost" onClick={() => setConfirm('empty')}>Mark all drums empty (after landing ashore)</button>
+                            <button className="btn-ghost" onClick={() => setConfirm('blank')}>Start blank vessel</button>
+                            <button className="btn-ghost gb-danger" onClick={() => setConfirm('sample')}>Reload Kite Arrow GMP layout</button>
+                        </div>
+                        {['empty', 'blank', 'sample'].includes(confirm) && (
+                            <div className="gb-bar gb-confirm">
+                                <span>{{ empty: 'Set every drum to 0 L?', blank: 'Erase this vessel and start blank?', sample: 'Replace everything with the Kite Arrow GMP layout (all empty)?' }[confirm]}</span>
+                                <button className="btn-ghost gb-danger" onClick={() => {
+                                    if (confirm === 'empty') { up((n) => n.areas.forEach((a) => a.drums.forEach((d) => { d.fill = 0; }))); setMsg('All drums emptied'); }
+                                    if (confirm === 'blank') { setS({ vessel: { name: 'New Vessel', imo: '', gmp: '', unit: 'm3' }, categories: JSON.parse(JSON.stringify(GB_CATS)), areas: [{ id: gbId('a'), name: 'Poop Deck', note: '', drums: [] }] }); setView('setup'); setMsg('Blank vessel ready'); }
+                                    if (confirm === 'sample') { setS(gbSample()); setMsg('GMP layout loaded'); }
+                                    setConfirm(null);
+                                }}>Yes</button>
+                                <button className="btn-ghost" onClick={() => setConfirm(null)}>Cancel</button>
+                            </div>
+                        )}
+                    </div>
+                </>
+            );
+
+            const sheet = () => {
+                const a = areaOf(edit); const x = a && a.drums.find((d) => d.id === edit); if (!x) return null;
+                const c = cat(x.cat), p = gbPct(x.fill, x.cap);
+                const setF = (v) => withDrum(x.id, (d) => { d.fill = Math.max(0, Math.min(d.cap, +v || 0)); });
+                return (
+                    <div className="gb-scrim" onClick={(e) => { if (e.target === e.currentTarget) setEdit(null); }}>
+                        <div className="gb-sheet" role="dialog" aria-modal="true" aria-label={'Edit ' + x.label}>
+                            <div className="gb-sheet-top">
+                                <GbDrum x={x} c={c} />
+                                <div style={{ minWidth: 0, flex: 1 }}>
+                                    <div className="input-label" style={{ margin: 0 }}>{a.name}</div>
+                                    <div className="gb-sheet-name">{x.label}</div>
+                                    <div className="gb-fig">{Math.round(x.fill)} / {x.cap} L · {p}% · {fmt(x.cap - x.fill)} free</div>
+                                </div>
+                            </div>
+                            <label className="input-label" htmlFor="gb-fill">Fill level (L)</label>
+                            <input id="gb-fill" type="range" className="gb-range" min="0" max={x.cap} step="5" value={x.fill} onChange={(e) => setF(e.target.value)} />
+                            <div className="gb-quick">{[0, 25, 50, 75, 100].map((q) => <button key={q} className="btn-ghost gb-sm" onClick={() => setF(x.cap * q / 100)}>{q === 0 ? 'Empty' : q === 100 ? 'Full' : q + '%'}</button>)}</div>
+                            <div className="gb-form">
+                                <div><label className="input-label" htmlFor="gb-dl">Label</label><input id="gb-dl" className="input-field" value={x.label} onChange={(e) => withDrum(x.id, (d) => { d.label = e.target.value; })} /></div>
+                                <div><label className="input-label" htmlFor="gb-dlit">Litres in drum</label><input id="gb-dlit" type="number" inputMode="numeric" className="input-field" min="0" max={x.cap} value={Math.round(x.fill)} onChange={(e) => setF(e.target.value)} /></div>
+                                <div><label className="input-label" htmlFor="gb-dc">Category</label><select id="gb-dc" className="input-field" value={x.cat} onChange={(e) => withDrum(x.id, (d) => { d.cat = e.target.value; })}>{S.categories.map((k) => <option key={k.id} value={k.id}>{k.id} · {k.name}</option>)}</select></div>
+                                <div><label className="input-label" htmlFor="gb-dcap">Capacity (L)</label><input id="gb-dcap" type="number" inputMode="numeric" className="input-field" min="1" value={x.cap} onChange={(e) => withDrum(x.id, (d) => { d.cap = Math.max(1, +e.target.value || 1); d.fill = Math.min(d.fill, d.cap); })} /></div>
+                                <div><label className="input-label" htmlFor="gb-da">Area</label><select id="gb-da" className="input-field" value={a.id} onChange={(e) => { const to = e.target.value; up((n) => { const from = n.areas.find((o) => o.id === a.id), dest = n.areas.find((o) => o.id === to); const i = from.drums.findIndex((d) => d.id === x.id); dest.drums.push(from.drums.splice(i, 1)[0]); }); setMsg('Moved to ' + (S.areas.find((o) => o.id === to) || {}).name); }}>{S.areas.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}</select></div>
+                            </div>
+                            <div className="gb-bar gb-sheet-bar">
+                                <span className="gb-bar">
+                                    <button className="btn-ghost gb-danger" onClick={() => { up((n) => { const ar = n.areas.find((o) => o.id === a.id); ar.drums = ar.drums.filter((d) => d.id !== x.id); }); setEdit(null); setMsg('Drum deleted'); }}>Delete drum</button>
+                                    <button className="btn-ghost" onClick={() => { up((n) => { const ar = n.areas.find((o) => o.id === a.id); const i = ar.drums.findIndex((d) => d.id === x.id); ar.drums.splice(i + 1, 0, { ...ar.drums[i], id: gbId('d'), label: ar.drums[i].label + ' (2)', fill: 0 }); }); setEdit(null); setMsg('Drum duplicated'); }}>Duplicate</button>
+                                </span>
+                                <button className="btn btn-primary" style={{ margin: 0 }} onClick={() => setEdit(null)}>Done</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="tab-pane gb">
+                    <div className="gb-head">
+                        <div style={{ minWidth: 0 }}>
+                            <div className="section-title" style={{ margin: 0 }}>{S.vessel.name || 'Vessel'}</div>
+                            <div className="gb-mut gb-hint">{[S.vessel.imo, S.vessel.gmp].filter(Boolean).join('  ·  ')}</div>
+                        </div>
+                        <div className="gb-fig">Onboard {fmt(t.fill)} / {fmt(t.cap)} · {tp}%</div>
+                    </div>
+                    <div className="seg gb-seg" role="group" aria-label="Garbage view">
+                        {[['dash', 'Dashboard'], ['decks', 'Deck Plan'], ['setup', 'Setup'], ['data', 'Data']].map(([k, l]) => <button key={k} aria-pressed={view === k} onClick={() => { setView(k); setConfirm(null); }}>{l}</button>)}
+                    </div>
+                    {view === 'dash' && dash()}
+                    {view === 'decks' && decks()}
+                    {view === 'setup' && setup()}
+                    {view === 'data' && data()}
+                    {edit && sheet()}
+                    {msg && <div className="gb-toast" role="status">{msg}</div>}
+                </div>
+            );
+        }
 // @@NEWTABS-END
 
         const TABS = [
@@ -2304,7 +2694,8 @@ const Proof = (function () {
             { key: 'dwt', label: 'Deadweight', c: '#c2410c', cd: '#fb923c' },
             { key: 'proof', label: 'Proofread', c: '#a21caf', cd: '#e879f9' },
             { key: 'time', label: 'Time Zones', c: '#4d7c0f', cd: '#a3e635' },
-            { key: 'load', label: 'Load Line', c: '#0e7490', cd: '#22d3ee' }
+            { key: 'load', label: 'Load Line', c: '#0e7490', cd: '#22d3ee' },
+            { key: 'garbage', label: 'Garbage', c: '#475569', cd: '#cbd5e1' }
         ];
         const ICON_PATHS = {
             rob: <><path d="M12 2.7s6 6.2 6 10.8a6 6 0 0 1-12 0C6 8.9 12 2.7 12 2.7z" /></>,
@@ -2317,6 +2708,7 @@ const Proof = (function () {
             proof: <><path d="m6 16 6-12 6 12" /><path d="M8 12h8" /><path d="m16 20 2 2 4-4" /></>,
             time: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z" /></>,
             load: <><circle cx="10" cy="12" r="6" /><path d="M2 12h16" /><path d="M18 7v10" /><path d="M18 8h4M18 12h4M18 16h4" /></>,
+            garbage: <><path d="M4 7h16" /><path d="M9 7V4h6v3" /><path d="M6 7l1 13h10l1-13" /><path d="M10 11v6M14 11v6" /></>,
             sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></>,
             moon: <><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></>
         };
@@ -3012,6 +3404,7 @@ const Proof = (function () {
                             {activeTab === 7 && <ProofTab />}
                             {activeTab === 8 && <TimeTab />}
                             {activeTab === 9 && <LoadLineTab />}
+                            {activeTab === 10 && <GarbageTab />}
                         </div>
                     </div>
                 </>

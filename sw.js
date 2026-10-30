@@ -1,5 +1,5 @@
-const VERSION = 'tools-for-mate-v7';
-const CORE = ['./', 'index.html', 'app.js?v=6', 'manifest.webmanifest', 'garbage.html', 'dict-en.txt', 'dict-common.txt', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'];
+const VERSION = 'tools-for-mate-v8';
+const CORE = ['./', 'index.html', 'app.js?v=7', 'manifest.webmanifest', 'dict-en.txt', 'dict-common.txt', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));
@@ -21,7 +21,7 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(
       fetch(req).then((res) => { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(req, copy)); return res; })
         .catch(() => caches.match(req, { ignoreSearch: true })
-          .then((r) => r || (url.pathname.endsWith('garbage.html') ? caches.match('garbage.html') : caches.match('index.html')))
+          .then((r) => r || caches.match('index.html'))
           .then((r) => r || caches.match('./')))
     );
     return;
