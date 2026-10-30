@@ -1,6 +1,6 @@
 {
-  "name": "Tools for Mate",
-  "short_name": "Tools for Mate",
+  "name": "Meridian Tools for Mate",
+  "short_name": "Meridian Tools",
   "description": "Maritime tools for the watchkeeper: ROB, ETA, speed, ventilation, converter, hydrostatics and deadweight.",
   "id": "./",
   "start_url": "./",
@@ -9,10 +9,29 @@
   "orientation": "any",
   "background_color": "#0b1424",
   "theme_color": "#121b2d",
-  "categories": ["navigation", "utilities", "productivity"],
+  "categories": [
+    "navigation",
+    "utilities",
+    "productivity"
+  ],
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
