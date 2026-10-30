@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d2f40">
+<title>Garbage Stowage Board</title>
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+[hidden]{display:none!important}
+/* Layout: ship's board. Sticky header + tabs, summary first, then deck-by-deck drum racks. */
+:root{
+  --bg:#eef1f4; --panel:#ffffff; --ink:#14212e; --muted:#5b6b7a; --line:#d5dce3;
+  --accent:#0b5c8a; --accent-ink:#ffffff; --hull:#1d2f40;
+  --ok:#2b8a3e; --warn:#c77700; --crit:#c92a2a;
+  --steel:#c9d2da; --drum-empty:#f6f8fa;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f171f; --panel:#16212c; --ink:#e3eaf1; --muted:#8fa1b2; --line:#2a3947;
+  --accent:#4fa3d6; --accent-ink:#06121c; --hull:#0a1118;
+  --ok:#51cf66; --warn:#fab005; --crit:#ff6b6b; --steel:#3a4b5b; --drum-empty:#1d2b38; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f171f; --panel:#16212c; --ink:#e3eaf1; --muted:#8fa1b2; --line:#2a3947;
+  --accent:#4fa3d6; --accent-ink:#06121c; --hull:#0a1118;
+  --ok:#51cf66; --warn:#fab005; --crit:#ff6b6b; --steel:#3a4b5b; --drum-empty:#1d2b38; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--hull)}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1100px;margin:0 auto}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--hull);color:#e8eef4}
+header .wrap{padding-block:10px 0}
+.hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.vname{font-family:var(--f-display);font-weight:700;font-size:24px;letter-spacing:.04em;text-transform:uppercase;margin:0}
+.vsub{font-family:var(--f-mono);font-size:11px;color:#9fb3c6;letter-spacing:.04em}
+nav{display:flex;gap:4px;margin-top:8px;overflow-x:auto}
+nav button{flex:0 0 auto;background:none;border:0;color:#9fb3c6;font-family:var(--f-display);font-weight:600;font-size:16px;letter-spacing:.06em;text-transform:uppercase;padding:8px 12px;border-bottom:3px solid transparent;cursor:pointer}
+nav button[aria-selected="true"]{color:#fff;border-bottom-color:#4fa3d6}
+nav button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main .wrap{padding-block:16px 48px;display:flex;flex-direction:column;gap:16px}
+h2{font-family:var(--f-display);font-weight:600;font-size:20px;letter-spacing:.05em;text-transform:uppercase;margin:0;text-wrap:balance}
+.lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px}
+.sample{font-size:12px;color:var(--muted);border-left:3px solid var(--warn);padding:6px 10px;background:var(--panel)}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi .v{font-family:var(--f-display);font-weight:700;font-size:30px;line-height:1.05}
+.kpi .s{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.gauge{height:10px;background:var(--steel);border-radius:5px;overflow:hidden}
+.gauge i{display:block;height:100%;background:var(--accent);border-radius:5px}
+.gauge i.warn{background:var(--warn)}.gauge i.crit{background:var(--crit)}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:760px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.rows{display:flex;flex-direction:column;gap:12px;margin-top:10px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center}
+.row .gauge{grid-column:1/-1}
+.row .nm{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .fig{font-family:var(--f-mono);font-size:12px;color:var(--muted);text-align:right}
+.chip{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:4px;font-family:var(--f-mono);font-weight:500;font-size:12px}
+.catrow{display:flex;align-items:center;gap:8px;min-width:0}
+.alerts{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.alert{display:flex;gap:8px;align-items:center;font-size:13px;padding:6px 8px;border-radius:4px;background:var(--bg)}
+.pill{font-family:var(--f-mono);font-size:11px;padding:2px 6px;border-radius:10px;color:#fff}
+.pill.full{background:var(--crit)}.pill.high{background:var(--warn)}
+
+/* Deck plan */
+.deck{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.deck-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line)}
+.deck-hd h3{font-family:var(--f-display);font-weight:700;font-size:19px;letter-spacing:.05em;text-transform:uppercase;margin:0;flex:1 1 auto;min-width:0}
+.deck-hd .fig{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.deck-gauge{padding:0 14px 10px;border-bottom:1px solid var(--line);padding-top:10px}
+.rack{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px;padding:14px;
+  background-image:repeating-linear-gradient(90deg,transparent 0 23px,var(--line) 23px 24px);background-size:24px 100%;background-color:var(--panel)}
+.drum{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 6px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;font:inherit;color:inherit;text-align:center;min-width:0}
+.drum:hover{border-color:var(--accent)}
+.drum svg{width:58px;height:74px;display:block}
+.drum .dl{font-size:12px;font-weight:600;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drum .df{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.add-drum{border:1.5px dashed var(--line);background:transparent;color:var(--muted);justify-content:center;min-height:132px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px}
+.legend span{display:inline-flex;align-items:center;gap:6px;font-size:12px}
+
+/* Controls */
+.btn{font:inherit;font-weight:600;font-size:13px;border-radius:5px;padding:8px 12px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--crit);border-color:var(--crit);background:transparent}
+.btn.sm{padding:5px 9px;font-size:12px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:8px 10px;width:100%;min-width:0}
+textarea{font-family:var(--f-mono);font-size:12px;min-height:140px}
+input[type=color]{padding:2px;height:36px;width:48px}
+input[type=range]{padding:0;accent-color:var(--accent)}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+table{border-collapse:collapse;width:100%}
+.tw{overflow-x:auto}
+td,th{padding:6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* Sheet */
+.scrim{position:fixed;inset:0;background:rgba(5,12,20,.55);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--panel);width:100%;max-width:520px;border-radius:12px 12px 0 0;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:12px;max-height:90vh;overflow:auto}
+@media (min-width:700px){.scrim{align-items:center}.sheet{border-radius:12px}}
+.sheet-top{display:flex;align-items:center;gap:12px}
+.sheet-top svg{width:52px;height:66px;flex:none}
+.quick{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--hull);color:#fff;padding:8px 14px;border-radius:6px;z-index:30;font-size:13px}
+.muted{color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.gauge i{transition:width .3s ease}.drum rect.lvl{transition:all .3s ease}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="hd">
+      <div><h1 class="vname" id="vname">Vessel</h1><div class="vsub" id="vsub"></div></div>
+      <div class="vsub num" id="hdtot"></div>
+    </div>
+    <nav role="tablist">
+      <button role="tab" data-tab="dash" aria-selected="true">Dashboard</button>
+      <button role="tab" data-tab="decks" aria-selected="false">Deck Plan</button>
+      <button role="tab" data-tab="setup" aria-selected="false">Vessel Setup</button>
+      <button role="tab" data-tab="data" aria-selected="false">Data</button>
+    </nav>
+  </div>
+</header>
+<main><div class="wrap" id="view"></div></main>
+<div id="modal"></div>
+
+<script>
+(function(){
+const KEY='gmp-garbage-board-v2';
+const CATS=[
+ {id:'A',name:'Plastics',color:'#d63a3a'},
+ {id:'B',name:'Food wastes',color:'#2f9e44'},
+ {id:'C',name:'Domestic wastes',color:'#1c7ed6'},
+ {id:'D',name:'Cooking oil',color:'#a0612b'},
+ {id:'E',name:'Incinerator ashes',color:'#7a8590'},
+ {id:'F',name:'Operational wastes',color:'#e6b800'},
+ {id:'G',name:'Animal carcass(es)',color:'#7048e8'},
+ {id:'H',name:'Fishing gear',color:'#0c8599'},
+ {id:'I',name:'E-waste',color:'#ae3ec9'},
+ {id:'J',name:'Cargo residues (non-HME)',color:'#5c940d'},
+ {id:'K',name:'Cargo residues (HME)',color:'#a61e4d'},
+ {id:'S',name:'Special (medical, pyro) land ashore',color:'#343a40'}
+];
+let uid=0;const nid=p=>p+Date.now().toString(36)+(uid++).toString(36);
+function d(label,cat,cap,fill){return{id:nid('d'),label,cat,cap,fill}}
+function rep(n,label,cat,cap){return Array.from({length:n},(_,i)=>d(n>1?label+' '+(i+1):label,cat,cap,0))}
+function area(name,note,drums){return{id:nid('a'),name,note,drums:drums.flat()}}
+function sample(){return{
+ vessel:{name:'M.V. KITE ARROW',imo:'IMO 9077082 · Bahamas',gmp:'SMS 0602.05.01 GMP · Dec 2025 rev.',unit:'m3'},
+ categories:JSON.parse(JSON.stringify(CATS)),
+ areas:[
+  area('Poop Deck','Final storage · Bosun',[rep(3,'Food waste','B',200),rep(5,'Plastic','A',200),rep(3,'Bottle / Cans','C',200),rep(2,'Paper','C',200)]),
+  area('C Deck (Outside)','Final storage · Bosun',[rep(4,'Plastic','A',200),rep(2,'Bottle / Cans','C',200),rep(4,'Paper','C',200)]),
+  area('B Deck','Port: E-waste · Stbd: Plastics · Bosun',[rep(2,'E-waste (P)','I',200),rep(1,'Plastics (S)','A',400)]),
+  area("Fo'c'sle Store Port",'Entrance area · Bosun',[rep(1,'Cargo res. HME','K',200),rep(1,'Cargo res. non-HME','J',200),rep(1,'Rust / paint flakes','F',200)]),
+  area('Paint Locker','Empty paint drums · Bosun',[rep(1,'Empty paint drums','F',200)]),
+  area('Galley & Pantry','Chief Cook / Galley Boy',[d('Food waste','B',50,0),d('Food waste (small)','B',20,0),rep(2,'Plastic','A',100),d('Bottle / Cans','C',100,0),rep(2,'Glass / Cans','C',20),d('Paper','C',100,0),d('Paper (small)','C',20,0),d('Cooking oil can','D',18,0)]),
+  area('Bridge','Galley Boy',[d('Paper','C',20,0),d('Bottle & Cans','C',20,0),d('Plastic','A',20,0)]),
+  area("Ship's Office",'Chief Officer · land ashore',[d('Used batteries','I',20,0),d('Used cartridges','I',20,0)]),
+  area('Hospital','2nd Officer · land ashore',[d('Medical waste','S',20,0)]),
+  area('F Deck Locker','2nd Officer · expired medicine, sealed with list',[d('Expired medicine','S',20,0)]),
+  area('Pyrotechnics Locker','3rd Officer · kept locked with list',[d('Expired pyrotechnics','S',20,0)]),
+  area('ER 2nd Deck','Chief Engineer / 2nd Engineer',[rep(2,'Oily rags','F',200),rep(2,'Plastic','A',200),d('Operational waste','F',200,0)]),
+  area('Incinerator Room','Chief Engineer / 2nd Engineer',[rep(3,'Incinerator ash','E',200),d('Paper waste','C',100,0)]),
+  area('ER Workshop','Chief Engineer / 2nd Engineer',[d('Metal waste','F',100,0),rep(2,'Plastic','A',100)]),
+  area('Steering Gear Flat','Chief Engineer / 2nd Engineer · Chief Cook for freezer',[d('Tubes & bulbs','C',200,0),d('Metal waste','F',200,0),d('Freezer cabinet (food)','B',525,0)])
+ ]}}
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){S=null}
+if(!S||!S.areas)S=sample();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){} }
+let tab='dash';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cat=id=>S.categories.find(c=>c.id===id)||{id:'?',name:'Unassigned',color:'#888888'};
+function inkOn(hex){const h=hex.replace('#','');const r=parseInt(h.substr(0,2),16),g=parseInt(h.substr(2,2),16),b=parseInt(h.substr(4,2),16);return (r*299+g*587+b*114)/1000>150?'#111':'#fff'}
+const m3=l=>(l/1000);
+function fmt(l){return S.vessel.unit==='L'?Math.round(l).toLocaleString()+' L':m3(l).toFixed(2)+' m³'}
+function pct(a,b){return b>0?Math.round(a/b*100):0}
+function lvl(p){return p>=90?'crit':p>=75?'warn':''}
+function sum(drums){let c=0,f=0;drums.forEach(x=>{c+=+x.cap||0;f+=Math.min(+x.fill||0,+x.cap||0)});return{cap:c,fill:f,rem:c-f}}
+function all(){return S.areas.flatMap(a=>a.drums)}
+
+function drumSVG(x){
+  const c=cat(x.cat),p=x.cap>0?Math.min(1,x.fill/x.cap):0;
+  const top=10,bot=66,h=bot-top,lh=h*p,ly=bot-lh;
+  return `<svg viewBox="0 0 58 74" aria-hidden="true">
+  <rect x="5" y="${top}" width="48" height="${h}" fill="var(--drum-empty)" stroke="${c.color}" stroke-width="2"/>
+  <rect class="lvl" x="6" y="${ly}" width="46" height="${lh}" fill="${c.color}" opacity=".85"/>
+  <line x1="5" y1="${top+h*0.33}" x2="53" y2="${top+h*0.33}" stroke="${c.color}" stroke-width="1.5" opacity=".6"/>
+  <line x1="5" y1="${top+h*0.66}" x2="53" y2="${top+h*0.66}" stroke="${c.color}" stroke-width="1.5" opacity=".6"/>
+  <ellipse cx="29" cy="${top}" rx="24" ry="5" fill="${c.color}"/>
+  <text x="29" y="${top+3.5}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" font-weight="600" fill="${inkOn(c.color)}">${esc(c.id)}</text>
+  <ellipse cx="29" cy="${bot}" rx="24" ry="4" fill="none" stroke="${c.color}" stroke-width="2"/>
+  </svg>`}
+
+function gauge(p){return `<div class="gauge" role="meter" aria-valuenow="${p}" aria-valuemin="0" aria-valuemax="100"><i class="${lvl(p)}" style="width:${Math.min(100,p)}%"></i></div>`}
+
+function header(){
+  document.getElementById('vname').textContent=S.vessel.name||'Vessel';
+  document.getElementById('vsub').textContent=[S.vessel.imo,S.vessel.gmp].filter(Boolean).join('  ·  ');
+  const t=sum(all());document.getElementById('hdtot').textContent=`ONBOARD ${fmt(t.fill)} / ${fmt(t.cap)}  ·  ${pct(t.fill,t.cap)}%`;
+}
+
+function dash(){
+  const t=sum(all()),drums=all(),p=pct(t.fill,t.cap);
+  const full=drums.filter(x=>pct(x.fill,x.cap)>=90),high=drums.filter(x=>{const q=pct(x.fill,x.cap);return q>=75&&q<90});
+  const areaRows=S.areas.map(a=>{const s=sum(a.drums),q=pct(s.fill,s.cap);return`<div class="row"><div class="nm">${esc(a.name)} <span class="muted" style="font-weight:400">· ${a.drums.length} drums</span></div><div class="fig">${fmt(s.fill)} used · <b>${fmt(s.rem)}</b> free · ${q}%</div>${gauge(q)}</div>`}).join('');
+  const catRows=S.categories.map(c=>{const ds=drums.filter(x=>x.cat===c.id);if(!ds.length)return'';const s=sum(ds),q=pct(s.fill,s.cap);
+    return`<div class="row"><div class="catrow nm"><span class="chip" style="background:${c.color};color:${inkOn(c.color)}">${esc(c.id)}</span>${esc(c.name)}</div><div class="fig">${fmt(s.fill)} / ${fmt(s.cap)} · ${fmt(s.rem)} free</div>${gauge(q)}</div>`}).join('');
+  const areaOf=x=>S.areas.find(a=>a.drums.includes(x))?.name||'';
+  const al=[...full.map(x=>[x,'full']),...high.map(x=>[x,'high'])].map(([x,k])=>{const c=cat(x.cat);return`<div class="alert"><span class="chip" style="background:${c.color};color:${inkOn(c.color)}">${esc(c.id)}</span><span style="flex:1;min-width:0">${esc(x.label)} <span class="muted">· ${esc(areaOf(x))}</span></span><span class="pill ${k}">${pct(x.fill,x.cap)}%</span></div>`}).join('');
+  return `
+  ${t.fill===0?'<div class="sample">All receptacles start empty. Open Deck Plan and tap a drum to log its level.</div>':''}
+  <section class="kpis">
+    <div class="kpi"><span class="lbl">Total onboard</span><span class="v num">${fmt(t.fill)}</span><span class="s">${drums.length} drums · ${S.areas.length} areas</span></div>
+    <div class="kpi"><span class="lbl">Remaining space</span><span class="v num">${fmt(t.rem)}</span><span class="s">${100-p}% free</span></div>
+    <div class="kpi"><span class="lbl">Total capacity</span><span class="v num">${fmt(t.cap)}</span><span class="s">all receptacles</span></div>
+    <div class="kpi"><span class="lbl">Fill level</span><span class="v num">${p}%</span>${gauge(p)}</div>
+  </section>
+  <div class="grid2">
+    <section class="panel"><h2>By area</h2><div class="rows">${areaRows||'<p class="muted">No areas yet.</p>'}</div></section>
+    <section class="panel"><h2>By category</h2><div class="rows">${catRows||'<p class="muted">No drums yet.</p>'}</div></section>
+  </div>
+  <section class="panel"><h2>Drums needing attention</h2>${al?`<div class="alerts">${al}</div>`:'<p class="muted" style="margin:8px 0 0">All drums below 75%.</p>'}</section>`;
+}
+
+function decks(){
+  const legend=S.categories.filter(c=>all().some(x=>x.cat===c.id)).map(c=>`<span><span class="chip" style="background:${c.color};color:${inkOn(c.color)}">${esc(c.id)}</span>${esc(c.name)}</span>`).join('');
+  return `<div class="panel"><div class="legend">${legend}</div></div>
+  <p class="muted" style="margin:0;font-size:12px">Tap a drum to update its level, label, category or capacity.</p>
+  ${S.areas.map(a=>{const s=sum(a.drums),q=pct(s.fill,s.cap);return`
+  <section class="deck">
+    <div class="deck-hd"><h3>${esc(a.name)}</h3><span class="fig">${fmt(s.fill)} / ${fmt(s.cap)} · <b>${fmt(s.rem)} free</b></span></div>
+    <div class="deck-gauge">${a.note?`<div class="muted" style="font-size:12px;margin-bottom:6px">${esc(a.note)}</div>`:''}${gauge(q)}</div>
+    <div class="rack">${a.drums.map(x=>`<button class="drum" data-drum="${x.id}" aria-label="${esc(x.label)}, ${pct(x.fill,x.cap)} percent">${drumSVG(x)}<span class="dl">${esc(x.label)}</span><span class="df">${pct(x.fill,x.cap)}% · ${Math.round(x.fill)}/${x.cap} L</span></button>`).join('')}
+      <button class="drum add-drum" data-add="${a.id}">+ Add drum</button></div>
+  </section>`}).join('')}`;
+}
+
+function setup(){
+  const v=S.vessel;
+  return `<section class="panel"><h2>Vessel</h2><div class="form" style="margin-top:10px">
+   <label class="field"><span class="lbl">Vessel name</span><input id="v-name" value="${esc(v.name)}"></label>
+   <label class="field"><span class="lbl">IMO / call sign</span><input id="v-imo" value="${esc(v.imo)}"></label>
+   <label class="field"><span class="lbl">GMP reference</span><input id="v-gmp" value="${esc(v.gmp)}"></label>
+   <label class="field"><span class="lbl">Display unit</span><select id="v-unit"><option value="m3"${v.unit==='m3'?' selected':''}>m³</option><option value="L"${v.unit==='L'?' selected':''}>Litres</option></select></label>
+  </div></section>
+  <section class="panel"><h2>Areas & drums</h2>
+   <div class="tw" style="margin-top:10px"><table><thead><tr><th>Area / deck</th><th>Note</th><th>Drums</th><th></th></tr></thead><tbody>
+   ${S.areas.map((a,i)=>`<tr><td><input data-area-name="${a.id}" value="${esc(a.name)}"></td><td><input data-area-note="${a.id}" value="${esc(a.note||'')}"></td><td class="num">${a.drums.length}</td>
+     <td style="white-space:nowrap"><button class="btn sm" data-up="${a.id}" ${i===0?'disabled':''} aria-label="Move up">↑</button> <button class="btn sm" data-down="${a.id}" ${i===S.areas.length-1?'disabled':''} aria-label="Move down">↓</button> <button class="btn sm danger" data-delarea="${a.id}">Delete</button></td></tr>`).join('')}
+   </tbody></table></div>
+   <div class="bar" style="margin-top:10px"><button class="btn pri" id="add-area">+ Add area</button><span class="muted" style="font-size:12px">Add drums from the Deck Plan tab.</span></div>
+  </section>
+  <section class="panel"><h2>Categories & colour code</h2>
+   <div class="tw" style="margin-top:10px"><table><thead><tr><th>Code</th><th>Name</th><th>Colour</th><th></th></tr></thead><tbody>
+   ${S.categories.map(c=>`<tr><td style="width:70px"><input data-cat-id="${c.id}" value="${esc(c.id)}" maxlength="3"></td><td><input data-cat-name="${c.id}" value="${esc(c.name)}"></td><td style="width:60px"><input type="color" data-cat-color="${c.id}" value="${c.color}"></td><td><button class="btn sm danger" data-delcat="${c.id}">Delete</button></td></tr>`).join('')}
+   </tbody></table></div>
+   <div class="bar" style="margin-top:10px"><button class="btn" id="add-cat">+ Add category</button><button class="btn" id="reset-cats">Reset to MARPOL A to K</button></div>
+  </section>`;
+}
+
+function dataView(){
+  return `<section class="panel"><h2>Export for another vessel</h2>
+   <p class="muted" style="margin:6px 0 10px">Copy this setup and paste it into the same tool on another vessel or device. Data is saved in this browser only.</p>
+   <textarea id="exp" readonly>${esc(JSON.stringify(S,null,1))}</textarea>
+   <div class="bar" style="margin-top:8px"><button class="btn pri" id="copy">Copy setup</button></div></section>
+  <section class="panel"><h2>Import</h2>
+   <p class="muted" style="margin:6px 0 10px">Paste a copied setup or choose a .json file. This replaces the current vessel.</p>
+   <textarea id="imp" placeholder="Paste setup here"></textarea>
+   <div class="bar" style="margin-top:8px"><button class="btn pri" id="do-imp">Import pasted</button><label class="btn">Choose file<input type="file" id="file" accept=".json,application/json" hidden></label></div></section>
+  <section class="panel"><h2>Reset</h2><div class="bar" style="margin-top:10px">
+   <button class="btn" id="empty-all">Mark all drums empty (after landing ashore)</button>
+   <button class="btn" id="blank">Start blank vessel</button>
+   <button class="btn danger" id="reload-sample">Reload Kite Arrow GMP layout</button></div><div id="confirm"></div></section>`;
+}
+
+function render(){
+  header();
+  const v=document.getElementById('view');
+  v.innerHTML=tab==='dash'?dash():tab==='decks'?decks():tab==='setup'?setup():dataView();
+  document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===tab));
+}
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),1800)}
+function findDrum(id){for(const a of S.areas){const x=a.drums.find(d=>d.id===id);if(x)return[a,x]}return[]}
+
+function openDrum(id,isNew){
+  const [a,x]=findDrum(id);if(!x)return;
+  const m=document.getElementById('modal');
+  const draw=()=>{const p=pct(x.fill,x.cap);
+    m.innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Edit drum">
+    <div class="sheet-top"><span id="sv">${drumSVG(x)}</span><div style="min-width:0;flex:1"><div class="lbl">${esc(a.name)}</div><div style="font-family:var(--f-display);font-size:22px;font-weight:700">${esc(x.label)}</div><div class="num muted" id="lvtxt">${Math.round(x.fill)} / ${x.cap} L · ${p}% · ${fmt(x.cap-x.fill)} free</div></div></div>
+    <label class="field"><span class="lbl">Fill level (L)</span><input type="range" id="d-fill" min="0" max="${x.cap}" step="5" value="${x.fill}"></label>
+    <div class="quick">${[0,25,50,75,100].map(q=>`<button class="btn sm" data-q="${q}">${q===0?'Empty':q+'%'}</button>`).join('')}</div>
+    <div class="form">
+      <label class="field"><span class="lbl">Label</span><input id="d-label" value="${esc(x.label)}"></label>
+      <label class="field"><span class="lbl">Litres in drum</span><input id="d-l" type="number" min="0" max="${x.cap}" value="${Math.round(x.fill)}"></label>
+      <label class="field"><span class="lbl">Category</span><select id="d-cat">${S.categories.map(c=>`<option value="${esc(c.id)}"${c.id===x.cat?' selected':''}>${esc(c.id)} · ${esc(c.name)}</option>`).join('')}</select></label>
+      <label class="field"><span class="lbl">Capacity (L)</span><input id="d-cap" type="number" min="1" value="${x.cap}"></label>
+      <label class="field"><span class="lbl">Area</span><select id="d-area">${S.areas.map(o=>`<option value="${o.id}"${o.id===a.id?' selected':''}>${esc(o.name)}</option>`).join('')}</select></label>
+    </div>
+    <div class="bar" style="justify-content:space-between"><span class="bar"><button class="btn danger" id="d-del">Delete drum</button><button class="btn" id="d-dup">Duplicate</button></span><button class="btn pri" id="d-done">Done</button></div>
+    </div></div>`;
+  };
+  draw();
+  const live=()=>{document.getElementById('sv').innerHTML=drumSVG(x);document.getElementById('lvtxt').textContent=`${Math.round(x.fill)} / ${x.cap} L · ${pct(x.fill,x.cap)}% · ${fmt(x.cap-x.fill)} free`;document.getElementById('d-fill').value=x.fill;document.getElementById('d-l').value=Math.round(x.fill);save();render()};
+  const close=()=>{m.innerHTML='';save();render()};
+  m.onclick=e=>{
+    if(e.target.id==='scrim'||e.target.id==='d-done')close();
+    else if(e.target.dataset.q!==undefined){x.fill=x.cap*(+e.target.dataset.q)/100;live()}
+    else if(e.target.id==='d-del'){a.drums=a.drums.filter(d=>d!==x);close();toast('Drum deleted')}
+    else if(e.target.id==='d-dup'){const n={...x,id:nid('d'),label:x.label+' (2)',fill:0};a.drums.splice(a.drums.indexOf(x)+1,0,n);close();toast('Drum duplicated')}
+  };
+  m.oninput=e=>{const t=e.target;
+    if(t.id==='d-fill'){x.fill=+t.value;live()}
+    else if(t.id==='d-l'){x.fill=Math.max(0,Math.min(x.cap,+t.value||0));document.getElementById('sv').innerHTML=drumSVG(x);document.getElementById('d-fill').value=x.fill;save();render()}
+    else if(t.id==='d-label'){x.label=t.value;save();render()}
+  };
+  m.onchange=e=>{const t=e.target;
+    if(t.id==='d-cat'){x.cat=t.value;draw();save();render()}
+    else if(t.id==='d-cap'){x.cap=Math.max(1,+t.value||1);x.fill=Math.min(x.fill,x.cap);draw();save();render()}
+    else if(t.id==='d-area'){const to=S.areas.find(o=>o.id===t.value);if(to&&to!==a){a.drums=a.drums.filter(d=>d!==x);to.drums.push(x);close();toast('Moved to '+to.name)}}
+  };
+  document.addEventListener('keydown',function k(e){if(e.key==='Escape'){close();document.removeEventListener('keydown',k)}});
+}
+
+document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(b){tab=b.dataset.tab;render();window.scrollTo(0,0)}};
+const V=document.getElementById('view');
+V.onclick=e=>{
+  const t=e.target.closest('button,[data-drum]');if(!t)return;
+  if(t.dataset.drum)return openDrum(t.dataset.drum);
+  if(t.dataset.add){const a=S.areas.find(o=>o.id===t.dataset.add);const x=d('New drum',S.categories[0]?.id||'A',200,0);a.drums.push(x);save();render();return openDrum(x.id)}
+  if(t.dataset.up||t.dataset.down){const id=t.dataset.up||t.dataset.down,i=S.areas.findIndex(a=>a.id===id),j=t.dataset.up?i-1:i+1;[S.areas[i],S.areas[j]]=[S.areas[j],S.areas[i]];save();render();return}
+  if(t.dataset.delarea){const a=S.areas.find(o=>o.id===t.dataset.delarea);
+    if(t.dataset.armed){S.areas=S.areas.filter(o=>o!==a);save();render();toast('Area deleted')}else{t.dataset.armed=1;t.textContent=a.drums.length?`Delete ${a.drums.length} drums?`:'Confirm';setTimeout(()=>{if(t.isConnected){delete t.dataset.armed;t.textContent='Delete'}},3000)}return}
+  if(t.dataset.delcat){if(all().some(x=>x.cat===t.dataset.delcat)){toast('Category in use by drums');return}S.categories=S.categories.filter(c=>c.id!==t.dataset.delcat);save();render();return}
+  switch(t.id){
+    case 'add-area':S.areas.push({id:nid('a'),name:'New area',note:'',drums:[]});save();render();break;
+    case 'add-cat':{let n=1;while(S.categories.some(c=>c.id==='X'+n))n++;S.categories.push({id:'X'+n,name:'New category',color:'#495057'});save();render();break}
+    case 'reset-cats':{const used=new Set(all().map(x=>x.cat));S.categories=JSON.parse(JSON.stringify(CATS)).concat(S.categories.filter(c=>used.has(c.id)&&!CATS.some(k=>k.id===c.id)));save();render();toast('Categories reset');break}
+    case 'copy':{const ta=document.getElementById('exp');navigator.clipboard?.writeText(ta.value).then(()=>toast('Setup copied'),()=>{ta.select();toast('Selected, copy manually')})||(ta.select(),toast('Selected, copy manually'));break}
+    case 'do-imp':doImport(document.getElementById('imp').value);break;
+    case 'empty-all':case 'blank':case 'reload-sample':{
+      const c=document.getElementById('confirm');const msg={'empty-all':'Set every drum to 0 L?','blank':'Erase this vessel and start blank?','reload-sample':'Replace everything with the Kite Arrow GMP layout (all empty)?'}[t.id];
+      c.innerHTML=`<div class="bar" style="margin-top:10px"><span>${msg}</span><button class="btn danger" data-really="${t.id}">Yes</button><button class="btn" data-really="no">Cancel</button></div>`;break}
+  }
+  if(t.dataset.really){const k=t.dataset.really;
+    if(k==='empty-all'){all().forEach(x=>x.fill=0);toast('All drums emptied')}
+    if(k==='blank'){S={vessel:{name:'New Vessel',imo:'',gmp:'',unit:'m3'},categories:JSON.parse(JSON.stringify(CATS)),areas:[{id:nid('a'),name:'Poop Deck',note:'',drums:[]}]};tab='setup';toast('Blank vessel ready')}
+    if(k==='reload-sample'){S=sample();toast('GMP layout loaded')}
+    save();render()}
+};
+V.oninput=e=>{const t=e.target,v=S.vessel;
+  if(t.id==='v-name'){v.name=t.value;header()} else if(t.id==='v-imo'){v.imo=t.value;header()} else if(t.id==='v-gmp'){v.gmp=t.value;header()}
+  else if(t.dataset.areaName){S.areas.find(a=>a.id===t.dataset.areaName).name=t.value}
+  else if(t.dataset.areaNote!==undefined){S.areas.find(a=>a.id===t.dataset.areaNote).note=t.value}
+  else if(t.dataset.catName){S.categories.find(c=>c.id===t.dataset.catName).name=t.value}
+  else if(t.dataset.catColor){S.categories.find(c=>c.id===t.dataset.catColor).color=t.value}
+  else return;save()};
+V.onchange=e=>{const t=e.target;
+  if(t.id==='v-unit'){S.vessel.unit=t.value;save();header()}
+  else if(t.dataset.catId){const old=t.dataset.catId,nw=t.value.trim().toUpperCase();if(!nw||S.categories.some(c=>c.id===nw&&c.id!==old)){t.value=old;toast('Code must be unique');return}
+    S.categories.find(c=>c.id===old).id=nw;all().forEach(x=>{if(x.cat===old)x.cat=nw});save();render()}
+  else if(t.id==='file'&&t.files[0]){const r=new FileReader();r.onload=()=>doImport(r.result);r.readAsText(t.files[0])}};
+function doImport(txt){try{const o=JSON.parse(txt);if(!o.areas||!o.categories||!o.vessel)throw 0;S=o;save();tab='dash';render();toast('Imported '+(o.vessel.name||'vessel'))}catch(e){toast('Not a valid setup. Paste the full copied text.')}}
+render();
+})();
+</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}</script>
+</body>
+</html>
