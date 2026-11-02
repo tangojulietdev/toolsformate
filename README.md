@@ -5,3 +5,5 @@ Maritime tools for the watchkeeper by Tango Juliet Dev: ROB, ETA, speed, ventila
 Installable PWA that works offline. All data stays on the device.
 
 `source/tools-for-mate-single-file.html` is the editable single-file version of the app.
+
+UI: macOS style window with sidebar and unified toolbar on desktop, iOS list to detail navigation on phones. Control metrics adapted from [Puppertino](https://github.com/codedgar/Puppertino) (MIT).
