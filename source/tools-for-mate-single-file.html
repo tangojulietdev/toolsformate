@@ -783,6 +783,13 @@
         .cx-bar { height: 8px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; margin-top: 12px; }
         .cx-bar span { display: block; height: 100%; background: var(--accent); }
         .cx-out .v .u { font-weight: 600; }
+        .cx-wt, .cx-tk { display: grid; gap: 6px; align-items: center; margin-bottom: 6px; }
+        .cx-wt { grid-template-columns: minmax(0, 1.4fr) 72px minmax(0, 1fr) minmax(0, 1fr) 36px; }
+        .cx-tk { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr) 70px 36px; }
+        .cx-wt .input-field, .cx-tk .input-field { margin: 0; min-height: 38px; padding: 6px 9px; font-size: 14px; }
+        .cx-wt-h { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: 4px; }
+        .cx-tk-t { font-size: 13px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+        @media (max-width: 640px) { .cx-wt { grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr) minmax(0, 1fr) 32px; } .cx-tk { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 58px 32px; } .cx-wt-h { font-size: 10px; } }
         @media (max-width: 900px) { .cx-two { grid-template-columns: minmax(0, 1fr); } }
         @media (max-width: 640px) { .cx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cx-out .v { font-size: 17px; } .seg { flex-wrap: wrap; } }
     </style>
@@ -2922,14 +2929,17 @@ const Proof = (function () {
                 tool: 'sal',
                 sal: { read: '', temp: '', sIn: '', tIn: '', mode: 'calc', disp: '', tpc: '', fwa: '', sw: '1.025', ldraft: '', present: '', dDisp: '', dTpc: '', r1: '1.025', r2: '', dDraft: '' },
                 days: { mode: 'between', a: cxNowWall(cxTzMin(tz)), aTz: tz, b: '', bTz: tz, incl: false, base: cxNowWall(cxTzMin(tz)), baseTz: tz, op: 'add', ad: '', ah: '', am: '', son: cxToday(), cm: '6', cd: '0', tol: '30', ref: '', countFirst: true },
-                sf: { v: '', u: 0, bs: '0', vol: '', w: '' }
+                sf: { v: '', u: 0, bs: '0', vol: '', w: '' },
+                trim: { lbp: '', df: '', da: '', tpc: '', mct: '', lcf: '', ref: 'ap', rows: [{ n: '', op: 'L', w: '', x: '' }, { n: '', op: 'L', w: '', x: '' }], tgt: '', sx: '' },
+                roll: { b: '', d: '', lwl: '', method: 'imo', f: '0.8', tt: '', n: '', T: '', gmIn: '', v: '', r: '', rmode: 'r', kg: '', km: '', gmT: '', lim: '10' },
+                bwe: { method: 'seq', np: '2', rate: '', eff: '', sameIn: true, npIn: '', rateIn: '', vf: '3', strip: '', start: cxNowWall(cxTzMin(tz)), tz: tz, spd: '', tanks: [{ n: '', cap: '', cur: '' }, { n: '', cap: '', cur: '' }] }
             };
         };
         function cxLoad() {
             const d = CX_DEFAULT();
             try {
                 const s = JSON.parse(localStorage.getItem(CX_KEY) || 'null');
-                if (s) return { tool: s.tool || d.tool, sal: { ...d.sal, ...(s.sal || {}) }, days: { ...d.days, ...(s.days || {}) }, sf: { ...d.sf, ...(s.sf || {}) } };
+                if (s) { const o = { tool: s.tool || d.tool }; ['sal', 'days', 'sf', 'trim', 'roll', 'bwe'].forEach((k) => { o[k] = { ...d[k], ...(s[k] || {}) }; }); return o; }
             } catch (e) {}
             return d;
         }
@@ -3298,6 +3308,367 @@ const Proof = (function () {
             );
         }
 
+        // ---------- shared: read hydrostatics tab table ----------
+        function cxHydroAt(draft) {
+            const h = loadHydro();
+            if (!h || !(draft > 0)) return null;
+            const find = (re) => h.cols.findIndex((c) => re.test(String(c)));
+            let di = find(/draft|^d$|^t$/i); if (di < 0) di = 0;
+            const idx = { tpc: find(/tpc/i), mct: find(/mct/i), lcf: find(/lcf/i), km: find(/km/i), disp: find(/disp|Δ/i) };
+            const rows = h.rows.map((r) => r.map(pn)).filter((r) => isFinite(r[di])).sort((a, b) => a[di] - b[di]);
+            if (rows.length < 1) return null;
+            let i = rows.findIndex((r) => r[di] >= draft);
+            const out = { found: [] };
+            const val = (j) => {
+                if (j < 0) return NaN;
+                if (i === 0 || rows.length === 1) return rows[0][j];
+                if (i < 0) return rows[rows.length - 1][j];
+                const a = rows[i - 1], b = rows[i];
+                return interpLerp(a[di], a[j], b[di], b[j], draft);
+            };
+            out.range = i < 0 || (i === 0 && rows[0][di] !== draft) ? false : true;
+            Object.keys(idx).forEach((k) => { const v = val(idx[k]); if (isFinite(v)) { out[k] = v; out.found.push(k.toUpperCase()); } });
+            return out;
+        }
+        const cxR = (v, d) => (isFinite(v) ? String(Math.round(v * 10 ** d) / 10 ** d) : '');
+
+        // ---------- Trim & draft ----------
+        function CxTrim({ s, set, setMany }) {
+            const [msg, setMsg] = useState('');
+            const L = pn(s.lbp), dF = pn(s.df), dA = pn(s.da);
+            const tpc = pn(s.tpc), mct = pn(s.mct), lcfIn = pn(s.lcf);
+            const toAP = (x) => (!isFinite(x) || !(L > 0) ? NaN : s.ref === 'ap' ? x : s.ref === 'midf' ? L / 2 + x : L / 2 - x);
+            const fromAP = (x) => (!isFinite(x) || !(L > 0) ? NaN : s.ref === 'ap' ? x : s.ref === 'midf' ? x - L / 2 : L / 2 - x);
+            const lcf = toAP(lcfIn);
+            const mean = dF > 0 && dA > 0 ? (dF + dA) / 2 : NaN;
+            const trim0 = dF > 0 && dA > 0 ? dA - dF : NaN; // + by stern
+            const ok = L > 0 && tpc > 0 && mct > 0 && isFinite(lcf);
+
+            const rows = s.rows.map((r) => {
+                const w = pn(r.w), x = toAP(pn(r.x));
+                const sw = isFinite(w) ? (r.op === 'D' ? -Math.abs(w) : Math.abs(w)) : NaN;
+                const mom = isFinite(sw) && isFinite(x) && isFinite(lcf) ? sw * (lcf - x) : NaN; // + = trimming by stern
+                return { sw, x, mom };
+            });
+            const W = rows.reduce((a, r) => a + (isFinite(r.sw) ? r.sw : 0), 0);
+            const M = rows.reduce((a, r) => a + (isFinite(r.mom) ? r.mom : 0), 0);
+            const sink = ok ? W / tpc : NaN; // cm
+            const ct = ok ? M / mct : NaN; // cm, + by stern
+            const cA = ok ? ct * lcf / L : NaN, cF = ok ? -ct * (L - lcf) / L : NaN;
+            const nA = isFinite(dA) && ok ? dA + (sink + cA) / 100 : NaN;
+            const nF = isFinite(dF) && ok ? dF + (sink + cF) / 100 : NaN;
+            const nTrim = nA - nF, nMean = (nA + nF) / 2;
+            const nMeanCorr = isFinite(nMean) ? nMean + (nTrim * (L / 2 - lcf) / L) : NaN; // mean draft at LCF
+
+            // solver: weight at position to reach target trim
+            const tgt = pn(s.tgt), sx = toAP(pn(s.sx));
+            const baseTrim = isFinite(nTrim) ? nTrim : trim0;
+            const needCm = isFinite(tgt) && isFinite(baseTrim) ? (tgt - baseTrim) * 100 : NaN;
+            const arm = ok && isFinite(sx) ? lcf - sx : NaN;
+            const wReq = isFinite(needCm) && isFinite(arm) && Math.abs(arm) > 0.01 ? needCm * mct / arm : NaN;
+
+            const pull = () => {
+                if (!(mean > 0)) { setMsg('Enter the present drafts first.'); return; }
+                const h = cxHydroAt(mean);
+                if (!h || !h.found.length) { setMsg('No usable table in the Hydrostatics tab. Fill or paste it there first.'); return; }
+                const upd = {};
+                if (isFinite(h.tpc)) upd.tpc = cxR(h.tpc, 2);
+                if (isFinite(h.mct)) upd.mct = cxR(h.mct, 1);
+                if (isFinite(h.lcf)) upd.lcf = cxR(h.lcf, 3);
+                setMany(upd);
+                setMsg('Interpolated at ' + mean.toFixed(3) + ' m: ' + h.found.filter((k) => ['TPC', 'MCT', 'LCF'].includes(k)).join(', ') + '.' + (h.range ? '' : ' Draft is outside the table, end values used.') + ' Check the LCF reference below matches the booklet.');
+            };
+            const setRow = (i, k, v) => setMany({ rows: s.rows.map((r, j) => (j === i ? { ...r, [k]: v } : r)) });
+            const refLbl = s.ref === 'ap' ? 'from AP' : s.ref === 'midf' ? 'from midships, + fwd' : 'from midships, + aft';
+
+            return (
+                <div className="cx-two">
+                    <div>
+                        <div className="card cx-card">
+                            <div className="card-title">Ship and present condition</div>
+                            <div className="cx-row">
+                                <CxField label="LBP (m)" value={s.lbp} onChange={set('lbp')} />
+                                <CxField label="Draft fwd (m)" value={s.df} onChange={set('df')} />
+                                <CxField label="Draft aft (m)" value={s.da} onChange={set('da')} />
+                            </div>
+                            <div className="cx-row">
+                                <CxField label="TPC (t/cm)" value={s.tpc} onChange={set('tpc')} />
+                                <CxField label="MCTC (t·m/cm)" value={s.mct} onChange={set('mct')} />
+                                <CxField label={'LCF (m, ' + refLbl + ')'} value={s.lcf} onChange={set('lcf')} />
+                            </div>
+                            <label className="input-label">LCF and LCG measured</label>
+                            <select className="input-field" value={s.ref} onChange={(e) => set('ref')(e.target.value)}>
+                                <option value="ap">From AP (positive forward)</option>
+                                <option value="midf">From midships, + forward / - aft</option>
+                                <option value="mida">From midships, + aft / - forward</option>
+                            </select>
+                            <div className="cx-btns"><button style={subBtn} onClick={pull}>Fill TPC, MCTC, LCF from Hydrostatics tab</button></div>
+                            {msg && <div style={noteStyle('')}>{msg}</div>}
+                            <div className="cx-grid">
+                                <CxOut l="Mean draft" v={cxF(mean, 3)} u="m" />
+                                <CxOut l="Present trim" v={isFinite(trim0) ? cxF(Math.abs(trim0), 3) : '-'} u="m" sub={isFinite(trim0) ? (trim0 > 0 ? 'by the stern' : trim0 < 0 ? 'by the head' : 'even keel') : null} />
+                                <CxOut l="LCF from AP" v={cxF(lcf, 2)} u="m" />
+                            </div>
+                        </div>
+
+                        <div className="card cx-card">
+                            <div className="card-title">Weights to load or discharge</div>
+                            <div className="cx-wt cx-wt-h"><span>Item</span><span>L / D</span><span>Weight (t)</span><span>LCG (m)</span><span></span></div>
+                            {s.rows.map((r, i) => (
+                                <div key={i} className="cx-wt">
+                                    <input className="input-field" value={r.n} placeholder={'Item ' + (i + 1)} onChange={(e) => setRow(i, 'n', e.target.value)} />
+                                    <button style={{ ...subBtn, padding: '8px 10px', background: r.op === 'D' ? 'var(--bad-soft)' : 'var(--ok-soft)', color: r.op === 'D' ? 'var(--bad)' : 'var(--ok)' }} onClick={() => setRow(i, 'op', r.op === 'D' ? 'L' : 'D')} aria-label="Toggle load or discharge">{r.op === 'D' ? 'Disch' : 'Load'}</button>
+                                    <input className="input-field" inputMode="decimal" value={r.w} onChange={(e) => setRow(i, 'w', e.target.value)} />
+                                    <input className="input-field" inputMode="decimal" value={r.x} placeholder={refLbl} onChange={(e) => setRow(i, 'x', e.target.value)} />
+                                    <button className="icon-btn" style={{ minWidth: 36, minHeight: 36, fontSize: 16 }} onClick={() => setMany({ rows: s.rows.length > 1 ? s.rows.filter((_, j) => j !== i) : [{ n: '', op: 'L', w: '', x: '' }] })} aria-label="Remove row">×</button>
+                                </div>
+                            ))}
+                            <div className="cx-btns"><button style={subBtn} onClick={() => setMany({ rows: [...s.rows, { n: '', op: 'L', w: '', x: '' }] })}>+ Add weight</button></div>
+                            <div className="cx-hint">Tap Load / Disch to switch. Shifting a weight = discharge at the old LCG and load at the new LCG.</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="card cx-card">
+                            <div className="card-title">Result</div>
+                            <div className="cx-grid" style={{ marginTop: 0 }}>
+                                <CxOut l="Net weight" v={cxInt(W)} u="t" sub={W < 0 ? 'net discharge' : null} />
+                                <CxOut l={sink < 0 ? 'Bodily rise' : 'Bodily sinkage'} v={cxF(Math.abs(sink), 1)} u="cm" />
+                                <CxOut l="Trimming moment" v={cxInt(Math.abs(M))} u="t·m" sub={M ? (M > 0 ? 'by the stern' : 'by the head') : null} />
+                                <CxOut l="Change of trim" v={cxF(Math.abs(ct), 1)} u="cm" sub={isFinite(ct) && ct ? (ct > 0 ? 'by the stern' : 'by the head') : null} />
+                                <CxOut l="Change fwd" v={isFinite(sink + cF) ? (sink + cF >= 0 ? '+' : '') + cxF(sink + cF, 1) : '-'} u="cm" />
+                                <CxOut l="Change aft" v={isFinite(sink + cA) ? (sink + cA >= 0 ? '+' : '') + cxF(sink + cA, 1) : '-'} u="cm" />
+                                <CxOut l="New draft fwd" v={cxF(nF, 3)} u="m" hi />
+                                <CxOut l="New draft aft" v={cxF(nA, 3)} u="m" hi />
+                                <CxOut l="New trim" v={isFinite(nTrim) ? cxF(Math.abs(nTrim), 3) : '-'} u="m" hi sub={isFinite(nTrim) ? (nTrim > 0.0005 ? 'by the stern' : nTrim < -0.0005 ? 'by the head' : 'even keel') : null} />
+                                <CxOut l="New mean draft" v={cxF(nMean, 3)} u="m" />
+                                <CxOut l="Draft at LCF" v={cxF(nMeanCorr, 3)} u="m" sub="true mean, use for displacement" />
+                            </div>
+                            {!ok && <div style={noteStyle('warn')}>Enter LBP, TPC, MCTC and LCF to calculate.</div>}
+                            <div className="cx-hint" style={{ marginTop: 10 }}>Sinkage = w / TPC. Change of trim = Σ w × (LCF - LCG) / MCTC. Change aft = trim change × LCF / LBP, change fwd = trim change - change aft. Uses the hydrostatics at the present draft. For large weights, rerun with the TPC, MCTC and LCF at the mean of the old and new drafts.</div>
+                        </div>
+
+                        <div className="card cx-card">
+                            <div className="card-title">Weight needed for a target trim</div>
+                            <div className="cx-row">
+                                <CxField label="Target trim (m, + stern, - head)" value={s.tgt} onChange={set('tgt')} placeholder="0 = even keel" />
+                                <CxField label={'Load at LCG (m, ' + refLbl + ')'} value={s.sx} onChange={set('sx')} />
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l={isFinite(wReq) && wReq < 0 ? 'Discharge from there' : 'Load there'} v={cxInt(Math.abs(wReq))} u="t" hi />
+                                <CxOut l="Trim change needed" v={cxF(needCm, 1)} u="cm" />
+                                <CxOut l="Lever from LCF" v={cxF(Math.abs(arm), 2)} u="m" sub={isFinite(arm) ? (arm > 0 ? 'aft of LCF' : 'forward of LCF') : null} />
+                            </div>
+                            <div className="cx-hint" style={{ marginTop: 10 }}>Starts from the new trim above (or the present trim if no weights are entered). A weight loaded at the LCF only causes sinkage, no trim change.</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ---------- Rolling period & heel when turning ----------
+        function CxRoll({ s, set, setMany }) {
+            const [msg, setMsg] = useState('');
+            const B = pn(s.b), Lw = pn(s.lwl), d = pn(s.d);
+            const Cimo = B > 0 && d > 0 && Lw > 0 ? 0.373 + 0.023 * (B / d) - 0.043 * (Lw / 100) : NaN;
+            // IS Code: T = 2 C B / sqrt(GM). Factor method: T = f B / sqrt(GM)
+            const k = s.method === 'imo' ? 2 * Cimo : pn(s.f);
+            const tSec = pn(s.tt), nRoll = pn(s.n);
+            const T = s.tt !== '' && nRoll > 0 ? tSec / nRoll : pn(s.T);
+            const gmFromT = k > 0 && B > 0 && T > 0 ? Math.pow(k * B / T, 2) : NaN;
+            const gmIn = pn(s.gmIn);
+            const tFromGm = k > 0 && B > 0 && gmIn > 0 ? k * B / Math.sqrt(gmIn) : NaN;
+
+            const kg = pn(s.kg), km = pn(s.km);
+            const gmT = s.gmT !== '' ? pn(s.gmT) : (km > 0 && kg > 0 ? km - kg : NaN);
+            const v = pn(s.v) * 1852 / 3600;
+            const R = s.rmode === 'td' ? pn(s.r) / 2 : pn(s.r);
+            const lever = kg > 0 && d > 0 ? kg - d / 2 : NaN;
+            const acc = v > 0 && R > 0 ? v * v / R : NaN;
+            const heel = isFinite(acc) && lever > 0 && gmT > 0 ? Math.atan(acc * lever / (9.81 * gmT)) * 180 / Math.PI : NaN;
+            const lim = pn(s.lim) > 0 ? pn(s.lim) : 10;
+            const vMax = R > 0 && lever > 0 && gmT > 0 ? Math.sqrt(Math.tan(lim * Math.PI / 180) * 9.81 * R * gmT / lever) * 3600 / 1852 : NaN;
+            const isLever = v > 0 && Lw > 0 && lever > 0 ? 0.2 * v * v / Lw * lever : NaN;
+            const isHeel = isFinite(isLever) && gmT > 0 ? Math.atan(isLever / gmT) * 180 / Math.PI : NaN;
+
+            const pull = () => {
+                const h = cxHydroAt(d);
+                if (!h || !isFinite(h.km)) { setMsg(d > 0 ? 'No KM column found in the Hydrostatics tab.' : 'Enter the mean draft first.'); return; }
+                setMany({ km: cxR(h.km, 3) }); setMsg('KM ' + h.km.toFixed(3) + ' m interpolated at ' + d.toFixed(3) + ' m.' + (h.range ? '' : ' Draft is outside the table.'));
+            };
+
+            return (
+                <div className="cx-two">
+                    <div className="card cx-card">
+                        <div className="card-title">Rolling period and GM</div>
+                        <div className="cx-row">
+                            <CxField label="Breadth B (m)" value={s.b} onChange={set('b')} />
+                            <CxField label="Mean draft d (m)" value={s.d} onChange={set('d')} />
+                            <CxField label="Length Lwl (m)" value={s.lwl} onChange={set('lwl')} />
+                        </div>
+                        <label className="input-label">Rolling coefficient</label>
+                        <div className="seg" role="group" aria-label="Method" style={{ marginBottom: 10 }}>
+                            <button aria-pressed={s.method === 'imo'} onClick={() => set('method')('imo')}>IS Code C formula</button>
+                            <button aria-pressed={s.method === 'f'} onClick={() => set('method')('f')}>Factor f</button>
+                        </div>
+                        {s.method === 'f' && <CxField label="Factor f (T = f × B / √GM)" value={s.f} onChange={set('f')} hint="Typically 0.7 to 0.8 for cargo ships. Use the ship's stability booklet value if given." />}
+                        <div className="cx-sub">Measured roll</div>
+                        <div className="cx-row" style={{ marginTop: 6 }}>
+                            <CxField label="Time for N rolls (s)" value={s.tt} onChange={set('tt')} placeholder="stopwatch" />
+                            <CxField label="N full rolls" value={s.n} onChange={set('n')} placeholder="e.g. 5" />
+                            <CxField label="or period T (s)" value={s.T} onChange={set('T')} placeholder="one full roll" />
+                        </div>
+                        <div className="cx-grid">
+                            <CxOut l="Coefficient" v={s.method === 'imo' ? cxF(Cimo, 3) : cxF(k, 2)} sub={s.method === 'imo' ? 'C, T = 2CB/√GM' : 'f'} />
+                            <CxOut l="Rolling period" v={cxF(T, 1)} u="s" />
+                            <CxOut l="GM from roll" v={cxF(gmFromT, 2)} u="m" hi />
+                        </div>
+                        {isFinite(gmFromT) && gmFromT < 0.15 && <div style={noteStyle('bad')}>GM below 0.15 m, the IS Code minimum. Check the condition.</div>}
+                        <div className="cx-sub">Expected period for a GM</div>
+                        <div className="cx-row" style={{ marginTop: 6 }}>
+                            <CxField label="GM (m)" value={s.gmIn} onChange={set('gmIn')} />
+                        </div>
+                        <div className="cx-grid">
+                            <CxOut l="Expected rolling period" v={cxF(tFromGm, 1)} u="s" hi />
+                        </div>
+                        <div className="cx-hint" style={{ marginTop: 10 }}>C = 0.373 + 0.023 (B/d) - 0.043 (Lwl/100), IS Code 2008 weather criterion. Time at least 5 full rolls (port to port and back) in calm water with no free surface changes. The result is an estimate only, use the loading computer for the real GM.</div>
+                    </div>
+
+                    <div className="card cx-card">
+                        <div className="card-title">Heel when turning</div>
+                        <div className="cx-row">
+                            <CxField label="Speed (kn)" value={s.v} onChange={set('v')} />
+                            <CxField label={s.rmode === 'td' ? 'Turning diameter (m)' : 'Turning radius (m)'} value={s.r} onChange={set('r')} />
+                        </div>
+                        <div className="seg" role="group" aria-label="Turn input" style={{ marginBottom: 10 }}>
+                            <button aria-pressed={s.rmode !== 'td'} onClick={() => set('rmode')('r')}>Radius</button>
+                            <button aria-pressed={s.rmode === 'td'} onClick={() => set('rmode')('td')}>Diameter</button>
+                        </div>
+                        <div className="cx-row">
+                            <CxField label="KG (m)" value={s.kg} onChange={set('kg')} />
+                            <CxField label="KM (m)" value={s.km} onChange={set('km')} />
+                            <CxField label="GM fluid (m)" value={s.gmT} onChange={set('gmT')} placeholder={km > 0 && kg > 0 ? 'KM - KG = ' + (km - kg).toFixed(2) : 'or KM - KG'} />
+                        </div>
+                        <div className="cx-row">
+                            <CxField label="Mean draft d (m)" value={s.d} onChange={set('d')} placeholder="shared with roll" />
+                            <CxField label="Heel limit (°)" value={s.lim} onChange={set('lim')} placeholder="10" />
+                        </div>
+                        <div className="cx-btns"><button style={subBtn} onClick={pull}>Fill KM from Hydrostatics tab</button></div>
+                        {msg && <div style={noteStyle('')}>{msg}</div>}
+                        <div className="cx-grid">
+                            <CxOut l="GM used" v={cxF(gmT, 2)} u="m" />
+                            <CxOut l="Lever KG - d/2" v={cxF(lever, 2)} u="m" />
+                            <CxOut l="Centripetal acceleration" v={cxF(acc, 3)} u="m/s²" />
+                            <CxOut l="Heel in the turn" v={cxF(heel, 1)} u="°" hi />
+                            <CxOut l={'Max speed for ' + lim + '°'} v={cxF(vMax, 1)} u="kn" hi />
+                            <CxOut l="IS Code heel (ref.)" v={cxF(isHeel, 1)} u="°" sub="0.2 v²/Lwl × (KG - d/2)" />
+                        </div>
+                        {isFinite(heel) && heel > lim && <div style={noteStyle('bad')}>Heel exceeds {lim}°. Reduce speed or use a larger radius. Watch cargo securing, deck cargo and free surface.</div>}
+                        <div className="cx-hint" style={{ marginTop: 10 }}>tan θ = v² (KG - d/2) / (g R GM). Steady turn, small angles. The ship first heels inward on applying helm, then outward in the steady turn. The IS Code figure is the passenger ship criterion, shown for reference.</div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ---------- Ballast water exchange ----------
+        function CxBwe({ s, set, setMany }) {
+            const outR = (pn(s.np) || 0) * (pn(s.rate) || 0) * (pn(s.eff) > 0 ? pn(s.eff) / 100 : 1);
+            const inR = s.sameIn ? outR : (pn(s.npIn) || 0) * (pn(s.rateIn) || 0) * (pn(s.eff) > 0 ? pn(s.eff) / 100 : 1);
+            const strip = (pn(s.strip) || 0) / 60;
+            const vol = pn(s.vf) > 0 ? pn(s.vf) : 3;
+            const rows = s.tanks.map((t) => {
+                const cap = pn(t.cap), cur = t.cur === '' ? cap : pn(t.cur);
+                let h = NaN, pumped = NaN;
+                if (cap > 0) {
+                    if (s.method === 'seq') { pumped = (cur || 0) + cap; h = outR > 0 && inR > 0 ? (cur || 0) / outR + cap / inR + strip : NaN; }
+                    else { pumped = cap * vol; h = inR > 0 ? pumped / inR + strip : NaN; }
+                }
+                return { cap, cur, h, pumped };
+            });
+            const totH = rows.reduce((a, r) => a + (isFinite(r.h) ? r.h : 0), 0);
+            const totV = rows.reduce((a, r) => a + (isFinite(r.pumped) ? r.pumped : 0), 0);
+            const totCap = rows.reduce((a, r) => a + (r.cap > 0 ? r.cap : 0), 0);
+            const off = cxTzMin(s.tz);
+            const start = cxWallToUtc(s.start, off);
+            const finish = isFinite(start) && totH > 0 ? start + totH * 3600000 : NaN;
+            const sp = pn(s.spd);
+            const dist = sp > 0 && totH > 0 ? sp * totH : NaN;
+            const hm = (h) => (isFinite(h) && h > 0 ? Math.floor(h) + 'h ' + cx2(Math.round((h % 1) * 60) % 60) + 'm' : '-');
+            const setT = (i, k, v) => setMany({ tanks: s.tanks.map((t, j) => (j === i ? { ...t, [k]: v } : t)) });
+
+            return (
+                <div className="cx-two">
+                    <div>
+                        <div className="card cx-card">
+                            <div className="card-title">Method and pumps</div>
+                            <div className="seg" role="group" aria-label="Method" style={{ marginBottom: 12 }}>
+                                <button aria-pressed={s.method === 'seq'} onClick={() => set('method')('seq')}>Sequential</button>
+                                <button aria-pressed={s.method === 'ft'} onClick={() => set('method')('ft')}>Flow-through</button>
+                                <button aria-pressed={s.method === 'dil'} onClick={() => set('method')('dil')}>Dilution</button>
+                            </div>
+                            <div className="cx-row">
+                                <CxField label={s.method === 'seq' ? 'Pumps deballasting' : 'Pumps in use'} value={s.np} onChange={set('np')} />
+                                <CxField label="Rate per pump (m³/h)" value={s.rate} onChange={set('rate')} />
+                                <CxField label="Efficiency (%)" value={s.eff} onChange={set('eff')} placeholder="100" />
+                            </div>
+                            {s.method === 'seq' && (
+                                <>
+                                    <label className="cx-check"><input type="checkbox" checked={s.sameIn} onChange={(e) => set('sameIn')(e.target.checked)} /> Same pumps and rate for refilling</label>
+                                    {!s.sameIn && <div className="cx-row"><CxField label="Pumps ballasting" value={s.npIn} onChange={set('npIn')} /><CxField label="Rate per pump (m³/h)" value={s.rateIn} onChange={set('rateIn')} /></div>}
+                                </>
+                            )}
+                            <div className="cx-row">
+                                {s.method !== 'seq' && <CxField label="Volumes pumped through" value={s.vf} onChange={set('vf')} placeholder="3" hint="3 × tank volume meets D-1" />}
+                                <CxField label="Stripping / changeover per tank (min)" value={s.strip} onChange={set('strip')} placeholder="0" />
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l={s.method === 'seq' ? 'Deballast rate' : 'Effective rate'} v={cxInt(outR)} u="m³/h" />
+                                {s.method === 'seq' && <CxOut l="Ballast rate" v={cxInt(inR)} u="m³/h" />}
+                            </div>
+                        </div>
+
+                        <div className="card cx-card">
+                            <div className="card-title">Start and passage</div>
+                            <div className="cx-row">
+                                <CxField label="Start" type="datetime-local" value={s.start} onChange={set('start')} />
+                                <CxTz label="Time zone" value={s.tz} onChange={set('tz')} />
+                            </div>
+                            <div className="cx-row">
+                                <CxField label="Ship's speed (kn)" value={s.spd} onChange={set('spd')} placeholder="for distance run" />
+                            </div>
+                            <div className="cx-btns"><button style={subBtn} onClick={() => set('start')(cxNowWall(off))}>Start = now</button></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="card cx-card">
+                            <div className="card-title">Tanks</div>
+                            <div className="cx-tk cx-wt-h"><span>Tank</span><span>Capacity (m³)</span><span>{s.method === 'seq' ? 'Now in tank (m³)' : ''}</span><span>Time</span><span></span></div>
+                            {s.tanks.map((t, i) => (
+                                <div key={i} className="cx-tk">
+                                    <input className="input-field" value={t.n} placeholder={'Tank ' + (i + 1)} onChange={(e) => setT(i, 'n', e.target.value)} />
+                                    <input className="input-field" inputMode="decimal" value={t.cap} onChange={(e) => setT(i, 'cap', e.target.value)} />
+                                    {s.method === 'seq' ? <input className="input-field" inputMode="decimal" value={t.cur} placeholder="full" onChange={(e) => setT(i, 'cur', e.target.value)} /> : <span />}
+                                    <span className="cx-tk-t">{hm(rows[i].h)}</span>
+                                    <button className="icon-btn" style={{ minWidth: 36, minHeight: 36, fontSize: 16 }} onClick={() => setMany({ tanks: s.tanks.length > 1 ? s.tanks.filter((_, j) => j !== i) : [{ n: '', cap: '', cur: '' }] })} aria-label="Remove tank">×</button>
+                                </div>
+                            ))}
+                            <div className="cx-btns"><button style={subBtn} onClick={() => setMany({ tanks: [...s.tanks, { n: '', cap: '', cur: '' }] })}>+ Add tank</button></div>
+                            <div className="cx-grid">
+                                <CxOut l="Total capacity" v={cxInt(totCap)} u="m³" />
+                                <CxOut l="Volume to pump" v={cxInt(totV)} u="m³" />
+                                <CxOut l="Total time" v={hm(totH)} hi sub={totH > 0 ? cxF(totH, 2) + ' h' : null} />
+                                <CxOut l={'Finish (' + s.tz.replace('GMT', 'UTC ') + ')'} v={cxFmt(finish, off)} hi />
+                                <CxOut l="Finish UTC" v={cxFmt(finish, 0)} />
+                                <CxOut l="Distance run" v={cxF(dist, 0)} u="NM" />
+                            </div>
+                            <div className="cx-hint" style={{ marginTop: 10 }}>Tanks are done one after another with the pumps given. Regulation B-4: exchange at least 200 NM from the nearest land in at least 200 m depth, or 50 NM and 200 m where that is not possible. Sequential exchange needs 95% volumetric exchange. Check stability, strength, bending moments and propeller immersion for each step against the ship's BWM plan.</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
         function CalcTab() {
             const [st, setSt] = useState(cxLoad);
             useEffect(() => { try { localStorage.setItem(CX_KEY, JSON.stringify(st)); } catch (e) {} }, [st]);
@@ -3306,7 +3677,7 @@ const Proof = (function () {
                 set: (k) => (v) => setSt((o) => ({ ...o, [p]: { ...o[p], [k]: v } })),
                 setMany: (obj) => setSt((o) => ({ ...o, [p]: { ...o[p], ...obj } }))
             });
-            const tools = [['sal', 'Salinity & DWA'], ['days', 'Days'], ['sf', 'SF / Density']];
+            const tools = [['sal', 'Salinity & DWA'], ['days', 'Days'], ['sf', 'SF / Density'], ['trim', 'Trim & Draft'], ['roll', 'Rolling & Turn'], ['bwe', 'Ballast Exchange']];
             return (
                 <div className="tab-pane">
                     <h2 className="section-title">Calculator</h2>
@@ -3318,6 +3689,9 @@ const Proof = (function () {
                     {st.tool === 'sal' && <CxSalinity {...part('sal')} />}
                     {st.tool === 'days' && <CxDays {...part('days')} />}
                     {st.tool === 'sf' && <CxSF {...part('sf')} />}
+                    {st.tool === 'trim' && <CxTrim {...part('trim')} />}
+                    {st.tool === 'roll' && <CxRoll {...part('roll')} />}
+                    {st.tool === 'bwe' && <CxBwe {...part('bwe')} />}
                 </div>
             );
         }

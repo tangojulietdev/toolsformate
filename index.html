@@ -782,6 +782,13 @@
         .cx-bar { height: 8px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; margin-top: 12px; }
         .cx-bar span { display: block; height: 100%; background: var(--accent); }
         .cx-out .v .u { font-weight: 600; }
+        .cx-wt, .cx-tk { display: grid; gap: 6px; align-items: center; margin-bottom: 6px; }
+        .cx-wt { grid-template-columns: minmax(0, 1.4fr) 72px minmax(0, 1fr) minmax(0, 1fr) 36px; }
+        .cx-tk { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr) 70px 36px; }
+        .cx-wt .input-field, .cx-tk .input-field { margin: 0; min-height: 38px; padding: 6px 9px; font-size: 14px; }
+        .cx-wt-h { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: 4px; }
+        .cx-tk-t { font-size: 13px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+        @media (max-width: 640px) { .cx-wt { grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr) minmax(0, 1fr) 32px; } .cx-tk { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 58px 32px; } .cx-wt-h { font-size: 10px; } }
         @media (max-width: 900px) { .cx-two { grid-template-columns: minmax(0, 1fr); } }
         @media (max-width: 640px) { .cx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cx-out .v { font-size: 17px; } .seg { flex-wrap: wrap; } }
     </style>
@@ -789,7 +796,7 @@
 <body>
     <div id="root"></div>
     
-    <script src="app.js?v=10" defer></script>
+    <script src="app.js?v=11" defer></script>
 
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(e){console.log("SW failed",e)})})}</script>
 </body>
