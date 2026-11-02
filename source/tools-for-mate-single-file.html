@@ -761,6 +761,30 @@
 
         @media print { .side, .tabs { display: none !important; } .shell { display: block; } }
         @media (max-width: 640px) { .spd-cols { grid-template-columns: minmax(0, 1fr); } .spd-fields { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); } .spd-cols > *, .card { min-width: 0; } }
+
+        /* ===== Calculator tab ===== */
+        .cx-tools { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+        .cx-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+        .cx-wrap { max-width: 980px; }
+        .cx-card { margin-bottom: 14px; }
+        .cx-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+        .cx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 12px; }
+        .cx-out { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 9px 11px; min-width: 0; }
+        .cx-out.hi { background: var(--accent-soft); border-color: var(--accent); }
+        .cx-out .l { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 2px; }
+        .cx-out .v { font-size: 19px; font-weight: 700; color: var(--accent); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+        .cx-out .u { font-size: 12px; color: var(--muted); font-weight: 600; margin-left: 4px; }
+        .cx-out .s { font-size: 11px; color: var(--muted); margin-top: 2px; }
+        .cx-hint { font-size: 12px; color: var(--muted); line-height: 1.45; }
+        .cx-sub { font-size: 12px; font-weight: 700; color: var(--text-2); margin-top: 14px; text-transform: uppercase; letter-spacing: .04em; }
+        .cx-btns { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 4px 0 2px; }
+        .cx-check { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; color: var(--text-2); cursor: pointer; min-height: 40px; }
+        .cx-check input { width: 18px; height: 18px; accent-color: var(--accent); }
+        .cx-bar { height: 8px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; margin-top: 12px; }
+        .cx-bar span { display: block; height: 100%; background: var(--accent); }
+        .cx-out .v .u { font-weight: 600; }
+        @media (max-width: 900px) { .cx-two { grid-template-columns: minmax(0, 1fr); } }
+        @media (max-width: 640px) { .cx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cx-out .v { font-size: 17px; } .seg { flex-wrap: wrap; } }
     </style>
 </head>
 <body>
@@ -2806,6 +2830,497 @@ const Proof = (function () {
                 </div>
             );
         }
+        // ===== Calculator tab: Salinity & DWA, Days, SF / Density =====
+        const CX_KEY = 'tfm_calc_v1';
+        const CX_WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const CX_MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const cx2 = (n) => String(n).padStart(2, '0');
+        function cxTzMin(lbl) { const m = /GMT([+-])(\d+):(\d+)/.exec(lbl || ''); return m ? (m[1] === '-' ? -1 : 1) * (+m[2] * 60 + +m[3]) : 0; }
+        function cxDevTz() {
+            const off = -new Date().getTimezoneOffset();
+            const hit = timezones.find((z) => cxTzMin(z) === off);
+            return hit || 'GMT+0:00';
+        }
+        function cxNowWall(off) { return new Date(Date.now() + off * 60000).toISOString().slice(0, 16); }
+        function cxToday() { const d = new Date(); return d.getFullYear() + '-' + cx2(d.getMonth() + 1) + '-' + cx2(d.getDate()); }
+        function cxWallToUtc(s, off) {
+            const m = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?/.exec(s || '');
+            if (!m) return NaN;
+            return Date.UTC(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0)) - off * 60000;
+        }
+        function cxFmt(ms, off, withTime) {
+            if (!isFinite(ms)) return '-';
+            const d = new Date(ms + off * 60000);
+            const s = CX_WD[d.getUTCDay()] + ' ' + cx2(d.getUTCDate()) + ' ' + CX_MON[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
+            return withTime === false ? s : s + ' ' + cx2(d.getUTCHours()) + ':' + cx2(d.getUTCMinutes());
+        }
+        function cxDOY(ms, off) { const d = new Date(ms + off * 60000); return Math.floor((Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - Date.UTC(d.getUTCFullYear(), 0, 1)) / 86400000) + 1; }
+        function cxISOWeek(ms, off) {
+            const d = new Date(ms + off * 60000);
+            const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+            const day = t.getUTCDay() || 7;
+            t.setUTCDate(t.getUTCDate() + 4 - day);
+            const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+            return Math.ceil(((t - y0) / 86400000 + 1) / 7);
+        }
+        function cxAddMonths(ms, n) {
+            const d = new Date(ms);
+            const y = d.getUTCFullYear(), m = d.getUTCMonth() + n, day = d.getUTCDate();
+            const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+            return Date.UTC(y, m, Math.min(day, last), d.getUTCHours(), d.getUTCMinutes());
+        }
+        function cxMonthsDays(a, b) {
+            // calendar months and remaining days from a to b (UTC wall ms, a <= b)
+            let months = 0;
+            while (cxAddMonths(a, months + 1) <= b && months < 12000) months++;
+            const rest = (b - cxAddMonths(a, months)) / 86400000;
+            return { months, days: rest };
+        }
+        function cxWeekdays(a, b) {
+            // count Mon-Fri and Sat/Sun calendar days from date a to date b inclusive (UTC midnight ms)
+            const n = Math.round((b - a) / 86400000) + 1;
+            if (n <= 0) return { wk: 0, we: 0 };
+            const full = Math.floor(n / 7);
+            let wk = full * 5, we = full * 2;
+            const sd = new Date(a).getUTCDay();
+            for (let i = 0; i < n % 7; i++) { const d = (sd + full * 7 + i) % 7; if (d === 0 || d === 6) we++; else wk++; }
+            return { wk, we };
+        }
+
+        // UNESCO 1981 one-atmosphere equation of state for sea water. S in g/kg (ppt), T in degC, result kg/m3
+        function swRho(S, T) {
+            const rw = 999.842594 + 6.793952e-2 * T - 9.095290e-3 * T * T + 1.001685e-4 * T ** 3 - 1.120083e-6 * T ** 4 + 6.536332e-9 * T ** 5;
+            const A = 8.24493e-1 - 4.0899e-3 * T + 7.6438e-5 * T * T - 8.2467e-7 * T ** 3 + 5.3875e-9 * T ** 4;
+            const B = -5.72466e-3 + 1.0227e-4 * T - 1.6546e-6 * T * T;
+            return rw + A * S + B * Math.pow(S, 1.5) + 4.8314e-4 * S * S;
+        }
+        function swSal(rho, T) {
+            if (!(rho > 0) || !isFinite(T)) return NaN;
+            if (rho <= swRho(0, T)) return 0;
+            if (rho > swRho(50, T)) return NaN;
+            let lo = 0, hi = 50;
+            for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; if (swRho(mid, T) < rho) lo = mid; else hi = mid; }
+            return (lo + hi) / 2;
+        }
+        // reading as typed: 1.012 / 1012 / 1012.5 -> t/m3
+        function cxRead(v) { const x = pn(v); if (!(x > 0)) return NaN; return x > 100 ? x / 1000 : x; }
+
+        const SF_UNITS = [
+            { n: 'm³/t', k: 'sf', f: 1 },
+            { n: 'ft³/t', k: 'sf', f: 0.028316846592 },
+            { n: 'ft³/LT', k: 'sf', f: 0.028316846592 / 1.0160469088 },
+            { n: 'm³/LT', k: 'sf', f: 1 / 1.0160469088 },
+            { n: 't/m³', k: 'd', f: 1 },
+            { n: 'kg/m³', k: 'd', f: 0.001 },
+            { n: 'lb/ft³', k: 'd', f: 0.45359237 / 1000 / 0.028316846592 },
+            { n: 'lb/US gal', k: 'd', f: 0.119826427 }
+        ];
+
+        const CX_DEFAULT = () => {
+            const tz = cxDevTz();
+            return {
+                tool: 'sal',
+                sal: { read: '', temp: '', sIn: '', tIn: '', mode: 'calc', disp: '', tpc: '', fwa: '', sw: '1.025', ldraft: '', present: '', dDisp: '', dTpc: '', r1: '1.025', r2: '', dDraft: '' },
+                days: { mode: 'between', a: cxNowWall(cxTzMin(tz)), aTz: tz, b: '', bTz: tz, incl: false, base: cxNowWall(cxTzMin(tz)), baseTz: tz, op: 'add', ad: '', ah: '', am: '', son: cxToday(), cm: '6', cd: '0', tol: '30', ref: '', countFirst: true },
+                sf: { v: '', u: 0, bs: '0', vol: '', w: '' }
+            };
+        };
+        function cxLoad() {
+            const d = CX_DEFAULT();
+            try {
+                const s = JSON.parse(localStorage.getItem(CX_KEY) || 'null');
+                if (s) return { tool: s.tool || d.tool, sal: { ...d.sal, ...(s.sal || {}) }, days: { ...d.days, ...(s.days || {}) }, sf: { ...d.sf, ...(s.sf || {}) } };
+            } catch (e) {}
+            return d;
+        }
+
+        function CxOut({ l, v, u, hi, sub }) {
+            return (
+                <div className={'cx-out' + (hi ? ' hi' : '')}>
+                    <div className="l">{l}</div>
+                    <div className="v">{v}{u && v !== '-' ? <span className="u">{u}</span> : null}</div>
+                    {sub && <div className="s">{sub}</div>}
+                </div>
+            );
+        }
+        function CxField({ label, value, onChange, placeholder, type, hint }) {
+            return (
+                <div>
+                    <label className="input-label">{label}</label>
+                    <input type={type || 'text'} inputMode={type ? undefined : 'decimal'} className="input-field" value={value} placeholder={placeholder || ''} onChange={(e) => onChange(e.target.value)} />
+                    {hint && <div className="cx-hint">{hint}</div>}
+                </div>
+            );
+        }
+        function CxTz({ label, value, onChange }) {
+            return (
+                <div>
+                    <label className="input-label">{label}</label>
+                    <select className="input-field" value={value} onChange={(e) => onChange(e.target.value)}>
+                        {timezones.map((z) => <option key={z} value={z}>{z.replace('GMT', 'UTC ')}</option>)}
+                    </select>
+                </div>
+            );
+        }
+        const cxF = (v, d) => (isFinite(v) ? v.toFixed(d) : '-');
+        const cxInt = (v) => (isFinite(v) ? Math.round(v).toLocaleString('en-GB') : '-');
+
+        // ---------- Salinity & DWA ----------
+        function CxSalinity({ s, set }) {
+            const T = s.temp === '' ? 15 : pn(s.temp);
+            const rho = cxRead(s.read); // t/m3
+            const sal = swSal(rho * 1000, T);
+            const pctSea = isFinite(rho) ? Math.max(0, Math.min(100, (rho - 1.000) / 0.025 * 100)) : NaN;
+            const kind = !isFinite(rho) ? '' : rho < 1.003 ? 'Fresh water' : rho < 1.020 ? 'Brackish (dock) water' : rho <= 1.030 ? 'Salt water' : 'Very saline water';
+
+            const Sin = pn(s.sIn), Tin = s.tIn === '' ? 15 : pn(s.tIn);
+            const rhoFromS = Sin >= 0 && Sin <= 50 && isFinite(Tin) ? swRho(Sin, Tin) : NaN;
+
+            const sw = pn(s.sw) > 0 ? pn(s.sw) : 1.025;
+            const disp = pn(s.disp), tpc = pn(s.tpc);
+            const fwa = s.mode === 'calc' ? (disp > 0 && tpc > 0 ? disp / (4 * tpc) : NaN) : pn(s.fwa);
+            const dwa = isFinite(fwa) && isFinite(rho) ? fwa * (sw - rho) / (sw - 1.000) : NaN;
+            const ld = pn(s.ldraft), pr = pn(s.present);
+            const maxDraft = ld > 0 && isFinite(dwa) ? ld + dwa / 1000 : NaN;
+            const tpcDock = tpc > 0 && isFinite(rho) ? tpc * rho / sw : NaN;
+            const toGo = isFinite(maxDraft) && pr > 0 ? (maxDraft - pr) * 100 : NaN; // cm
+            const toLoad = isFinite(toGo) && isFinite(tpcDock) ? toGo * tpcDock : NaN;
+
+            const dD = pn(s.dDisp), dT = pn(s.dTpc) > 0 ? pn(s.dTpc) : tpc, r1 = cxRead(s.r1), r2 = cxRead(s.r2), d0 = pn(s.dDraft);
+            const chg = dD > 0 && dT > 0 && r1 > 0 && r2 > 0 ? dD * sw * (1 / r2 - 1 / r1) / dT : NaN; // cm, + = sinkage
+            const newDraft = d0 > 0 && isFinite(chg) ? d0 + chg / 100 : NaN;
+            const sameDraftDisp = dD > 0 && r1 > 0 && r2 > 0 ? dD * r2 / r1 : NaN;
+
+            return (
+                <div className="cx-two">
+                    <div>
+                        <div className="card cx-card">
+                            <div className="card-title">Dock water density to salinity</div>
+                            <div className="cx-row">
+                                <CxField label="Hydrometer reading" value={s.read} onChange={set('read')} placeholder="1.012 or 1012" />
+                                <CxField label="Sample temperature (°C)" value={s.temp} onChange={set('temp')} placeholder="15 if blank" />
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l="Density" v={cxF(rho, 4)} u="t/m³" hi />
+                                <CxOut l="Density" v={cxF(rho * 1000, 1)} u="kg/m³" />
+                                <CxOut l="Salinity" v={cxF(sal, 2)} u="ppt" hi sub={isFinite(rho) && s.temp === '' ? 'at 15 °C (assumed)' : null} />
+                                <CxOut l="Sea water share" v={cxF(pctSea, 0)} u="%" sub="1.000 = 0%, 1.025 = 100%" />
+                            </div>
+                            {kind && <div style={noteStyle(rho < 1.020 ? 'warn' : '')}>{kind}. {isFinite(sal) && sal === 0 ? 'Reading is at or below pure water at this temperature, check the hydrometer and sample.' : ''}{!isFinite(sal) && isFinite(rho) ? 'Reading is outside the sea water range (above 50 ppt).' : ''}</div>}
+                        </div>
+
+                        <div className="card cx-card">
+                            <div className="card-title">Salinity to density</div>
+                            <div className="cx-row">
+                                <CxField label="Salinity (ppt / PSU)" value={s.sIn} onChange={set('sIn')} placeholder="e.g. 35" />
+                                <CxField label="Temperature (°C)" value={s.tIn} onChange={set('tIn')} placeholder="15 if blank" />
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l="Density" v={cxF(rhoFromS / 1000, 4)} u="t/m³" hi />
+                                <CxOut l="Density" v={cxF(rhoFromS, 2)} u="kg/m³" />
+                                <CxOut l="Sigma-t" v={cxF(rhoFromS - 1000, 2)} u="kg/m³" />
+                            </div>
+                            <div className="cx-hint" style={{ marginTop: 10 }}>UNESCO 1981 equation of state at atmospheric pressure. A load line hydrometer reads density at the sample temperature, so enter the reading as it is.</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="card cx-card">
+                            <div className="card-title">FWA and dock water allowance</div>
+                            <div className="seg" role="group" aria-label="FWA source" style={{ marginBottom: 12 }}>
+                                <button aria-pressed={s.mode === 'calc'} onClick={() => set('mode')('calc')}>Calculate FWA</button>
+                                <button aria-pressed={s.mode === 'known'} onClick={() => set('mode')('known')}>FWA known</button>
+                            </div>
+                            {s.mode === 'calc' ? (
+                                <div className="cx-row">
+                                    <CxField label="Summer displacement (t)" value={s.disp} onChange={set('disp')} />
+                                    <CxField label="TPC in sea water (t/cm)" value={s.tpc} onChange={set('tpc')} />
+                                </div>
+                            ) : (
+                                <div className="cx-row">
+                                    <CxField label="FWA (mm)" value={s.fwa} onChange={set('fwa')} placeholder="from load line certificate" />
+                                    <CxField label="TPC in sea water (t/cm)" value={s.tpc} onChange={set('tpc')} placeholder="for cargo to load" />
+                                </div>
+                            )}
+                            <div className="cx-row">
+                                <CxField label="Dock water density" value={s.read} onChange={set('read')} placeholder="same as hydrometer" />
+                                <CxField label="Sea water density" value={s.sw} onChange={set('sw')} />
+                            </div>
+                            <div className="cx-row">
+                                <CxField label="Load line draft in force (m)" value={s.ldraft} onChange={set('ldraft')} placeholder="S, T or W draft" />
+                                <CxField label="Present mean draft (m)" value={s.present} onChange={set('present')} placeholder="optional" />
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l="FWA" v={cxF(fwa, 0)} u="mm" />
+                                <CxOut l="DWA" v={cxF(dwa, 0)} u="mm" hi />
+                                <CxOut l="Max draft in dock" v={cxF(maxDraft, 3)} u="m" hi />
+                                <CxOut l="TPC in dock water" v={cxF(tpcDock, 2)} u="t/cm" />
+                                <CxOut l="Draft still available" v={cxF(toGo, 1)} u="cm" />
+                                <CxOut l="Cargo / weight still to load" v={cxInt(toLoad)} u="t" hi />
+                            </div>
+                            {isFinite(toGo) && toGo < 0 && <div style={noteStyle('bad')}>Present draft is {cxF(-toGo, 1)} cm deeper than allowed in this dock water.</div>}
+                            <div className="cx-hint" style={{ marginTop: 10 }}>FWA (mm) = Δ / (4 × TPC). DWA = FWA × (1.025 - ρ dock) / 0.025. Allow for sag, bunkers and stores to come, and the passage to the zone before final figures.</div>
+                        </div>
+
+                        <div className="card cx-card">
+                            <div className="card-title">Draft change between densities</div>
+                            <div className="cx-row">
+                                <CxField label="Present displacement (t)" value={s.dDisp} onChange={set('dDisp')} />
+                                <CxField label="TPC in sea water (t/cm)" value={s.dTpc} onChange={set('dTpc')} placeholder={tpc > 0 ? String(tpc) : ''} />
+                            </div>
+                            <div className="cx-row">
+                                <CxField label="From density" value={s.r1} onChange={set('r1')} />
+                                <CxField label="To density" value={s.r2} onChange={set('r2')} placeholder="e.g. 1.005" />
+                            </div>
+                            <CxField label="Present mean draft (m)" value={s.dDraft} onChange={set('dDraft')} placeholder="optional" />
+                            <div className="cx-grid">
+                                <CxOut l={isFinite(chg) && chg < 0 ? 'Rise' : 'Sinkage'} v={cxF(Math.abs(chg) * 10, 0)} u="mm" hi />
+                                <CxOut l="Change" v={cxF(Math.abs(chg), 1)} u="cm" />
+                                <CxOut l="New mean draft" v={cxF(newDraft, 3)} u="m" hi />
+                                <CxOut l="Displacement at same draft" v={cxInt(sameDraftDisp)} u="t" />
+                            </div>
+                            <div className="cx-hint" style={{ marginTop: 10 }}>Assumes a wall sided ship over the change. Displacement stays the same, only the draft changes.</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ---------- Days ----------
+        function CxDays({ s, set, setMany }) {
+            const now = () => cxNowWall(cxTzMin(s.aTz));
+            let body = null;
+
+            if (s.mode === 'between') {
+                const aOff = cxTzMin(s.aTz), bOff = cxTzMin(s.bTz);
+                const A = cxWallToUtc(s.a, aOff), B = cxWallToUtc(s.b, bOff);
+                const ok = isFinite(A) && isFinite(B);
+                const diff = ok ? B - A : NaN;
+                const neg = diff < 0;
+                const ad = Math.abs(diff);
+                const mins = ad / 60000;
+                const dd = Math.floor(mins / 1440), hh = Math.floor((mins % 1440) / 60), mm = Math.round(mins % 60);
+                // calendar day counts on the start time zone wall dates
+                let cal = NaN, wk = null, md = null;
+                if (ok) {
+                    const lo = Math.min(A, B), hi = Math.max(A, B);
+                    const la = new Date(lo + aOff * 60000), lb = new Date(hi + aOff * 60000);
+                    const da = Date.UTC(la.getUTCFullYear(), la.getUTCMonth(), la.getUTCDate());
+                    const db = Date.UTC(lb.getUTCFullYear(), lb.getUTCMonth(), lb.getUTCDate());
+                    cal = Math.round((db - da) / 86400000) + (s.incl ? 1 : 0);
+                    wk = cxWeekdays(s.incl ? da : da + 86400000, db);
+                    md = cxMonthsDays(lo + aOff * 60000, hi + aOff * 60000);
+                }
+                body = (
+                    <div className="card cx-card">
+                        <div className="card-title">Time between two dates</div>
+                        <div className="cx-row">
+                            <CxField label="From" type="datetime-local" value={s.a} onChange={set('a')} />
+                            <CxTz label="From time zone" value={s.aTz} onChange={set('aTz')} />
+                        </div>
+                        <div className="cx-row">
+                            <CxField label="To" type="datetime-local" value={s.b} onChange={set('b')} />
+                            <CxTz label="To time zone" value={s.bTz} onChange={set('bTz')} />
+                        </div>
+                        <div className="cx-btns">
+                            <button style={subBtn} onClick={() => setMany({ a: now(), aTz: s.aTz })}>From = now</button>
+                            <button style={subBtn} onClick={() => set('b')(cxNowWall(cxTzMin(s.bTz)))}>To = now</button>
+                            <button style={subBtn} onClick={() => setMany({ a: s.b, b: s.a, aTz: s.bTz, bTz: s.aTz })}>Swap</button>
+                            <label className="cx-check"><input type="checkbox" checked={s.incl} onChange={(e) => set('incl')(e.target.checked)} /> Count both first and last day</label>
+                        </div>
+                        <div className="cx-grid">
+                            <CxOut l="Total days" v={cxF(ad / 86400000, 3)} u="d" hi sub={neg ? 'To is before From' : null} />
+                            <CxOut l="Days, hours, minutes" v={ok ? dd + 'd ' + hh + 'h ' + mm + 'm' : '-'} hi />
+                            <CxOut l="Total hours" v={cxF(ad / 3600000, 2)} u="h" />
+                            <CxOut l="Total minutes" v={cxInt(mins)} u="min" />
+                            <CxOut l="Weeks and days" v={ok ? Math.floor(dd / 7) + 'w ' + (dd % 7) + 'd' : '-'} />
+                            <CxOut l="Months and days" v={md ? md.months + 'mo ' + Math.floor(md.days) + 'd' : '-'} />
+                            <CxOut l={s.incl ? 'Calendar days (inclusive)' : 'Calendar days'} v={cxInt(cal)} u="d" hi />
+                            <CxOut l="Weekdays / weekend" v={wk ? wk.wk + ' / ' + wk.we : '-'} sub="Mon to Fri / Sat and Sun" />
+                        </div>
+                        {ok && <div className="cx-hint" style={{ marginTop: 10 }}>From {cxFmt(A, aOff)} ({s.aTz.replace('GMT', 'UTC ')}) = {cxFmt(A, 0)} UTC. To {cxFmt(B, bOff)} ({s.bTz.replace('GMT', 'UTC ')}) = {cxFmt(B, 0)} UTC.</div>}
+                    </div>
+                );
+            } else if (s.mode === 'add') {
+                const off = cxTzMin(s.baseTz);
+                const base = cxWallToUtc(s.base, off);
+                const sign = s.op === 'sub' ? -1 : 1;
+                const delta = ((pn(s.ad) || 0) * 1440 + (pn(s.ah) || 0) * 60 + (pn(s.am) || 0)) * 60000 * sign;
+                const res = isFinite(base) ? base + delta : NaN;
+                body = (
+                    <div className="card cx-card">
+                        <div className="card-title">Add or subtract time</div>
+                        <div className="cx-row">
+                            <CxField label="Start" type="datetime-local" value={s.base} onChange={set('base')} />
+                            <CxTz label="Time zone" value={s.baseTz} onChange={set('baseTz')} />
+                        </div>
+                        <div className="seg" role="group" aria-label="Operation" style={{ margin: '4px 0 12px' }}>
+                            <button aria-pressed={s.op === 'add'} onClick={() => set('op')('add')}>Add +</button>
+                            <button aria-pressed={s.op === 'sub'} onClick={() => set('op')('sub')}>Subtract -</button>
+                        </div>
+                        <div className="cx-row">
+                            <CxField label="Days" value={s.ad} onChange={set('ad')} placeholder="0" hint="decimals allowed, e.g. 12.5" />
+                            <CxField label="Hours" value={s.ah} onChange={set('ah')} placeholder="0" />
+                            <CxField label="Minutes" value={s.am} onChange={set('am')} placeholder="0" />
+                        </div>
+                        <div className="cx-btns">
+                            <button style={subBtn} onClick={() => set('base')(cxNowWall(off))}>Start = now</button>
+                            <button style={subBtn} onClick={() => setMany({ ad: '', ah: '', am: '' })}>Clear</button>
+                        </div>
+                        <div className="cx-grid">
+                            <CxOut l={'Result (' + s.baseTz.replace('GMT', 'UTC ') + ')'} v={cxFmt(res, off)} hi />
+                            <CxOut l="Result in UTC" v={cxFmt(res, 0)} />
+                            <CxOut l="Ship's device time" v={cxFmt(res, -new Date().getTimezoneOffset())} />
+                            <CxOut l="Day of year" v={isFinite(res) ? String(cxDOY(res, off)) : '-'} />
+                            <CxOut l="ISO week" v={isFinite(res) ? String(cxISOWeek(res, off)) : '-'} />
+                            <CxOut l="Total shift" v={cxF(Math.abs(delta) / 3600000, 2)} u="h" />
+                        </div>
+                    </div>
+                );
+            } else {
+                const first = s.countFirst ? 1 : 0;
+                const son = cxWallToUtc(s.son, 0);
+                const refStr = s.ref || cxToday();
+                const ref = cxWallToUtc(refStr, 0);
+                const cm = pn(s.cm) || 0, cd = pn(s.cd) || 0, tol = pn(s.tol) || 0;
+                const ok = isFinite(son) && (cm > 0 || cd > 0);
+                const endExcl = ok ? cxAddMonths(son, Math.floor(cm)) + cd * 86400000 : NaN; // day after last day when sign-on counts
+                const end = ok ? endExcl - first * 86400000 : NaN;
+                const total = ok ? Math.round((end - son) / 86400000) + first : NaN;
+                const onboard = isFinite(son) && isFinite(ref) ? Math.round((ref - son) / 86400000) + first : NaN;
+                const remain = ok && isFinite(ref) ? Math.round((end - ref) / 86400000) : NaN;
+                const pct = ok && isFinite(onboard) ? Math.max(0, Math.min(100, onboard / total * 100)) : NaN;
+                const mlc = isFinite(son) ? cxAddMonths(son, 12) - 86400000 : NaN;
+                const mlcLeft = isFinite(mlc) && isFinite(ref) ? Math.round((mlc - ref) / 86400000) : NaN;
+                const md = isFinite(onboard) && onboard > 0 ? cxMonthsDays(son, son + onboard * 86400000) : null;
+                body = (
+                    <div className="card cx-card">
+                        <div className="card-title">Contract and days on board</div>
+                        <div className="cx-row">
+                            <CxField label="Sign-on date" type="date" value={s.son} onChange={set('son')} />
+                            <CxField label="Count up to (blank = today)" type="date" value={s.ref} onChange={set('ref')} />
+                        </div>
+                        <div className="cx-row">
+                            <CxField label="Contract months" value={s.cm} onChange={set('cm')} />
+                            <CxField label="Plus days" value={s.cd} onChange={set('cd')} />
+                            <CxField label="Tolerance (± days)" value={s.tol} onChange={set('tol')} />
+                        </div>
+                        <div className="cx-btns">
+                            <label className="cx-check"><input type="checkbox" checked={s.countFirst} onChange={(e) => set('countFirst')(e.target.checked)} /> Sign-on day counts as day 1</label>
+                        </div>
+                        <div className="cx-grid">
+                            <CxOut l="Days on board" v={cxInt(onboard)} u="d" hi sub={md ? md.months + (md.months === 1 ? ' month ' : ' months ') + Math.floor(md.days) + (Math.floor(md.days) === 1 ? ' day' : ' days') : null} />
+                            <CxOut l="Days remaining" v={cxInt(remain)} u="d" hi sub={isFinite(remain) && remain < 0 ? 'Overdue' : null} />
+                            <CxOut l="Contract ends" v={cxFmt(end, 0, false)} hi />
+                            <CxOut l="Contract length" v={cxInt(total)} u="d" />
+                            <CxOut l="Earliest relief" v={tol > 0 ? cxFmt(end - tol * 86400000, 0, false) : '-'} />
+                            <CxOut l="Latest relief" v={tol > 0 ? cxFmt(end + tol * 86400000, 0, false) : '-'} />
+                            <CxOut l="12 months on board" v={cxFmt(mlc, 0, false)} sub={isFinite(mlcLeft) ? mlcLeft + ' days away' : null} />
+                            <CxOut l="Complete" v={cxF(pct, 1)} u="%" />
+                        </div>
+                        {isFinite(pct) && <div className="cx-bar" aria-hidden="true"><span style={{ width: pct + '%' }} /></div>}
+                        {isFinite(mlcLeft) && mlcLeft < 30 && <div style={noteStyle(mlcLeft < 0 ? 'bad' : 'warn')}>MLC 2006 Standard A2.5.1: the maximum period of service on board before repatriation entitlement is less than 12 months. {mlcLeft < 0 ? 'This is already passed.' : 'This is ' + mlcLeft + ' days away.'}</div>}
+                    </div>
+                );
+            }
+
+            return (
+                <div className="cx-wrap">
+                    <div className="seg" role="group" aria-label="Days mode" style={{ marginBottom: 14 }}>
+                        <button aria-pressed={s.mode === 'between'} onClick={() => set('mode')('between')}>Between dates</button>
+                        <button aria-pressed={s.mode === 'add'} onClick={() => set('mode')('add')}>Add / subtract</button>
+                        <button aria-pressed={s.mode === 'contract'} onClick={() => set('mode')('contract')}>Contract</button>
+                    </div>
+                    {body}
+                </div>
+            );
+        }
+
+        // ---------- SF / Density ----------
+        function CxSF({ s, set }) {
+            const v = pn(s.v), u = SF_UNITS[s.u] || SF_UNITS[0];
+            let sf = NaN;
+            if (v > 0) sf = u.k === 'sf' ? v * u.f : 1 / (v * u.f);
+            const bs = Math.max(0, Math.min(90, pn(s.bs) || 0)) / 100;
+            const sfBs = isFinite(sf) ? sf / (1 - bs) : NaN;
+            const vol = pn(s.vol), w = pn(s.w);
+            const maxW = vol > 0 && sf > 0 ? vol * (1 - bs) / sf : NaN;
+            const volReq = w > 0 && sf > 0 ? w * sf / (1 - bs) : NaN;
+            const fill = isFinite(volReq) && vol > 0 ? volReq / vol * 100 : NaN;
+            const spare = isFinite(volReq) && vol > 0 ? vol - volReq : NaN;
+            const more = isFinite(maxW) && w > 0 ? maxW - w : NaN;
+
+            return (
+                <div className="cx-two">
+                    <div className="card cx-card">
+                        <div className="card-title">Stowage factor and density</div>
+                        <div className="cx-row">
+                            <CxField label="Value" value={s.v} onChange={set('v')} placeholder="e.g. 1.45" />
+                            <div>
+                                <label className="input-label">Unit</label>
+                                <select className="input-field" value={s.u} onChange={(e) => set('u')(parseInt(e.target.value))}>
+                                    <optgroup label="Stowage factor">{SF_UNITS.map((x, i) => x.k === 'sf' ? <option key={i} value={i}>{x.n}</option> : null)}</optgroup>
+                                    <optgroup label="Density">{SF_UNITS.map((x, i) => x.k === 'd' ? <option key={i} value={i}>{x.n}</option> : null)}</optgroup>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="cx-sub">Stowage factor</div>
+                        <div className="cx-grid" style={{ marginTop: 6 }}>
+                            {SF_UNITS.map((x, i) => x.k === 'sf' ? <CxOut key={i} l={x.n} v={isFinite(sf) ? fmtSig(sf / x.f) : '-'} hi={i === s.u} /> : null)}
+                        </div>
+                        <div className="cx-sub">Density</div>
+                        <div className="cx-grid" style={{ marginTop: 6 }}>
+                            {SF_UNITS.map((x, i) => x.k === 'd' ? <CxOut key={i} l={x.n} v={isFinite(sf) ? fmtSig(1 / sf / x.f) : '-'} hi={i === s.u} /> : null)}
+                        </div>
+                        <div className="cx-hint" style={{ marginTop: 10 }}>SF (m³/t) = 1 / density (t/m³). 1 m³/t = 35.315 ft³/t = 35.881 ft³/LT.</div>
+                    </div>
+
+                    <div className="card cx-card">
+                        <div className="card-title">Hold capacity with broken stowage</div>
+                        <div className="cx-row">
+                            <CxField label="Hold volume (m³)" value={s.vol} onChange={set('vol')} placeholder="grain or bale" />
+                            <CxField label="Broken stowage (%)" value={s.bs} onChange={set('bs')} />
+                        </div>
+                        <CxField label="Cargo to load (t)" value={s.w} onChange={set('w')} placeholder="optional" />
+                        <div className="cx-grid">
+                            <CxOut l="SF used" v={cxF(sf, 3)} u="m³/t" />
+                            <CxOut l="SF incl. broken stowage" v={cxF(sfBs, 3)} u="m³/t" />
+                            <CxOut l="Max cargo by volume" v={cxInt(maxW)} u="t" hi />
+                            <CxOut l="Space needed" v={cxInt(volReq)} u="m³" hi />
+                            <CxOut l="Hold filled" v={cxF(fill, 1)} u="%" />
+                            <CxOut l="Space left" v={cxInt(spare)} u="m³" />
+                            <CxOut l="More cargo by volume" v={cxInt(more)} u="t" />
+                        </div>
+                        {isFinite(fill) && fill > 100 && <div style={noteStyle('bad')}>The cargo needs {cxF(fill - 100, 1)}% more space than the hold has.</div>}
+                        <div className="cx-hint" style={{ marginTop: 10 }}>Use bale capacity for packaged cargo and grain capacity for bulk. Check the deadweight and tank top / deck strength limits as well, the lower figure governs.</div>
+                    </div>
+                </div>
+            );
+        }
+
+        function CalcTab() {
+            const [st, setSt] = useState(cxLoad);
+            useEffect(() => { try { localStorage.setItem(CX_KEY, JSON.stringify(st)); } catch (e) {} }, [st]);
+            const part = (p) => ({
+                s: st[p],
+                set: (k) => (v) => setSt((o) => ({ ...o, [p]: { ...o[p], [k]: v } })),
+                setMany: (obj) => setSt((o) => ({ ...o, [p]: { ...o[p], ...obj } }))
+            });
+            const tools = [['sal', 'Salinity & DWA'], ['days', 'Days'], ['sf', 'SF / Density']];
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Calculator</h2>
+                    <div className="cx-tools" role="group" aria-label="Calculator">
+                        {tools.map(([k, n]) => (
+                            <button key={k} onClick={() => setSt((o) => ({ ...o, tool: k }))} style={{ ...subBtn, background: st.tool === k ? 'var(--accent)' : 'var(--surface-2)', color: st.tool === k ? 'var(--on-accent)' : 'var(--text-2)' }}>{n}</button>
+                        ))}
+                    </div>
+                    {st.tool === 'sal' && <CxSalinity {...part('sal')} />}
+                    {st.tool === 'days' && <CxDays {...part('days')} />}
+                    {st.tool === 'sf' && <CxSF {...part('sf')} />}
+                </div>
+            );
+        }
 // @@NEWTABS-END
 
         const TABS = [
@@ -2819,7 +3334,8 @@ const Proof = (function () {
             { key: 'proof', label: 'Proofread', c: '#a21caf', cd: '#e879f9' },
             { key: 'time', label: 'Time Zones', c: '#4d7c0f', cd: '#a3e635' },
             { key: 'load', label: 'Load Line', c: '#0e7490', cd: '#22d3ee' },
-            { key: 'garbage', label: 'Garbage', c: '#475569', cd: '#cbd5e1' }
+            { key: 'garbage', label: 'Garbage', c: '#475569', cd: '#cbd5e1' },
+            { key: 'calc', label: 'Calculator', c: '#7c3aed', cd: '#c4b5fd' }
         ];
         const ICON_PATHS = {
             rob: <><path d="M12 2.7s6 6.2 6 10.8a6 6 0 0 1-12 0C6 8.9 12 2.7 12 2.7z" /></>,
@@ -2833,6 +3349,7 @@ const Proof = (function () {
             time: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z" /></>,
             load: <><circle cx="10" cy="12" r="6" /><path d="M2 12h16" /><path d="M18 7v10" /><path d="M18 8h4M18 12h4M18 16h4" /></>,
             garbage: <><path d="M4 7h16" /><path d="M9 7V4h6v3" /><path d="M6 7l1 13h10l1-13" /><path d="M10 11v6M14 11v6" /></>,
+            calc: <><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M8 7h8" /><path d="M8 11h.01M12 11h.01M16 11h.01M8 14.5h.01M12 14.5h.01M16 14.5h.01M8 18h4M16 18h.01" /></>,
             sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></>,
             moon: <><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></>
         };
@@ -3546,6 +4063,7 @@ const Proof = (function () {
                             {activeTab === 8 && <TimeTab />}
                             {activeTab === 9 && <LoadLineTab />}
                             {activeTab === 10 && <GarbageTab />}
+                            {activeTab === 11 && <CalcTab />}
                         </div>
                     </div>
                     </main>
