@@ -789,6 +789,12 @@
         .cx-wt-h { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: 4px; }
         .cx-tk-t { font-size: 13px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
         @media (max-width: 640px) { .cx-wt { grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr) minmax(0, 1fr) 32px; } .cx-tk { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 58px 32px; } .cx-wt-h { font-size: 10px; } }
+        .cx-nv { display: grid; gap: 6px; align-items: center; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 60px 36px; margin-bottom: 2px; }
+        .cx-nv .input-field { margin: 0; min-height: 38px; padding: 6px 9px; font-size: 14px; }
+        .cx-status { border-radius: 10px; padding: 12px 14px; font-size: 13px; border: 1px solid; }
+        .cx-status.ok { background: var(--ok-soft); color: var(--ok); border-color: var(--ok); }
+        .cx-status.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+        .cx-status-h { font-size: 20px; font-weight: 800; margin-bottom: 2px; }
         @media (max-width: 900px) { .cx-two { grid-template-columns: minmax(0, 1fr); } }
         @media (max-width: 640px) { .cx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cx-out .v { font-size: 17px; } .seg { flex-wrap: wrap; } }
     </style>
@@ -796,7 +802,7 @@
 <body>
     <div id="root"></div>
     
-    <script src="app.js?v=11" defer></script>
+    <script src="app.js?v=12" defer></script>
 
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(e){console.log("SW failed",e)})})}</script>
 </body>
