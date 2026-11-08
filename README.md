@@ -1,6 +1,6 @@
 # Meridian Tools for Mate
 
-Maritime tools for the watchkeeper by Tango Juliet Dev: ROB, ETA, speed, ventilation, unit converter, hydrostatics interpolation, deadweight / max cargo intake, proofread, time zones, load line zones, a Calculator (salinity and DWA, days, SF and density, trim and draft, rolling period and turning heel, ballast exchange, NRE days for Indian seafarers) and a Garbage Stowage Board (GMP drums per deck, fill and free space, MARPOL Annex V categories, editable per vessel).
+Maritime tools for the watchkeeper by Tango Juliet Dev: ROB, ETA, speed, ventilation, unit converter, hydrostatics interpolation, deadweight / max cargo intake, proofread, time zones, load line zones, a Calculator (salinity and DWA, days, SF and density, trim and draft, rolling period and turning heel, ballast exchange, anchor holding, NRE days for Indian seafarers) and a Garbage Stowage Board (GMP drums per deck, fill and free space, MARPOL Annex V categories, editable per vessel) and a Budget tab (contracts and salary by pay day, ledger, recurring EMIs and SIPs, monthly budgets, and the final in hand forecast for any date).
 
 Installable PWA that works offline. All data stays on the device.
 

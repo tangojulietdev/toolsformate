@@ -971,6 +971,18 @@
             .cx-tools::-webkit-scrollbar { display: none; }
             .cx-tools button { flex: none; }
         }
+        .bt-chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 2px 0 6px; }
+        .bt-tx { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto 30px; gap: 8px; align-items: center; padding: 7px 0; border-bottom: .5px solid var(--border); font-size: 13px; }
+        .bt-tx > span { min-width: 0; }
+        .bt-tx .n { display: block; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .bt-tx .c { display: block; font-size: 11px; color: var(--muted); }
+        .bt-tx .a { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; color: var(--text); white-space: nowrap; }
+        .bt-tx .a.bt-in { color: var(--ok); }
+        .bt-tag { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 99px; background: var(--warn-soft); color: var(--warn); margin-left: 6px; vertical-align: 1px; }
+        .bt-con { padding: 10px 0 8px; border-bottom: .5px solid var(--border); margin-bottom: 8px; }
+        .bt-con-f { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); font-weight: 600; }
+        .bt-cat .cx-tk { margin-bottom: 4px; }
+        @media (max-width: 640px) { .bt-tx { grid-template-columns: 74px minmax(0, 1fr) auto 28px; gap: 6px; } }
     </style>
 </head>
 <body>
@@ -3111,6 +3123,7 @@ const Proof = (function () {
                 sf: { v: '', u: 0, bs: '0', vol: '', w: '' },
                 trim: { lbp: '', df: '', da: '', tpc: '', mct: '', lcf: '', ref: 'ap', rows: [{ n: '', op: 'L', w: '', x: '' }, { n: '', op: 'L', w: '', x: '' }], tgt: '', sx: '' },
                 roll: { b: '', d: '', lwl: '', method: 'imo', f: '0.8', tt: '', n: '', T: '', gmIn: '', v: '', r: '', rmode: 'r', kg: '', km: '', gmT: '', lim: '10' },
+                anch: { lbp: '', t: '', at: '', al: '', wind: '', cur: '', yaw: '0', cw: '0.9', cc: '0.05', depth: '', hawse: '', len: '', lunit: 'sh', shl: '27.5', dia: '', wpm: '', grade: '3', am: '', atype: 'stockless', fac: '', bed: 'sand', la: '', lc: '', sf: '1.5' },
                 nre: { fy: '', other: '', voy: [{ on: '', off: '', elig: true }, { on: '', off: '', elig: true }] },
                 bwe: { method: 'seq', np: '2', rate: '', eff: '', sameIn: true, npIn: '', rateIn: '', vf: '3', strip: '', start: cxNowWall(cxTzMin(tz)), tz: tz, spd: '', tanks: [{ n: '', cap: '', cur: '' }, { n: '', cap: '', cur: '' }] }
             };
@@ -3119,7 +3132,7 @@ const Proof = (function () {
             const d = CX_DEFAULT();
             try {
                 const s = JSON.parse(localStorage.getItem(CX_KEY) || 'null');
-                if (s) { const o = { tool: s.tool || d.tool }; ['sal', 'days', 'sf', 'trim', 'roll', 'bwe', 'nre'].forEach((k) => { o[k] = { ...d[k], ...(s[k] || {}) }; }); return o; }
+                if (s) { const o = { tool: s.tool || d.tool }; ['sal', 'days', 'sf', 'trim', 'roll', 'bwe', 'anch', 'nre'].forEach((k) => { o[k] = { ...d[k], ...(s[k] || {}) }; }); return o; }
             } catch (e) {}
             return d;
         }
@@ -3973,6 +3986,208 @@ const Proof = (function () {
             );
         }
 
+        // ---------- Anchor holding ----------
+        const ANCH_BED = {
+            sand: { n: 'Sand', a: 3.5, c: 0.75 },
+            mud: { n: 'Firm mud', a: 3.0, c: 0.65 },
+            soft: { n: 'Soft mud', a: 2.0, c: 0.6 },
+            clay: { n: 'Clay / stiff mud', a: 4.0, c: 0.8 },
+            shell: { n: 'Shell / gravel', a: 2.5, c: 0.7 },
+            rock: { n: 'Rock (poor)', a: 1.0, c: 0.5 }
+        };
+        const ANCH_BL = { 1: 0.00981, 2: 0.01373, 3: 0.01961 }; // kN, x d²(44 - 0.08d), IACS W18
+        function anchCalc(s, windKn) {
+            const g = 9.80665, SUB = 1 - 1.025 / 7.85, KN = 1852 / 3600;
+            const bed = ANCH_BED[s.bed] || ANCH_BED.sand;
+            const la = s.la !== '' ? pn(s.la) : bed.a;
+            const lc = s.lc !== '' ? pn(s.lc) : bed.c;
+            const fac = s.atype === 'hhp' ? 2 : s.atype === 'custom' ? (pn(s.fac) || 1) : 1;
+            const dmm = pn(s.dia);
+            const wAir = s.wpm !== '' ? pn(s.wpm) : (dmm > 0 ? 0.0219 * dmm * dmm : NaN);
+            const w = wAir * SUB * g;
+            const Wa = pn(s.am) * 1000 * SUB * g;
+            const shl = pn(s.shl) > 0 ? pn(s.shl) : 27.5;
+            const L = s.lunit === 'm' ? pn(s.len) : pn(s.len) * shl;
+            const y = (pn(s.depth) || 0) + (pn(s.hawse) || 0);
+            const th = (pn(s.yaw) || 0) * Math.PI / 180;
+            const at = pn(s.at), al = pn(s.al) || 0;
+            const area = at > 0 ? at * Math.cos(th) ** 2 + al * Math.sin(th) ** 2 : NaN;
+            const cw = pn(s.cw) > 0 ? pn(s.cw) : 0.9, cc = pn(s.cc) > 0 ? pn(s.cc) : 0.05;
+            const V = windKn === undefined ? (pn(s.wind) || 0) : windKn;
+            const Vc = pn(s.cur) || 0;
+            const fw = V > 0 ? 0.5 * 1.225 * cw * area * (V * KN) ** 2 : 0;
+            const lt = pn(s.lbp) * pn(s.t);
+            const fc = Vc > 0 ? 0.5 * 1025 * cc * lt * (Vc * KN) ** 2 : 0;
+            const F = fw + fc;
+            const a = F / w;
+            const susp = F > 0 ? Math.sqrt(y * (y + 2 * a)) : y;
+            const lying = L - susp;
+            const hA = la * fac * Wa;
+            const hC = lying > 0 ? lc * w * lying : 0;
+            const hold = hA + hC;
+            const top = F + w * y;
+            const angle = F > 0 ? Math.atan(w * Math.min(susp, L) / F) * 180 / Math.PI : 90;
+            const sf = pn(s.sf) > 0 ? pn(s.sf) : 1.5;
+            const req = susp + Math.max(0, (F * sf - hA) / (lc * w));
+            const bl = ANCH_BL[s.grade] && dmm > 0 ? ANCH_BL[s.grade] * dmm * dmm * (44 - 0.08 * dmm) * 1000 : NaN;
+            return { g, la, lc, fac, wAir, w, Wa, L, shl, y, area, fw, fc, F, susp, lying, hA, hC, hold, top, angle, sf, req, bl, ok: F > 0 && w > 0 && Wa > 0 && L > 0 && y > 0 };
+        }
+        function CxAnchor({ s, set, setMany }) {
+            const r = anchCalc(s);
+            const tf = (n) => (isFinite(n) ? (n / (r.g * 1000)).toFixed(1) : '-');
+            const shk = (m) => (isFinite(m) ? (m / r.shl).toFixed(1) : '-');
+            const SF = r.ok ? r.hold / r.F : NaN;
+            // highest wind the ground tackle holds, current unchanged
+            let vMax = NaN;
+            if (r.w > 0 && r.Wa > 0 && r.L > 0 && r.y > 0 && r.area > 0) {
+                const f = (v) => { const q = anchCalc(s, v); return q.hold - q.F; };
+                if (f(0) <= 0) vMax = 0;
+                else if (f(150) > 0) vMax = Infinity;
+                else { let lo = 0, hi = 150; for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (f(m) > 0) lo = m; else hi = m; } vMax = lo; }
+            }
+            const dep = pn(s.depth);
+            const rt1 = dep > 0 ? 3 * dep + 90 : NaN, rt2 = dep > 0 ? 4 * dep + 145 : NaN;
+            const brake = r.bl * 0.45;
+            const pickBed = (k) => setMany({ bed: k, la: '', lc: '' });
+            const status = !r.ok ? null : r.lying <= 0 ? 'bad' : SF < 1 ? 'bad' : SF < r.sf ? 'warn' : 'ok';
+
+            return (
+                <div className="cx-two">
+                    <div>
+                        <div className="card cx-card">
+                            <div className="card-title">Ship and weather</div>
+                            <div className="cx-row">
+                                <CxField label="LBP (m)" value={s.lbp} onChange={set('lbp')} />
+                                <CxField label="Mean draft (m)" value={s.t} onChange={set('t')} />
+                            </div>
+                            <div className="cx-row">
+                                <CxField label="Front windage AT (m²)" value={s.at} onChange={set('at')} />
+                                <CxField label="Side windage AL (m²)" value={s.al} onChange={set('al')} />
+                            </div>
+                            <div className="cx-hint" style={{ margin: '-2px 0 10px' }}>AT: area above water seen bow on, about B × freeboard plus the accommodation front. AL: side area above water, used only for the yaw angle.</div>
+                            <div className="cx-row">
+                                <CxField label="Wind (kn)" value={s.wind} onChange={set('wind')} placeholder="use gusts" />
+                                <CxField label="Current (kn)" value={s.cur} onChange={set('cur')} />
+                                <CxField label="Yaw angle (°)" value={s.yaw} onChange={set('yaw')} placeholder="0 bow on" />
+                            </div>
+                            <div className="cx-row">
+                                <CxField label="Wind coefficient Cw" value={s.cw} onChange={set('cw')} />
+                                <CxField label="Current coefficient Cc" value={s.cc} onChange={set('cc')} />
+                            </div>
+                            <div className="cx-hint">Cw 0.8 to 1.0 for head wind. Cc 0.04 to 0.06 in deep water, rising sharply as UKC gets small.</div>
+                        </div>
+
+                        <div className="card cx-card">
+                            <div className="card-title">Ground tackle and seabed</div>
+                            <div className="cx-row">
+                                <CxField label="Water depth (m)" value={s.depth} onChange={set('depth')} />
+                                <CxField label="Hawse pipe above water (m)" value={s.hawse} onChange={set('hawse')} />
+                            </div>
+                            <div className="cx-row">
+                                <CxField label={s.lunit === 'm' ? 'Cable paid out (m)' : 'Cable paid out (shackles)'} value={s.len} onChange={set('len')} placeholder="on deck mark" />
+                                <CxField label="One shackle (m)" value={s.shl} onChange={set('shl')} placeholder="27.5" />
+                            </div>
+                            <div className="seg" role="group" aria-label="Cable unit" style={{ marginBottom: 10 }}>
+                                <button aria-pressed={s.lunit !== 'm'} onClick={() => set('lunit')('sh')}>Shackles</button>
+                                <button aria-pressed={s.lunit === 'm'} onClick={() => set('lunit')('m')}>Metres</button>
+                            </div>
+                            <div className="cx-row">
+                                <CxField label="Chain diameter (mm)" value={s.dia} onChange={set('dia')} />
+                                <CxField label="Chain mass (kg/m)" value={s.wpm} onChange={set('wpm')} placeholder={pn(s.dia) > 0 ? 'auto ' + (0.0219 * pn(s.dia) * pn(s.dia)).toFixed(1) : '0.0219 d²'} />
+                                <div>
+                                    <label className="input-label">Chain grade</label>
+                                    <select className="input-field" value={s.grade} onChange={(e) => set('grade')(e.target.value)}>
+                                        <option value="1">U1 / Grade 1</option>
+                                        <option value="2">U2 / Grade 2</option>
+                                        <option value="3">U3 / Grade 3</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="cx-row">
+                                <CxField label="Anchor mass (t)" value={s.am} onChange={set('am')} />
+                                <div>
+                                    <label className="input-label">Anchor type</label>
+                                    <select className="input-field" value={s.atype} onChange={(e) => set('atype')(e.target.value)}>
+                                        <option value="stockless">Stockless (Hall, Spek)</option>
+                                        <option value="hhp">HHP, e.g. AC-14 (x2)</option>
+                                        <option value="custom">Other (factor)</option>
+                                    </select>
+                                </div>
+                                {s.atype === 'custom' && <CxField label="Factor vs stockless" value={s.fac} onChange={set('fac')} />}
+                            </div>
+                            <label className="input-label">Seabed</label>
+                            <div className="cx-btns" style={{ marginBottom: 10 }}>
+                                {Object.keys(ANCH_BED).map((k) => (
+                                    <button key={k} onClick={() => pickBed(k)} style={{ ...subBtn, background: s.bed === k ? 'var(--accent)' : 'var(--fill-2)', color: s.bed === k ? 'var(--on-accent)' : 'var(--text)' }}>{ANCH_BED[k].n}</button>
+                                ))}
+                            </div>
+                            <div className="cx-row">
+                                <CxField label="Anchor holding coeff. λa" value={s.la} onChange={set('la')} placeholder={String((ANCH_BED[s.bed] || ANCH_BED.sand).a)} />
+                                <CxField label="Chain friction coeff. λc" value={s.lc} onChange={set('lc')} placeholder={String((ANCH_BED[s.bed] || ANCH_BED.sand).c)} />
+                                <CxField label="Safety factor wanted" value={s.sf} onChange={set('sf')} placeholder="1.5" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="card cx-card">
+                            <div className="card-title">Holding against load</div>
+                            {status && (
+                                <div className={'cx-status ' + (status === 'ok' ? 'ok' : 'bad')} style={status === 'warn' ? { background: 'var(--warn-soft)', color: 'var(--warn)', borderColor: 'var(--warn)' } : null}>
+                                    <div className="cx-status-h">{r.lying <= 0 ? 'Anchor shank lifted' : SF < 1 ? 'Anchor will drag' : SF < r.sf ? 'Holding, low margin' : 'Holding'}</div>
+                                    <div>{r.lying <= 0 ? 'All the cable is off the bottom. Pay out more or reduce the load.' : 'Safety factor ' + SF.toFixed(2) + ' with ' + r.lying.toFixed(0) + ' m of cable on the bottom.'}</div>
+                                </div>
+                            )}
+                            {!r.ok && <div style={noteStyle('')}>Enter wind or current with the areas, depth, cable, chain size and anchor mass.</div>}
+                            <div className="cx-grid">
+                                <CxOut l="Wind force" v={tf(r.fw)} u="t" />
+                                <CxOut l="Current force" v={tf(r.fc)} u="t" />
+                                <CxOut l="Total load" v={tf(r.F)} u="t" hi />
+                                <CxOut l="Anchor holding" v={tf(r.hA)} u="t" sub={'λa ' + cxF(r.la * r.fac, 1) + ' × weight in water'} />
+                                <CxOut l="Chain friction" v={tf(r.hC)} u="t" sub={'λc ' + cxF(r.lc, 2) + ' × lying chain'} />
+                                <CxOut l="Total holding" v={tf(r.hold)} u="t" hi />
+                                <CxOut l="Safety factor" v={cxF(SF, 2)} hi />
+                                <CxOut l="Max wind before drag" v={vMax === Infinity ? '>150' : cxF(vMax, 0)} u="kn" sub={pn(s.cur) > 0 ? 'with ' + s.cur + ' kn current' : 'no current'} />
+                            </div>
+                            <div className="cx-sub">Catenary</div>
+                            <div className="cx-grid">
+                                <CxOut l="Cable paid out" v={cxF(r.L, 0)} u="m" sub={shk(r.L) + ' shackles'} />
+                                <CxOut l="Hanging length" v={cxF(Math.min(r.susp, r.L || r.susp), 0)} u="m" sub={shk(r.susp) + ' shackles'} />
+                                <CxOut l="Lying on bottom" v={r.L > 0 ? cxF(Math.max(0, r.lying), 0) : '-'} u="m" />
+                                <CxOut l="Cable angle at hawse" v={cxF(r.angle, 0)} u="° to horiz." />
+                                <CxOut l="Needed, no lift" v={shk(r.susp)} u="sh" sub={cxF(r.susp, 0) + ' m'} />
+                                <CxOut l={'Needed for SF ' + r.sf} v={shk(r.req)} u="sh" sub={cxF(r.req, 0) + ' m'} hi />
+                            </div>
+                            <div className="cx-sub">Chain and windlass</div>
+                            <div className="cx-grid">
+                                <CxOut l="Chain mass in water" v={cxF(r.w / r.g, 1)} u="kg/m" />
+                                <CxOut l="Tension at hawse" v={tf(r.top)} u="t" />
+                                <CxOut l="Chain breaking load" v={tf(r.bl)} u="t" />
+                                <CxOut l="Brake at 45% BL" v={tf(brake)} u="t" sub={isFinite(brake) && r.ok ? (r.top < brake ? 'tension below brake' : 'tension over brake') : null} />
+                            </div>
+                            {r.ok && isFinite(brake) && r.top >= brake && <div style={noteStyle('bad')}>Hawse tension is over the brake holding load. Use the chain stopper and do not hold on the brake alone.</div>}
+                            <div className="cx-sub">Rule of thumb scope</div>
+                            <div className="cx-grid">
+                                <CxOut l="Fair weather 3D + 90" v={shk(rt1)} u="sh" sub={cxF(rt1, 0) + ' m'} />
+                                <CxOut l="Bad weather 4D + 145" v={shk(rt2)} u="sh" sub={cxF(rt2, 0) + ' m'} />
+                            </div>
+                        </div>
+
+                        <div className="card cx-card">
+                            <div className="card-title">How it is worked out</div>
+                            <div className="cx-hint" style={{ lineHeight: 1.6 }}>
+                                1. Wind force = ½ × 1.225 × Cw × A × V². A = AT cos²θ + AL sin²θ for a yaw angle θ. Current force = ½ × 1025 × Cc × LBP × draft × Vc², head on.<br />
+                                2. Weights in sea water are 0.87 of the weight in air. Stud link chain is about 0.0219 d² kg/m.<br />
+                                3. Catenary: hanging length = √(h (h + 2T/w)), where h is depth plus hawse height, T the horizontal load and w the chain weight in water per metre.<br />
+                                4. Holding = λa × anchor weight in water + λc × chain weight in water × length lying on the bottom. The coefficients are typical values for a stockless anchor; HHP anchors hold at least twice as much.<br />
+                                5. Class anchoring equipment is sized for about 25 m/s wind (48 kn) with 2.5 m/s current at a scope of 6 to 10 in good holding ground, and is not meant to hold a ship off an exposed coast in bad weather. Treat these figures as a guide, watch the bearings and heave up early.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
         function CalcTab() {
             const [st, setSt] = useState(cxLoad);
             useEffect(() => { try { localStorage.setItem(CX_KEY, JSON.stringify(st)); } catch (e) {} }, [st]);
@@ -3981,7 +4196,7 @@ const Proof = (function () {
                 set: (k) => (v) => setSt((o) => ({ ...o, [p]: { ...o[p], [k]: v } })),
                 setMany: (obj) => setSt((o) => ({ ...o, [p]: { ...o[p], ...obj } }))
             });
-            const tools = [['sal', 'Salinity & DWA'], ['days', 'Days'], ['sf', 'SF / Density'], ['trim', 'Trim & Draft'], ['roll', 'Rolling & Turn'], ['bwe', 'Ballast Exchange'], ['nre', 'NRE Days']];
+            const tools = [['sal', 'Salinity & DWA'], ['days', 'Days'], ['sf', 'SF / Density'], ['trim', 'Trim & Draft'], ['roll', 'Rolling & Turn'], ['bwe', 'Ballast Exchange'], ['anch', 'Anchor Holding'], ['nre', 'NRE Days']];
             return (
                 <div className="tab-pane">
                     <h2 className="section-title">Calculator</h2>
@@ -3996,7 +4211,531 @@ const Proof = (function () {
                     {st.tool === 'trim' && <CxTrim {...part('trim')} />}
                     {st.tool === 'roll' && <CxRoll {...part('roll')} />}
                     {st.tool === 'bwe' && <CxBwe {...part('bwe')} />}
+                    {st.tool === 'anch' && <CxAnchor {...part('anch')} />}
                     {st.tool === 'nre' && <CxNre {...part('nre')} />}
+                </div>
+            );
+        }
+        // ===== Budget tracker (salary, ledger, recurring, in hand forecast) =====
+        const BT_KEY = 'tfm_budget_v1';
+        const BT_DAY = 86400000;
+        const BT_MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const BT_CATS = ['Home', 'Family', 'Food', 'Transport', 'Bills', 'Shopping', 'Health', 'Travel', 'Savings / SIP', 'Loan / EMI', 'Insurance', 'Other'];
+        const btD = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) : NaN; };
+        const btS = (ms) => new Date(ms).toISOString().slice(0, 10);
+        const btNow = () => btD(cxToday());
+        const btEom = (ms) => { const d = new Date(ms); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0); };
+        const btSom = (ms) => { const d = new Date(ms); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1); };
+        const btAddM = (ms, n, day) => { const d = new Date(ms); const y = d.getUTCFullYear(), m = d.getUTCMonth() + n; const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate(); return Date.UTC(y, m, Math.min(day || d.getUTCDate(), last)); };
+        const btMk = (ms) => btS(ms).slice(0, 7);
+        const btMn = (k) => BT_MON[+k.slice(5, 7) - 1] + ' ' + k.slice(0, 4);
+        const btFd = (ms) => { if (!isFinite(ms)) return '-'; const d = new Date(ms); return d.getUTCDate() + ' ' + BT_MON[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); };
+        const btId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+        function btMoney(v, code, dec) {
+            if (!isFinite(v)) return '-';
+            if (v === 0 || Math.abs(v) < 0.005) v = 0;
+            const c = String(code || '').trim().toUpperCase();
+            const loc = c === 'INR' ? 'en-IN' : 'en-GB';
+            const d = dec === undefined ? 0 : dec;
+            try { if (/^[A-Z]{3}$/.test(c)) return new Intl.NumberFormat(loc, { style: 'currency', currency: c, minimumFractionDigits: d, maximumFractionDigits: d }).format(v); } catch (e) {}
+            return v.toLocaleString(loc, { minimumFractionDigits: d, maximumFractionDigits: d }) + (c ? ' ' + c : '');
+        }
+        const BT_NEWC = () => ({ id: btId(), n: '', on: '', off: '', wage: '', ded: '' });
+        const BT_NEWR = () => ({ id: btId(), n: '', amt: '', c: 'H', type: 'out', freq: '1', start: cxToday(), end: '', cat: 'Bills' });
+        const BT_DEFAULT = () => ({
+            view: 'over', wc: 'USD', hc: 'INR', rate: '', payDay: '0', openDate: cxToday(), openBal: '', target: '', goal: '', month: '',
+            contracts: [BT_NEWC()], recur: [], tx: [], cats: BT_CATS.map((n) => ({ n, lim: '' }))
+        });
+        function btLoad() {
+            const d = BT_DEFAULT();
+            try { const s = JSON.parse(localStorage.getItem(BT_KEY) || 'null'); if (s && typeof s === 'object') return { ...d, ...s }; } catch (e) {}
+            return d;
+        }
+
+        // Salary credits: each calendar month on board is paid on the pay day, net of monthly deductions
+        function btSalary(st, horizon) {
+            const pay = parseInt(st.payDay) || 0;
+            const out = [];
+            (st.contracts || []).forEach((c) => {
+                const on = btD(c.on); const wage = pn(c.wage) || 0; const ded = pn(c.ded) || 0;
+                if (!isFinite(on) || wage <= 0) return;
+                const offIn = btD(c.off); const open = !isFinite(offIn);
+                const end = open ? horizon : offIn;
+                if (!(end >= on)) return;
+                const dW = wage * 12 / 365, dD = ded * 12 / 365;
+                for (let m = btSom(on); m <= end; m = btAddM(m, 1, 1)) {
+                    const a = Math.max(on, m), b = Math.min(end, btEom(m));
+                    const days = Math.round((b - a) / BT_DAY) + 1;
+                    if (days <= 0) continue;
+                    const d = pay === 0 ? btEom(m) : btAddM(m, 1, pay);
+                    out.push({ d, w: days * (dW - dD), gross: days * dW, ded: days * dD, days, cid: c.id, open, label: (c.n || 'Salary') + ' ' + btMn(btMk(m)) + (days < 28 ? ' (' + days + ' d)' : '') });
+                }
+            });
+            return out;
+        }
+        function btEarned(st, x) {
+            let w = 0;
+            (st.contracts || []).forEach((c) => {
+                const on = btD(c.on); const wage = pn(c.wage) || 0; const ded = pn(c.ded) || 0;
+                if (!isFinite(on) || wage <= 0 || on > x) return;
+                const off = btD(c.off); const b = isFinite(off) ? Math.min(off, x) : x;
+                if (b >= on) w += (Math.round((b - on) / BT_DAY) + 1) * (wage - ded) * 12 / 365;
+            });
+            return w;
+        }
+        function btRecurring(st, from, to) {
+            const out = [];
+            (st.recur || []).forEach((r) => {
+                const s = btD(r.start); const amt = pn(r.amt);
+                if (!isFinite(s) || !(amt > 0)) return;
+                const e = btD(r.end); const last = isFinite(e) ? Math.min(e, to) : to;
+                const step = parseInt(r.freq) || 1; const day = new Date(s).getUTCDate();
+                for (let i = 0, d = s; d <= last && i < 1200; i++, d = btAddM(s, i * step, day)) {
+                    if (d > from) out.push({ d, amt, c: r.c, type: r.type, cat: r.cat, label: r.n || r.cat || 'Recurring', rec: true });
+                }
+            });
+            return out;
+        }
+        // All money events after the opening balance date up to horizon, in home currency
+        function btEvents(st, horizon) {
+            const rate = st.wc === st.hc ? 1 : pn(st.rate);
+            const toH = (amt, c) => (c === 'W' ? amt * rate : amt);
+            const o = btD(st.openDate);
+            const from = isFinite(o) ? o : -Infinity;
+            const ev = [];
+            btSalary(st, horizon).forEach((s) => { if (s.d > from && s.d <= horizon) ev.push({ d: s.d, h: toH(s.w, 'W'), w: s.w, kind: 'sal', label: s.label, cat: 'Salary' }); });
+            btRecurring(st, from - 1, horizon).forEach((r) => ev.push({ d: r.d, h: (r.type === 'in' ? 1 : -1) * toH(r.amt, r.c), kind: 'rec', label: r.label, cat: r.cat, type: r.type }));
+            (st.tx || []).forEach((t) => {
+                const d = btD(t.d); const a = pn(t.amt);
+                if (!isFinite(d) || !(a > 0) || d < from || d > horizon) return;
+                ev.push({ d, h: (t.type === 'in' ? 1 : -1) * toH(a, t.c), kind: 'tx', label: t.n || t.cat, cat: t.cat, type: t.type, id: t.id });
+            });
+            return ev.sort((a, b) => a.d - b.d);
+        }
+
+        function BudgetTab() {
+            const [st, setSt] = useState(btLoad);
+            const [msg, setMsg] = useState('');
+            const [nt, setNt] = useState(() => ({ d: cxToday(), n: '', amt: '', c: 'H', type: 'out', cat: 'Food' }));
+            const fileRef = useRef(null);
+            useEffect(() => { try { localStorage.setItem(BT_KEY, JSON.stringify(st)); } catch (e) {} }, [st]);
+            const set = (k) => (v) => setSt((o) => ({ ...o, [k]: v }));
+            const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 2500); };
+            const updList = (list, id, k, v) => setSt((o) => ({ ...o, [list]: o[list].map((x) => (x.id === id ? { ...x, [k]: v } : x)) }));
+            const delList = (list, id) => setSt((o) => ({ ...o, [list]: o[list].filter((x) => x.id !== id) }));
+
+            const today = btNow();
+            const H = st.hc || 'INR', W = st.wc || 'USD';
+            const same = H === W;
+            const rate = same ? 1 : pn(st.rate);
+            const rateOk = rate > 0;
+            const hasW = (st.contracts || []).some((c) => pn(c.wage) > 0) || (st.recur || []).some((r) => r.c === 'W') || (st.tx || []).some((t) => t.c === 'W');
+            const rateBad = !rateOk && hasW;
+            const mH = (v) => (rateBad ? '-' : btMoney(v, H));
+            const mW = (v) => btMoney(v, W);
+            const asW = (h) => (rateOk ? btMoney(h / rate, W) : '-');
+
+            // contracts: current or next
+            const cons = (st.contracts || []).map((c) => ({ ...c, a: btD(c.on), b: btD(c.off) })).filter((c) => isFinite(c.a));
+            const curC = cons.find((c) => c.a <= today && (!isFinite(c.b) || c.b >= today));
+            const nextC = cons.filter((c) => c.a > today).sort((x, y) => x.a - y.a)[0];
+            const lastOff = cons.reduce((m, c) => (isFinite(c.b) && c.b > m ? c.b : m), -Infinity);
+
+            // target date
+            const fyEnd = (() => { const d = new Date(today); const y = d.getUTCMonth() >= 3 ? d.getUTCFullYear() + 1 : d.getUTCFullYear(); return Date.UTC(y, 2, 31); })();
+            const chips = [
+                curC && isFinite(curC.b) ? ['Sign-off', curC.b] : nextC && isFinite(nextC.b) ? ['Next sign-off', nextC.b] : null,
+                ['Month end', btEom(today)],
+                ['31 Mar (FY)', fyEnd],
+                ['+3 months', btAddM(today, 3)],
+                ['+6 months', btAddM(today, 6)],
+                ['+1 year', btAddM(today, 12)]
+            ].filter(Boolean);
+            let T = btD(st.target);
+            if (!isFinite(T) || T < today) T = lastOff > today ? lastOff : btAddM(today, 6);
+
+            // balances
+            const openBal = pn(st.openBal) || 0;
+            const evAll = btEvents(st, Math.max(T, btEom(today)));
+            const evNow = evAll.filter((e) => e.d <= today);
+            const evFut = evAll.filter((e) => e.d > today && e.d <= T);
+            const sum = (arr, f) => arr.reduce((t, e) => t + (f ? (f(e) ? e.h : 0) : e.h), 0);
+            const balNow = openBal + sum(evNow);
+            const balT = balNow + sum(evFut);
+            const salFut = evFut.filter((e) => e.kind === 'sal');
+            const salFutW = salFut.reduce((t, e) => t + e.w, 0);
+            const inOther = sum(evFut, (e) => e.kind !== 'sal' && e.h > 0);
+            const outFut = -sum(evFut, (e) => e.h < 0);
+            // earned by T but credited after T
+            const credT = btSalary(st, T).filter((s) => s.d <= T).reduce((t, s) => t + s.w, 0);
+            const accrued = Math.max(0, btEarned(st, T) - credT);
+            const goal = pn(st.goal);
+
+            // current contract
+            let cStat = null;
+            if (curC) {
+                const end = isFinite(curC.b) ? curC.b : NaN;
+                const dOn = Math.round((today - curC.a) / BT_DAY) + 1;
+                const tot = isFinite(end) ? Math.round((end - curC.a) / BT_DAY) + 1 : NaN;
+                const net = (pn(curC.wage) - (pn(curC.ded) || 0)) * 12 / 365;
+                cStat = { n: curC.n, dOn, tot, left: isFinite(tot) ? tot - dOn : NaN, earned: dOn * net, remain: isFinite(tot) ? (tot - dOn) * net : NaN, total: isFinite(tot) ? tot * net : NaN };
+            }
+
+            // month by month from today to T
+            const months = [];
+            for (let m = btSom(today), bal = balNow; m <= T && months.length < 61; m = btAddM(m, 1, 1)) {
+                const k = btMk(m);
+                const ev = evFut.filter((e) => btMk(e.d) === k);
+                const sal = sum(ev, (e) => e.kind === 'sal');
+                const inn = sum(ev, (e) => e.kind !== 'sal' && e.h > 0);
+                const out = -sum(ev, (e) => e.h < 0);
+                bal += sal + inn - out;
+                months.push({ k, sal, inn, out, net: sal + inn - out, bal });
+            }
+
+            // this month by category (spending only, ledger and recurring)
+            const mk = btMk(today);
+            const monthEv = evAll.filter((e) => btMk(e.d) === mk && e.h < 0);
+            const spentBy = {};
+            monthEv.forEach((e) => { spentBy[e.cat || 'Other'] = (spentBy[e.cat || 'Other'] || 0) - e.h; });
+            const spentMonth = Object.values(spentBy).reduce((a, b) => a + b, 0);
+            const limTotal = (st.cats || []).reduce((t, c) => t + (pn(c.lim) || 0), 0);
+            const catNames = (st.cats || []).map((c) => c.n).filter(Boolean);
+
+            // ledger
+            const months2 = Array.from(new Set((st.tx || []).map((t) => (t.d || '').slice(0, 7)).filter(Boolean))).sort().reverse();
+            const fMonth = st.month || '';
+            const txs = (st.tx || []).filter((t) => !fMonth || (t.d || '').slice(0, 7) === fMonth).slice().sort((a, b) => (b.d || '').localeCompare(a.d || ''));
+            const txH = (t) => (t.c === 'W' ? pn(t.amt) * (rateOk ? rate : NaN) : pn(t.amt));
+            const tIn = txs.reduce((s, t) => s + (t.type === 'in' ? txH(t) || 0 : 0), 0);
+            const tOut = txs.reduce((s, t) => s + (t.type !== 'in' ? txH(t) || 0 : 0), 0);
+            const addTx = () => {
+                if (!(pn(nt.amt) > 0)) { flash('Enter an amount.'); return; }
+                if (!btD(nt.d)) { flash('Enter a date.'); return; }
+                setSt((o) => ({ ...o, tx: [...(o.tx || []), { ...nt, id: btId() }] }));
+                setNt((o) => ({ ...o, n: '', amt: '' }));
+                flash(btD(nt.d) > today ? 'Planned entry added.' : 'Entry added.');
+            };
+
+            const download = (name, text, type) => {
+                try { const b = new Blob([text], { type }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 1500); } catch (e) { flash('Download blocked.'); }
+            };
+            const exportJson = () => download('meridian-budget-' + cxToday() + '.json', JSON.stringify(st, null, 1), 'application/json');
+            const exportCsv = () => {
+                const q = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+                const rows = [['Date', 'Description', 'Category', 'Type', 'Amount', 'Currency']].concat((st.tx || []).slice().sort((a, b) => (a.d || '').localeCompare(b.d || '')).map((t) => [t.d, t.n, t.cat, t.type === 'in' ? 'Income' : 'Expense', t.amt, t.c === 'W' ? W : H]));
+                download('meridian-ledger-' + cxToday() + '.csv', rows.map((r) => r.map(q).join(',')).join('\n'), 'text/csv');
+            };
+            const importJson = (f) => {
+                if (!f) return;
+                const rd = new FileReader();
+                rd.onload = () => { try { const s = JSON.parse(rd.result); if (!s || !Array.isArray(s.tx)) throw 0; setSt({ ...BT_DEFAULT(), ...s }); flash('Backup restored.'); } catch (e) { flash('Not a budget backup file.'); } };
+                rd.readAsText(f);
+            };
+
+            const views = [['over', 'Overview'], ['ledger', 'Ledger'], ['salary', 'Salary'], ['recur', 'Recurring'], ['cats', 'Budgets'], ['data', 'Backup']];
+            const curSel = (val, on) => (
+                <select className="input-field" value={val} onChange={(e) => on(e.target.value)} aria-label="Currency">
+                    <option value="H">{H}</option>
+                    {!same && <option value="W">{W}</option>}
+                </select>
+            );
+            const catSel = (val, on, extra) => (
+                <select className="input-field" value={val} onChange={(e) => on(e.target.value)} aria-label="Category">
+                    {(extra ? [extra] : []).concat(catNames).filter((v, i, a) => a.indexOf(v) === i).map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+            );
+
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Budget</h2>
+                    <div className="cx-tools" role="group" aria-label="Budget views">
+                        {views.map(([k, n]) => (
+                            <button key={k} onClick={() => set('view')(k)} style={{ ...subBtn, background: st.view === k ? 'var(--accent)' : 'var(--fill-2)', color: st.view === k ? 'var(--on-accent)' : 'var(--text)' }}>{n}</button>
+                        ))}
+                    </div>
+                    {msg && <div style={{ ...noteStyle(''), marginTop: 0, marginBottom: 12 }}>{msg}</div>}
+                    {rateBad && <div style={{ ...noteStyle('warn'), marginTop: 0, marginBottom: 12 }}>Enter the {W} to {H} rate in Salary to see totals in {H}.</div>}
+
+                    {st.view === 'over' && (
+                        <div className="cx-two">
+                            <div>
+                                <div className="card cx-card">
+                                    <div className="card-title">Final in hand by</div>
+                                    <div className="cx-row">
+                                        <CxField label="Date" type="date" value={st.target || btS(T)} onChange={set('target')} />
+                                        <CxField label={'Savings goal (' + H + ')'} value={st.goal} onChange={set('goal')} placeholder="optional" />
+                                    </div>
+                                    <div className="bt-chips">
+                                        {chips.map(([n, d]) => <button key={n} onClick={() => set('target')(btS(d))} style={{ ...subBtn, minHeight: 30, background: btS(d) === btS(T) ? 'var(--accent)' : 'var(--fill-2)', color: btS(d) === btS(T) ? 'var(--on-accent)' : 'var(--text)' }}>{n}</button>)}
+                                    </div>
+                                    <div className="cx-grid">
+                                        <CxOut l="Balance today" v={mH(balNow)} sub={same || !rateOk ? null : asW(balNow)} />
+                                        <CxOut l={'In hand on ' + btFd(T)} v={mH(balT)} sub={same || !rateOk ? null : asW(balT)} hi />
+                                        <CxOut l="Salary credited till then" v={mW(salFutW)} sub={(same ? '' : mH(sum(salFut)) + ', ') + salFut.length + ' credit' + (salFut.length === 1 ? '' : 's')} />
+                                        <CxOut l="Earned, paid later" v={mW(accrued)} sub="wages due after this date" />
+                                        <CxOut l="Other income" v={mH(inOther)} sub="recurring and planned" />
+                                        <CxOut l="Spending" v={mH(outFut)} sub="recurring and planned" />
+                                    </div>
+                                    {isFinite(goal) && goal > 0 && !rateBad && (
+                                        <div>
+                                            <div className="cx-bar"><span style={{ width: Math.max(0, Math.min(100, balT / goal * 100)) + '%', background: balT >= goal ? 'var(--ok)' : 'var(--accent)' }} /></div>
+                                            <div className="cx-hint" style={{ marginTop: 6 }}>{balT >= goal ? 'Goal reached by this date, ' + mH(balT - goal) + ' over.' : mH(goal - balT) + ' short of the goal on this date.'}</div>
+                                        </div>
+                                    )}
+                                    <div className="cx-hint" style={{ marginTop: 10 }}>In hand = balance today + salary credited on the pay day + recurring items + planned (future dated) ledger entries, up to the date. Wages still owed after the date are shown separately.</div>
+                                </div>
+
+                                <div className="card cx-card">
+                                    <div className="card-title">Current contract</div>
+                                    {cStat ? (
+                                        <div>
+                                            <div className="cx-grid" style={{ marginTop: 0 }}>
+                                                <CxOut l="Day on board" v={String(cStat.dOn)} sub={isFinite(cStat.tot) ? 'of ' + cStat.tot + ', ' + cStat.left + ' to go' : 'no sign-off date'} />
+                                                <CxOut l="Earned to date (net)" v={mW(cStat.earned)} hi />
+                                                <CxOut l="Still to earn" v={mW(cStat.remain)} />
+                                                <CxOut l="Contract total (net)" v={mW(cStat.total)} />
+                                            </div>
+                                            {isFinite(cStat.tot) && <div className="cx-bar"><span style={{ width: Math.min(100, cStat.dOn / cStat.tot * 100) + '%' }} /></div>}
+                                        </div>
+                                    ) : (
+                                        <div className="cx-hint">{nextC ? 'Ashore. Next sign-on ' + btFd(nextC.a) + '.' : 'Not on a contract today. Add contracts in Salary.'}</div>
+                                    )}
+                                </div>
+
+                                <div className="card cx-card">
+                                    <div className="card-title">This month ({btMn(mk)})</div>
+                                    <div className="cx-grid" style={{ marginTop: 0 }}>
+                                        <CxOut l="Spent" v={mH(spentMonth)} hi />
+                                        <CxOut l="Budget" v={limTotal > 0 ? mH(limTotal) : '-'} sub={limTotal > 0 ? (spentMonth <= limTotal ? mH(limTotal - spentMonth) + ' left' : mH(spentMonth - limTotal) + ' over') : 'set in Budgets'} />
+                                    </div>
+                                    {limTotal > 0 && <div className="cx-bar"><span style={{ width: Math.min(100, spentMonth / limTotal * 100) + '%', background: spentMonth > limTotal ? 'var(--bad)' : 'var(--accent)' }} /></div>}
+                                </div>
+                            </div>
+
+                            <div>
+                                <div className="card cx-card">
+                                    <div className="card-title">Month by month to {btFd(T)}</div>
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table className="wt-table">
+                                            <thead><tr><th>Month</th><th style={{ textAlign: 'right' }}>Salary</th><th style={{ textAlign: 'right' }}>Other in</th><th style={{ textAlign: 'right' }}>Out</th><th style={{ textAlign: 'right' }}>Balance</th></tr></thead>
+                                            <tbody>
+                                                <tr className="dim"><td>Today</td><td></td><td></td><td></td><td style={{ textAlign: 'right' }}>{mH(balNow)}</td></tr>
+                                                {months.map((m) => (
+                                                    <tr key={m.k}>
+                                                        <td>{btMn(m.k)}</td>
+                                                        <td style={{ textAlign: 'right' }}>{m.sal ? mH(m.sal) : '-'}</td>
+                                                        <td style={{ textAlign: 'right' }}>{m.inn ? mH(m.inn) : '-'}</td>
+                                                        <td style={{ textAlign: 'right' }}>{m.out ? mH(m.out) : '-'}</td>
+                                                        <td style={{ textAlign: 'right', fontWeight: 700, color: m.bal < 0 ? 'var(--bad)' : 'var(--text)' }}>{mH(m.bal)}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {months.some((m) => m.bal < 0) && !rateBad && <div style={noteStyle('bad')}>Balance goes below zero in {btMn(months.find((m) => m.bal < 0).k)}.</div>}
+                                </div>
+
+                                <div className="card cx-card">
+                                    <div className="card-title">Coming up</div>
+                                    {evFut.length === 0 && <div className="cx-hint">Nothing due before {btFd(T)}.</div>}
+                                    {evFut.slice(0, 14).map((e, i) => (
+                                        <div key={i} className="bt-tx">
+                                            <span className="c">{btFd(e.d)}</span>
+                                            <span><span className="n">{e.label}</span><span className="c">{e.kind === 'sal' ? 'Salary' : (e.cat || '') + (e.kind === 'rec' ? ', recurring' : ', planned')}</span></span>
+                                            <span className={'a ' + (e.h >= 0 ? 'bt-in' : '')}>{e.h >= 0 ? '+' : '-'}{mH(Math.abs(e.h))}</span>
+                                            <span></span>
+                                        </div>
+                                    ))}
+                                    {evFut.length > 14 && <div className="cx-hint" style={{ marginTop: 6 }}>And {evFut.length - 14} more.</div>}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {st.view === 'ledger' && (
+                        <div className="cx-two">
+                            <div className="card cx-card">
+                                <div className="card-title">Add entry</div>
+                                <div className="seg" role="group" aria-label="Type" style={{ marginBottom: 10 }}>
+                                    <button aria-pressed={nt.type !== 'in'} onClick={() => setNt({ ...nt, type: 'out' })}>Expense</button>
+                                    <button aria-pressed={nt.type === 'in'} onClick={() => setNt({ ...nt, type: 'in', cat: nt.cat === 'Food' ? 'Other' : nt.cat })}>Income</button>
+                                </div>
+                                <div className="cx-row">
+                                    <CxField label="Date" type="date" value={nt.d} onChange={(v) => setNt({ ...nt, d: v })} />
+                                    <div>
+                                        <label className="input-label">Category</label>
+                                        {catSel(nt.cat, (v) => setNt({ ...nt, cat: v }), nt.type === 'in' ? 'Other' : null)}
+                                    </div>
+                                </div>
+                                <div className="cx-row">
+                                    <CxField label="Description" type="text" value={nt.n} onChange={(v) => setNt({ ...nt, n: v })} placeholder="e.g. Groceries, bonus" />
+                                    <CxField label="Amount" value={nt.amt} onChange={(v) => setNt({ ...nt, amt: v })} />
+                                    <div>
+                                        <label className="input-label">Currency</label>
+                                        {curSel(nt.c, (v) => setNt({ ...nt, c: v }))}
+                                    </div>
+                                </div>
+                                <div className="cx-btns"><button className="btn btn-primary" onClick={addTx}>Add</button></div>
+                                <div className="cx-hint" style={{ marginTop: 8 }}>A future date makes it a planned entry and it counts in the in hand forecast. Do not enter salary or recurring items here, they are added on their own.</div>
+                            </div>
+
+                            <div className="card cx-card">
+                                <div className="card-title">Entries</div>
+                                <div className="cx-row">
+                                    <div>
+                                        <label className="input-label">Month</label>
+                                        <select className="input-field" value={fMonth} onChange={(e) => set('month')(e.target.value)}>
+                                            <option value="">All</option>
+                                            {months2.map((m) => <option key={m} value={m}>{btMn(m)}</option>)}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="cx-grid" style={{ marginTop: 0, marginBottom: 8 }}>
+                                    <CxOut l="Income" v={mH(tIn)} />
+                                    <CxOut l="Expense" v={mH(tOut)} />
+                                    <CxOut l="Net" v={mH(tIn - tOut)} hi />
+                                </div>
+                                {txs.length === 0 && <div className="cx-hint">No entries yet.</div>}
+                                {txs.map((t) => (
+                                    <div key={t.id} className="bt-tx">
+                                        <span className="c">{btFd(btD(t.d))}</span>
+                                        <span><span className="n">{t.n || t.cat}{btD(t.d) > today && <span className="bt-tag">Planned</span>}</span><span className="c">{t.cat}</span></span>
+                                        <span className={'a ' + (t.type === 'in' ? 'bt-in' : '')}>{t.type === 'in' ? '+' : '-'}{btMoney(pn(t.amt), t.c === 'W' ? W : H)}</span>
+                                        <button className="icon-btn" style={{ minWidth: 30, minHeight: 30, fontSize: 15 }} onClick={() => delList('tx', t.id)} aria-label="Delete entry">×</button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {st.view === 'salary' && (
+                        <div className="cx-two">
+                            <div>
+                                <div className="card cx-card">
+                                    <div className="card-title">Currencies and pay</div>
+                                    <div className="cx-row">
+                                        <CxField label="Wage currency" type="text" value={st.wc} onChange={(v) => set('wc')(v.toUpperCase().slice(0, 3))} placeholder="USD" />
+                                        <CxField label="Home currency" type="text" value={st.hc} onChange={(v) => set('hc')(v.toUpperCase().slice(0, 3))} placeholder="INR" />
+                                        {!same && <CxField label={'1 ' + W + ' = ? ' + H} value={st.rate} onChange={set('rate')} placeholder="e.g. 84.5" />}
+                                    </div>
+                                    <div>
+                                        <label className="input-label">Salary credited on</label>
+                                        <select className="input-field" value={st.payDay} onChange={(e) => set('payDay')(e.target.value)}>
+                                            <option value="0">Last day of the same month</option>
+                                            {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => <option key={d} value={d}>{d + (d === 1 ? 'st' : d === 2 ? 'nd' : d === 3 ? 'rd' : d >= 21 && d % 10 === 1 ? 'st' : d >= 21 && d % 10 === 2 ? 'nd' : d >= 21 && d % 10 === 3 ? 'rd' : 'th')} of the next month</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="cx-row">
+                                        <CxField label={'Bank balance (' + H + ')'} value={st.openBal} onChange={set('openBal')} placeholder="all accounts" />
+                                        <CxField label="As on" type="date" value={st.openDate} onChange={set('openDate')} />
+                                    </div>
+                                    <div className="cx-hint">Ledger and recurring items from the "as on" date, and salary credited after it, are added to this balance. Update both now and then to stay in step with the bank.</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div className="card cx-card">
+                                    <div className="card-title">Contracts, past, current and planned</div>
+                                    {(st.contracts || []).map((c) => {
+                                        const a = btD(c.on), b = btD(c.off);
+                                        const days = isFinite(a) && isFinite(b) && b >= a ? Math.round((b - a) / BT_DAY) + 1 : NaN;
+                                        const net = (pn(c.wage) - (pn(c.ded) || 0)) * 12 / 365;
+                                        return (
+                                            <div key={c.id} className="bt-con">
+                                                <div className="cx-row">
+                                                    <CxField label="Vessel / note" type="text" value={c.n} onChange={(v) => updList('contracts', c.id, 'n', v)} placeholder="e.g. Kite Arrow" />
+                                                    <CxField label="Sign-on" type="date" value={c.on} onChange={(v) => updList('contracts', c.id, 'on', v)} />
+                                                    <CxField label="Sign-off" type="date" value={c.off} onChange={(v) => updList('contracts', c.id, 'off', v)} />
+                                                </div>
+                                                <div className="cx-row">
+                                                    <CxField label={'Monthly wage (' + W + ')'} value={c.wage} onChange={(v) => updList('contracts', c.id, 'wage', v)} placeholder="gross per month" />
+                                                    <CxField label={'Monthly deductions (' + W + ')'} value={c.ded} onChange={(v) => updList('contracts', c.id, 'ded', v)} placeholder="allotment, slop chest" />
+                                                </div>
+                                                <div className="bt-con-f">
+                                                    <span>{isFinite(days) ? days + ' days, net ' + mW(days * net) : isFinite(a) ? 'Open, no sign-off yet' : 'Enter sign-on date'}</span>
+                                                    <button style={{ ...subBtn, minHeight: 30 }} onClick={() => setSt((o) => ({ ...o, contracts: o.contracts.length > 1 ? o.contracts.filter((x) => x.id !== c.id) : [BT_NEWC()] }))}>Remove</button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                    <div className="cx-btns"><button style={subBtn} onClick={() => setSt((o) => ({ ...o, contracts: [...o.contracts, BT_NEWC()] }))}>+ Add contract</button></div>
+                                    <div className="cx-hint">Daily wage = monthly × 12 / 365, so part months pay by the day. A raise or promotion is a new contract line from that date. Leave sign-off blank while open; it is assumed you stay on board up to the forecast date. Deductions are money that does not reach your account (allotment to someone else, cash advance, slop chest).</div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {st.view === 'recur' && (
+                        <div className="card cx-card cx-wrap">
+                            <div className="card-title">Recurring income and payments</div>
+                            {(st.recur || []).length === 0 && <div className="cx-hint" style={{ marginBottom: 10 }}>Add EMIs, SIPs, insurance, rent, family transfer or rental income. Each one is counted on its due date in the forecast.</div>}
+                            {(st.recur || []).map((r) => (
+                                <div key={r.id} className="bt-con">
+                                    <div className="cx-row">
+                                        <CxField label="Name" type="text" value={r.n} onChange={(v) => updList('recur', r.id, 'n', v)} placeholder="e.g. Home loan EMI" />
+                                        <CxField label="Amount" value={r.amt} onChange={(v) => updList('recur', r.id, 'amt', v)} />
+                                        <div><label className="input-label">Currency</label>{curSel(r.c, (v) => updList('recur', r.id, 'c', v))}</div>
+                                        <div>
+                                            <label className="input-label">Type</label>
+                                            <select className="input-field" value={r.type} onChange={(e) => updList('recur', r.id, 'type', e.target.value)}><option value="out">Payment</option><option value="in">Income</option></select>
+                                        </div>
+                                    </div>
+                                    <div className="cx-row">
+                                        <div>
+                                            <label className="input-label">Every</label>
+                                            <select className="input-field" value={r.freq} onChange={(e) => updList('recur', r.id, 'freq', e.target.value)}><option value="1">Month</option><option value="3">Quarter</option><option value="6">6 months</option><option value="12">Year</option></select>
+                                        </div>
+                                        <CxField label="First due" type="date" value={r.start} onChange={(v) => updList('recur', r.id, 'start', v)} />
+                                        <CxField label="Last due" type="date" value={r.end} onChange={(v) => updList('recur', r.id, 'end', v)} hint="blank = no end" />
+                                        <div><label className="input-label">Category</label>{catSel(r.cat, (v) => updList('recur', r.id, 'cat', v))}</div>
+                                    </div>
+                                    <div className="bt-con-f">
+                                        <span>{pn(r.amt) > 0 ? (r.type === 'in' ? '+' : '-') + btMoney(pn(r.amt), r.c === 'W' ? W : H) + ' every ' + ({ 1: 'month', 3: 'quarter', 6: '6 months', 12: 'year' }[r.freq] || 'month') : 'Enter an amount'}</span>
+                                        <button style={{ ...subBtn, minHeight: 30 }} onClick={() => delList('recur', r.id)}>Remove</button>
+                                    </div>
+                                </div>
+                            ))}
+                            <div className="cx-btns"><button style={subBtn} onClick={() => setSt((o) => ({ ...o, recur: [...(o.recur || []), BT_NEWR()] }))}>+ Add recurring item</button></div>
+                        </div>
+                    )}
+
+                    {st.view === 'cats' && (
+                        <div className="card cx-card cx-wrap">
+                            <div className="card-title">Monthly budgets, {btMn(mk)}</div>
+                            {(st.cats || []).map((c, i) => {
+                                const sp = spentBy[c.n] || 0, lim = pn(c.lim);
+                                const pc = lim > 0 ? sp / lim * 100 : 0;
+                                return (
+                                    <div key={i} className="bt-cat">
+                                        <div className="cx-tk" style={{ gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) 36px' }}>
+                                            <input className="input-field" value={c.n} onChange={(e) => setSt((o) => ({ ...o, cats: o.cats.map((x, j) => (j === i ? { ...x, n: e.target.value } : x)) }))} aria-label="Category name" />
+                                            <input className="input-field" inputMode="decimal" value={c.lim} placeholder={'limit ' + H} onChange={(e) => setSt((o) => ({ ...o, cats: o.cats.map((x, j) => (j === i ? { ...x, lim: e.target.value } : x)) }))} aria-label="Monthly limit" />
+                                            <span className="cx-tk-t" style={{ color: lim > 0 && sp > lim ? 'var(--bad)' : 'var(--accent)' }}>{mH(sp)}</span>
+                                            <button className="icon-btn" style={{ minWidth: 34, minHeight: 34, fontSize: 15 }} onClick={() => setSt((o) => ({ ...o, cats: o.cats.filter((_, j) => j !== i) }))} aria-label="Remove category">×</button>
+                                        </div>
+                                        {lim > 0 && <div className="cx-bar" style={{ marginTop: 2, marginBottom: 8 }}><span style={{ width: Math.min(100, pc) + '%', background: sp > lim ? 'var(--bad)' : pc > 80 ? 'var(--warn)' : 'var(--accent)' }} /></div>}
+                                    </div>
+                                );
+                            })}
+                            <div className="cx-btns"><button style={subBtn} onClick={() => setSt((o) => ({ ...o, cats: [...o.cats, { n: 'New', lim: '' }] }))}>+ Add category</button></div>
+                            <div className="cx-hint">Spending this month counts ledger expenses and recurring payments due this month.</div>
+                        </div>
+                    )}
+
+                    {st.view === 'data' && (
+                        <div className="card cx-card cx-wrap">
+                            <div className="card-title">Backup</div>
+                            <div className="cx-hint" style={{ marginBottom: 10 }}>All budget data stays on this device. Save a backup before clearing the browser or changing phone.</div>
+                            <div className="cx-btns">
+                                <button style={subBtn} onClick={exportJson}>Save backup (.json)</button>
+                                <button style={subBtn} onClick={() => fileRef.current && fileRef.current.click()}>Restore backup</button>
+                                <button style={subBtn} onClick={exportCsv}>Export ledger (.csv)</button>
+                                <button style={{ ...subBtn, color: 'var(--bad)' }} onClick={() => { if (window.confirm('Delete all budget data on this device?')) { setSt(BT_DEFAULT()); flash('Budget cleared.'); } }}>Clear all</button>
+                            </div>
+                            <input ref={fileRef} type="file" accept="application/json,.json" style={{ display: 'none' }} onChange={(e) => { importJson(e.target.files && e.target.files[0]); e.target.value = ''; }} />
+                            <div className="cx-hint" style={{ marginTop: 10 }}>{(st.tx || []).length} ledger entries, {(st.recur || []).length} recurring items, {(st.contracts || []).filter((c) => c.on).length} contracts.</div>
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -4014,12 +4753,14 @@ const Proof = (function () {
             { key: 'time', label: 'Time Zones', c: '#4d7c0f', cd: '#a3e635' },
             { key: 'load', label: 'Load Line', c: '#0e7490', cd: '#22d3ee' },
             { key: 'garbage', label: 'Garbage', c: '#475569', cd: '#cbd5e1' },
-            { key: 'calc', label: 'Calculator', c: '#7c3aed', cd: '#c4b5fd' }
+            { key: 'calc', label: 'Calculator', c: '#7c3aed', cd: '#c4b5fd' },
+            { key: 'budget', label: 'Budget', c: '#a16207', cd: '#facc15' }
         ];
         const TAB_GROUPS = [
             { name: 'Voyage', keys: ['rob', 'eta', 'speed', 'time', 'load'] },
             { name: 'Cargo & Stability', keys: ['vent', 'dwt', 'hydro', 'calc'] },
-            { name: "Ship's Office", keys: ['garbage', 'conv', 'proof'] }
+            { name: "Ship's Office", keys: ['garbage', 'conv', 'proof'] },
+            { name: 'Personal', keys: ['budget'] }
         ];
         const TAB_DESC = {
             rob: 'Fuel and fresh water remaining per leg',
@@ -4033,13 +4774,15 @@ const Proof = (function () {
             time: 'Zone time and world clock',
             load: 'Load line zone and allowed draft',
             garbage: 'GMP drums per deck, Annex V',
-            calc: 'DWA, days, SF, trim, roll, BWE, NRE'
+            calc: 'DWA, days, SF, trim, roll, BWE, anchor, NRE',
+            budget: 'Salary, spending and in hand forecast'
         };
         const TAB_TAGS = {
             rob: 'bunker fuel fresh water consumption', eta: 'arrival time', speed: 'required speed eta', vent: 'ventilation dew point sweat',
             conv: 'units convert', hydro: 'hydrostatics tpc mctc lcf km', dwt: 'deadweight cargo intake draft', proof: 'spelling grammar email',
             time: 'time zone clock', load: 'load line zone summer winter tropical', garbage: 'garbage marpol annex v',
-            calc: 'salinity dwa fwa days contract stowage factor density trim draft rolling period gm turning heel ballast exchange nre nri tax resident'
+            calc: 'salinity dwa fwa days contract stowage factor density trim draft rolling period gm turning heel ballast exchange anchor holding cable scope catenary windlass nre nri tax resident',
+            budget: 'budget money salary wages expense spending savings allotment emi in hand forecast'
         };
         const ICON_PATHS = {
             rob: <><path d="M12 2.7s6 6.2 6 10.8a6 6 0 0 1-12 0C6 8.9 12 2.7 12 2.7z" /></>,
@@ -4053,6 +4796,7 @@ const Proof = (function () {
             time: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z" /></>,
             load: <><circle cx="10" cy="12" r="6" /><path d="M2 12h16" /><path d="M18 7v10" /><path d="M18 8h4M18 12h4M18 16h4" /></>,
             garbage: <><path d="M4 7h16" /><path d="M9 7V4h6v3" /><path d="M6 7l1 13h10l1-13" /><path d="M10 11v6M14 11v6" /></>,
+            budget: <><rect x="3" y="6" width="18" height="14" rx="2" /><path d="M3 10h18" /><path d="M7 6V4h10v2" /><circle cx="16.5" cy="15" r="1.3" /></>,
             calc: <><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M8 7h8" /><path d="M8 11h.01M12 11h.01M16 11h.01M8 14.5h.01M12 14.5h.01M16 14.5h.01M8 18h4M16 18h.01" /></>,
             search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
             print: <><path d="M7 9V3h10v6" /><rect x="3" y="9" width="18" height="8" rx="2" /><path d="M7 14h10v7H7z" /></>,
@@ -4843,6 +5587,7 @@ const Proof = (function () {
                             {activeTab === 9 && <LoadLineTab />}
                             {activeTab === 10 && <GarbageTab />}
                             {activeTab === 11 && <CalcTab />}
+                            {activeTab === 12 && <BudgetTab />}
                         </div>
                     </div>
                     </main>
