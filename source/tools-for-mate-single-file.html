@@ -983,6 +983,27 @@
         .bt-con-f { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); font-weight: 600; }
         .bt-cat .cx-tk { margin-bottom: 4px; }
         @media (max-width: 640px) { .bt-tx { grid-template-columns: 74px minmax(0, 1fr) auto 28px; gap: 6px; } }
+        .cx-mr { display: grid; gap: 6px; align-items: center; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.3fr) minmax(0, 1.3fr) 76px 92px 36px; margin-bottom: 6px; }
+        .cx-mr .input-field { margin: 0; min-height: 38px; padding: 6px 9px; font-size: 14px; }
+        .cx-mr-h { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin: 12px 0 4px; }
+        .cx-mr-v { font-size: 15px; font-weight: 700; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
+        .cx-mr-v.hi { color: var(--accent); }
+        .cx-mr-v em { display: none; font-style: normal; font-size: 11px; font-weight: 600; color: var(--muted); margin-right: 6px; }
+        .cx-mr-d { display: block; min-width: 0; margin: 0; }
+        .cx-mr-d em { display: none; font-style: normal; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 3px; }
+        .cx-mr-d .input-field { width: 100%; }
+        @media (max-width: 760px) {
+            .cx-mr-h { display: none; }
+            .cx-mr { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 34px; padding: 10px 0 8px; border-bottom: .5px solid var(--border); }
+            .cx-mr > input:first-child { grid-column: 1 / 3; }
+            .cx-mr > button { grid-column: 3; grid-row: 1; }
+            .cx-mr > .cx-mr-d { grid-column: 1 / 4; }
+            .cx-mr-d em { display: block; }
+            .cx-mr > .cx-mr-v { grid-column: 1; }
+            .cx-mr > .cx-mr-v.hi { grid-column: 2; }
+            .cx-mr-v { text-align: left; }
+            .cx-mr-v em { display: inline; }
+        }
     </style>
 </head>
 <body>
@@ -3123,6 +3144,7 @@ const Proof = (function () {
                 sf: { v: '', u: 0, bs: '0', vol: '', w: '' },
                 trim: { lbp: '', df: '', da: '', tpc: '', mct: '', lcf: '', ref: 'ap', rows: [{ n: '', op: 'L', w: '', x: '' }, { n: '', op: 'L', w: '', x: '' }], tgt: '', sx: '' },
                 roll: { b: '', d: '', lwl: '', method: 'imo', f: '0.8', tt: '', n: '', T: '', gmIn: '', v: '', r: '', rmode: 'r', kg: '', km: '', gmT: '', lim: '10' },
+                moor: { name: '', prev: '', lim: '', rows: [{ p: '', a: '', d: '' }, { p: '', a: '', d: '' }] },
                 anch: { lbp: '', t: '', at: '', al: '', wind: '', cur: '', yaw: '0', cw: '0.9', cc: '0.05', depth: '', hawse: '', len: '', lunit: 'sh', shl: '27.5', dia: '', wpm: '', grade: '3', am: '', atype: 'stockless', fac: '', bed: 'sand', la: '', lc: '', sf: '1.5' },
                 nre: { fy: '', other: '', voy: [{ on: '', off: '', elig: true }, { on: '', off: '', elig: true }] },
                 bwe: { method: 'seq', np: '2', rate: '', eff: '', sameIn: true, npIn: '', rateIn: '', vf: '3', strip: '', start: cxNowWall(cxTzMin(tz)), tz: tz, spd: '', tanks: [{ n: '', cap: '', cur: '' }, { n: '', cap: '', cur: '' }] }
@@ -3132,7 +3154,7 @@ const Proof = (function () {
             const d = CX_DEFAULT();
             try {
                 const s = JSON.parse(localStorage.getItem(CX_KEY) || 'null');
-                if (s) { const o = { tool: s.tool || d.tool }; ['sal', 'days', 'sf', 'trim', 'roll', 'bwe', 'anch', 'nre'].forEach((k) => { o[k] = { ...d[k], ...(s[k] || {}) }; }); return o; }
+                if (s) { const o = { tool: s.tool || d.tool }; ['sal', 'days', 'sf', 'trim', 'roll', 'bwe', 'anch', 'moor', 'nre'].forEach((k) => { o[k] = { ...d[k], ...(s[k] || {}) }; }); return o; }
             } catch (e) {}
             return d;
         }
@@ -3986,6 +4008,93 @@ const Proof = (function () {
             );
         }
 
+        // ---------- Mooring hours (Form 5 mooring time sheet) ----------
+        const MR_NEW = (a) => ({ p: '', a: a || '', d: '' });
+        const mrDt = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(s || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] + ' ' + m[4] + ':' + m[5] : ''; };
+        function CxMoor({ s, set, setMany }) {
+            const [msg, setMsg] = useState('');
+            const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 2200); };
+            const prev = pn(s.prev) || 0;
+            let acc = prev;
+            const rows = s.rows.map((r, i) => {
+                const A = cxWallToUtc(r.a, 0), D = cxWallToUtc(r.d, 0);
+                const ok = isFinite(A) && isFinite(D) && D > A;
+                const hrs = ok ? Math.round((D - A) / 360000) / 10 : NaN;
+                if (ok) acc = Math.round((acc + hrs) * 10) / 10;
+                const pD = i > 0 ? cxWallToUtc(s.rows[i - 1].d, 0) : NaN;
+                return { hrs, acc: ok ? acc : NaN, bad: isFinite(A) && isFinite(D) && D <= A, overlap: isFinite(A) && isFinite(pD) && A < pD };
+            });
+            const done = rows.filter((r) => isFinite(r.hrs));
+            const sheet = Math.round(done.reduce((t, r) => t + r.hrs, 0) * 10) / 10;
+            const total = Math.round((prev + sheet) * 10) / 10;
+            const longest = done.reduce((m, r, i) => (r.hrs > m.h ? { h: r.hrs, i: rows.indexOf(r) } : m), { h: 0, i: -1 });
+            const lim = pn(s.lim);
+            const left = lim > 0 ? lim - total : NaN;
+            const setR = (i, k, v) => setMany({ rows: s.rows.map((x, j) => (j === i ? { ...x, [k]: v } : x)) });
+            const add = () => { const last = s.rows[s.rows.length - 1]; setMany({ rows: [...s.rows, MR_NEW(last && last.d ? last.d : '')] }); };
+            const sortRows = () => setMany({ rows: s.rows.slice().sort((x, y) => (x.a || '9').localeCompare(y.a || '9')) });
+            const table = () => {
+                const head = ['Port', 'Arrival time (All Fast)', 'Departure time (All clear)', 'Hrs in port', 'Accumulated Mooring hours'];
+                return [head].concat(s.rows.map((r, i) => [r.p, mrDt(r.a), mrDt(r.d), isFinite(rows[i].hrs) ? rows[i].hrs.toFixed(1) : '', isFinite(rows[i].acc) ? rows[i].acc.toFixed(1) : '']));
+            };
+            const copy = () => {
+                const t = table().map((r) => r.join('\t')).join('\n');
+                try { navigator.clipboard.writeText(t).then(() => flash('Copied. Paste into the Form 5 sheet.'), () => flash('Copy blocked')); } catch (e) { flash('Copy blocked'); }
+            };
+            const csv = () => {
+                const q = (v) => '"' + String(v).replace(/"/g, '""') + '"';
+                const t = table().map((r) => r.map(q).join(',')).join('\n');
+                try { const b = new Blob([t], { type: 'text/csv' }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'mooring-hours-' + cxToday() + '.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 1500); } catch (e) { flash('Download blocked'); }
+            };
+
+            return (
+                <div>
+                    <div className="card cx-card">
+                        <div className="card-title">Mooring time sheet</div>
+                        <div className="cx-row">
+                            <CxField label="Vessel / sheet note" type="text" value={s.name} onChange={set('name')} placeholder="optional" />
+                            <CxField label="Previous accumulated hours" value={s.prev} onChange={set('prev')} placeholder="carried from last sheet" />
+                            <CxField label="Line limit (h)" value={s.lim} onChange={set('lim')} placeholder="optional, e.g. rotation or inspection" />
+                        </div>
+                        <div className="cx-mr cx-mr-h"><span>Port</span><span>Arrival (All Fast)</span><span>Departure (All Clear)</span><span>Hrs in port</span><span>Accumulated</span><span></span></div>
+                        {s.rows.map((r, i) => (
+                            <div key={i}>
+                                <div className="cx-mr">
+                                    <input className="input-field" value={r.p} placeholder={'Port ' + (i + 1)} onChange={(e) => setR(i, 'p', e.target.value)} aria-label="Port" />
+                                    <label className="cx-mr-d"><em>All fast</em><input type="datetime-local" className="input-field" value={r.a} onChange={(e) => setR(i, 'a', e.target.value)} aria-label="All fast" aria-invalid={rows[i].overlap} /></label>
+                                    <label className="cx-mr-d"><em>All clear</em><input type="datetime-local" className="input-field" value={r.d} onChange={(e) => setR(i, 'd', e.target.value)} aria-label="All clear" aria-invalid={rows[i].bad} /></label>
+                                    <span className="cx-mr-v"><em>Hrs</em>{isFinite(rows[i].hrs) ? rows[i].hrs.toFixed(1) : '-'}</span>
+                                    <span className="cx-mr-v hi"><em>Accum.</em>{isFinite(rows[i].acc) ? rows[i].acc.toFixed(1) : '-'}</span>
+                                    <button className="icon-btn" style={{ minWidth: 34, minHeight: 34, fontSize: 16 }} onClick={() => setMany({ rows: s.rows.length > 1 ? s.rows.filter((_, j) => j !== i) : [MR_NEW()] })} aria-label="Remove port">×</button>
+                                </div>
+                                {rows[i].bad && <div style={{ ...noteStyle('bad'), marginTop: 0, marginBottom: 6 }}>All clear is before all fast.</div>}
+                                {rows[i].overlap && <div style={{ ...noteStyle('warn'), marginTop: 0, marginBottom: 6 }}>All fast is before the previous port's all clear. Check the dates or sort the list.</div>}
+                            </div>
+                        ))}
+                        <div className="cx-btns" style={{ marginTop: 8 }}>
+                            <button style={subBtn} onClick={add}>+ Add port</button>
+                            <button style={subBtn} onClick={sortRows}>Sort by date</button>
+                            <button style={subBtn} onClick={copy}>Copy table</button>
+                            <button style={subBtn} onClick={csv}>Export CSV</button>
+                            <button style={subBtn} onClick={() => { if (window.confirm('Start a new sheet? The accumulated total is carried to Previous hours.')) setMany({ prev: total ? String(total) : s.prev, rows: [MR_NEW()] }); }}>New sheet</button>
+                        </div>
+                        {msg && <div style={noteStyle('')}>{msg}</div>}
+                        <div className="cx-grid">
+                            <CxOut l="Ports on this sheet" v={String(done.length)} />
+                            <CxOut l="Hours this sheet" v={sheet.toFixed(1)} u="h" />
+                            <CxOut l="Accumulated mooring hours" v={total.toFixed(1)} u="h" hi />
+                            <CxOut l="Average per port" v={done.length ? (sheet / done.length).toFixed(1) : '-'} u="h" />
+                            <CxOut l="Longest stay" v={longest.i >= 0 ? longest.h.toFixed(1) : '-'} u="h" sub={longest.i >= 0 ? s.rows[longest.i].p || 'Port ' + (longest.i + 1) : null} />
+                            {lim > 0 && <CxOut l="Left to line limit" v={left.toFixed(1)} u="h" sub={left <= 0 ? 'limit reached' : (left / 24).toFixed(1) + ' days alongside'} hi />}
+                        </div>
+                        {lim > 0 && <div className="cx-bar"><span style={{ width: Math.min(100, total / lim * 100) + '%', background: left <= 0 ? 'var(--bad)' : total / lim > 0.9 ? 'var(--warn)' : 'var(--accent)' }} /></div>}
+                        {lim > 0 && left <= 0 && <div style={noteStyle('bad')}>Mooring line hours have reached the limit. Arrange inspection, end for end or renewal as per the line management plan.</div>}
+                        <div className="cx-hint" style={{ marginTop: 10 }}>Hours in port = All Clear minus All Fast, to one decimal. Accumulated = previous hours plus each port, as on Form 5. Use ship's time for both entries; if the clocks were changed while alongside, adjust the entry. Each new port starts with the last All Clear date to save typing.</div>
+                    </div>
+                </div>
+            );
+        }
+
         // ---------- Anchor holding ----------
         const ANCH_BED = {
             sand: { n: 'Sand', a: 3.5, c: 0.75 },
@@ -4196,7 +4305,7 @@ const Proof = (function () {
                 set: (k) => (v) => setSt((o) => ({ ...o, [p]: { ...o[p], [k]: v } })),
                 setMany: (obj) => setSt((o) => ({ ...o, [p]: { ...o[p], ...obj } }))
             });
-            const tools = [['sal', 'Salinity & DWA'], ['days', 'Days'], ['sf', 'SF / Density'], ['trim', 'Trim & Draft'], ['roll', 'Rolling & Turn'], ['bwe', 'Ballast Exchange'], ['anch', 'Anchor Holding'], ['nre', 'NRE Days']];
+            const tools = [['sal', 'Salinity & DWA'], ['days', 'Days'], ['sf', 'SF / Density'], ['trim', 'Trim & Draft'], ['roll', 'Rolling & Turn'], ['bwe', 'Ballast Exchange'], ['anch', 'Anchor Holding'], ['moor', 'Mooring Hours'], ['nre', 'NRE Days']];
             return (
                 <div className="tab-pane">
                     <h2 className="section-title">Calculator</h2>
@@ -4212,6 +4321,7 @@ const Proof = (function () {
                     {st.tool === 'roll' && <CxRoll {...part('roll')} />}
                     {st.tool === 'bwe' && <CxBwe {...part('bwe')} />}
                     {st.tool === 'anch' && <CxAnchor {...part('anch')} />}
+                    {st.tool === 'moor' && <CxMoor {...part('moor')} />}
                     {st.tool === 'nre' && <CxNre {...part('nre')} />}
                 </div>
             );
@@ -4774,14 +4884,14 @@ const Proof = (function () {
             time: 'Zone time and world clock',
             load: 'Load line zone and allowed draft',
             garbage: 'GMP drums per deck, Annex V',
-            calc: 'DWA, days, SF, trim, roll, BWE, anchor, NRE',
+            calc: 'DWA, days, SF, trim, roll, BWE, anchor, mooring, NRE',
             budget: 'Salary, spending and in hand forecast'
         };
         const TAB_TAGS = {
             rob: 'bunker fuel fresh water consumption', eta: 'arrival time', speed: 'required speed eta', vent: 'ventilation dew point sweat',
             conv: 'units convert', hydro: 'hydrostatics tpc mctc lcf km', dwt: 'deadweight cargo intake draft', proof: 'spelling grammar email',
             time: 'time zone clock', load: 'load line zone summer winter tropical', garbage: 'garbage marpol annex v',
-            calc: 'salinity dwa fwa days contract stowage factor density trim draft rolling period gm turning heel ballast exchange anchor holding cable scope catenary windlass nre nri tax resident',
+            calc: 'salinity dwa fwa days contract stowage factor density trim draft rolling period gm turning heel ballast exchange anchor holding cable scope catenary windlass mooring hours lines form 5 all fast all clear nre nri tax resident',
             budget: 'budget money salary wages expense spending savings allotment emi in hand forecast'
         };
         const ICON_PATHS = {
