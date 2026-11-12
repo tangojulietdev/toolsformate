@@ -1004,6 +1004,50 @@
             .cx-mr-v { text-align: left; }
             .cx-mr-v em { display: inline; }
         }
+    
+        /* Media tab */
+        .md-seg { flex-wrap: wrap; max-width: 100%; }
+        .md-seg button { min-height: 34px; padding: 6px 12px; }
+        .md-field { margin-bottom: 12px; }
+        .md-inl { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .md-inl .input-field { flex: 1; min-width: 90px; }
+        .md-inl .btn-ghost { margin: 0; }
+        .md-chip { min-height: 30px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); font-size: 12px; font-weight: 600; cursor: pointer; }
+        .md-chip.on { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+        .md-drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 22px 14px; border: 1.5px dashed var(--border); border-radius: var(--r-sm, 10px); color: var(--text-2); text-align: center; transition: background .15s, border-color .15s; }
+        .md-drop.over { border-color: var(--accent); background: var(--fill-2); }
+        .md-drop .btn-ghost { margin: 0; }
+        .md-drop-t { font-weight: 600; color: var(--text); }
+        .md-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow: auto; }
+        .md-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; background: var(--fill-2); }
+        .md-item-main { flex: 1; min-width: 0; }
+        .md-name { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+        .md-meta { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+        .md-note { color: var(--text-2); font-style: italic; }
+        .md-x { width: 30px; height: 30px; flex: none; border: 0; border-radius: 8px; background: transparent; color: var(--text-2); font-size: 18px; cursor: pointer; }
+        .md-x:hover { background: var(--fill-2); color: var(--text); }
+        .md-thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; flex: none; background: #fff; }
+        .md-dl { margin: 0 !important; min-height: 32px; }
+        .md-acts { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+        .md-acts .btn-primary { margin: 0; }
+        .md-acts .btn-ghost { margin: 0; }
+        .md-sub { margin: 16px 0 8px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-2); }
+        .md-range { width: 100%; accent-color: var(--accent); }
+        .md-video { width: 100%; max-height: 300px; border-radius: 10px; background: #000; margin-bottom: 10px; }
+        .md-audio { width: 100%; margin-bottom: 10px; }
+        .md-check { display: flex; gap: 8px; align-items: center; margin: 6px 0 10px; font-size: 14px; }
+        .md-err { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, #d70015 12%, transparent); color: var(--text); font-size: 13px; }
+        .md-prog-h { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+        .md-bar { height: 8px; border-radius: 999px; background: var(--fill-2); overflow: hidden; }
+        .md-bar i { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .2s; }
+        .md-prog-f { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; gap: 10px; }
+        .md-prog-f .btn-ghost { margin: 0; }
+        .md-res-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+        .md-badge { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--fill-2); color: var(--text-2); }
+        .md-badge.ok { background: color-mix(in srgb, #1a7f37 16%, transparent); color: var(--text); }
+        .md-res .md-item { margin-bottom: 6px; }
+        .md-off { display: flex; align-items: center; gap: 12px; }
+        .md-off .btn-ghost { margin: 0; }
     </style>
 </head>
 <body>
@@ -4851,6 +4895,292 @@ const Proof = (function () {
         }
 // @@NEWTABS-END
 
+        // ===== Media: convert and compress photos, PDFs, video and audio on the device =====
+        const MD_KEY = 'tfm_media_v1';
+        const MD_DEF = {
+            tool: 'photo',
+            photo: { fmt: 'jpeg', q: 80, max: '1920', target: '', page: 'a4' },
+            pdf: { mode: 'compress', level: 'balanced', target: '', ifmt: 'jpeg', dpi: '150' },
+            video: { mode: 'compress', cont: 'mp4', sizeMode: 'quality', quality: 'medium', target: '25', height: '720', fps: '', audio: 'keep', rotate: '0', gw: '480', gfps: '10', afmt: 'mp3', abr: '128000' },
+            audio: { fmt: 'mp3', abr: '128000', mono: false }
+        };
+        function mdLoad() { try { const s = JSON.parse(localStorage.getItem(MD_KEY) || 'null'); if (s && typeof s === 'object') return { ...MD_DEF, ...s, photo: { ...MD_DEF.photo, ...s.photo }, pdf: { ...MD_DEF.pdf, ...s.pdf }, video: { ...MD_DEF.video, ...s.video }, audio: { ...MD_DEF.audio, ...s.audio } }; } catch (e) {} return MD_DEF; }
+        let mdEngine = null;
+        const mdImport = (u) => (new Function('u', 'return import(u)'))(u);
+        function mdLoadEngine() { if (!mdEngine) mdEngine = mdImport(new URL('media.js?v=1', document.baseURI).href).catch((e) => { mdEngine = null; throw e; }); return mdEngine; }
+        const mdFmt = (b) => (b >= 1073741824 ? (b / 1073741824).toFixed(2) + ' GB' : b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB');
+        const mdKind = (f) => { const t = (f.type || '').toLowerCase(); const e = (/\.([^.]+)$/.exec(f.name || '') || [, ''])[1].toLowerCase(); if (t === 'application/pdf' || e === 'pdf') return 'pdf'; if (t.startsWith('image/') || ['heic', 'heif', 'jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'avif'].includes(e)) return 'photo'; if (t.startsWith('video/') || ['mp4', 'mov', 'm4v', 'mkv', 'webm', '3gp', 'ts', 'mts', 'avi'].includes(e)) return 'video'; if (t.startsWith('audio/') || ['mp3', 'm4a', 'aac', 'wav', 'ogg', 'opus', 'flac', 'amr'].includes(e)) return 'audio'; return 'other'; };
+        const MD_ACCEPT = { photo: 'image/*,.heic,.heif', pdf: 'application/pdf,.pdf,image/*', video: 'video/*,.mkv,.mov,.mp4,.webm,.m4v,.3gp', audio: 'audio/*,video/*,.mp3,.m4a,.wav,.ogg,.opus,.flac,.aac' };
+        const mdTime = (s) => { if (!isFinite(s)) return '-'; const m = Math.floor(s / 60), x = s - m * 60; return m + ':' + (x < 10 ? '0' : '') + x.toFixed(1); };
+        function mdSave(blob, name) { const u = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); }
+        async function mdShare(items) { try { const files = items.map((r) => new File([r.blob], r.name, { type: r.blob.type || 'application/octet-stream' })); if (navigator.canShare && navigator.canShare({ files })) { await navigator.share({ files }); return true; } } catch (e) { if (e && e.name === 'AbortError') return true; } return false; }
+        function MdSeg({ value, onChange, opts }) {
+            return (
+                <div className="seg md-seg" role="group">
+                    {opts.map(([v, l]) => <button key={v} type="button" aria-pressed={String(value) === String(v)} onClick={() => onChange(v)}>{l}</button>)}
+                </div>
+            );
+        }
+        function MdField({ label, children, hint }) {
+            return (<div className="md-field"><label className="input-label">{label}</label>{children}{hint ? <div className="cx-hint">{hint}</div> : null}</div>);
+        }
+        function MdDrop({ tool, files, setFiles, onKind, multiple = true }) {
+            const inp = useRef(null); const [over, setOver] = useState(false);
+            const add = (list) => {
+                const arr = [...list].filter((f) => f && f.size > 0); if (!arr.length) return;
+                const kinds = new Set(arr.map(mdKind)); const k = kinds.size === 1 ? [...kinds][0] : null;
+                if (k && k !== 'other' && k !== tool && !(tool === 'pdf' && k === 'photo') && !(tool === 'audio' && k === 'video')) { onKind(k, arr); return; }
+                setFiles((o) => (multiple ? [...o, ...arr] : arr.slice(0, 1)));
+            };
+            return (
+                <div className={'md-drop' + (over ? ' over' : '')} onDragOver={(e) => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)} onDrop={(e) => { e.preventDefault(); setOver(false); add(e.dataTransfer.files); }}>
+                    <input ref={inp} type="file" accept={MD_ACCEPT[tool]} multiple={multiple} hidden onChange={(e) => { add(e.target.files); e.target.value = ''; }} />
+                    <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 16V4" /><path d="m7 9 5-5 5 5" /><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" /></svg>
+                    <div className="md-drop-t">{files.length ? files.length + (files.length === 1 ? ' file chosen' : ' files chosen') : 'Drop files here'}</div>
+                    <div className="md-inl" style={{ justifyContent: 'center' }}><button type="button" className="btn-ghost" onClick={() => inp.current && inp.current.click()}>{files.length ? 'Add more' : 'Choose files'}</button>
+                    {files.length ? <button type="button" className="btn-ghost" onClick={() => setFiles([])}>Clear</button> : null}</div>
+                </div>
+            );
+        }
+        function MdList({ files, setFiles, info, reorder }) {
+            if (!files.length) return null;
+            const mv = (i, d) => setFiles((o) => { const a = o.slice(); const j = i + d; if (j < 0 || j >= a.length) return o; [a[i], a[j]] = [a[j], a[i]]; return a; });
+            return (
+                <div className="md-list">
+                    {files.map((f, i) => (
+                        <div className="md-item" key={f.name + i + f.size}>
+                            <div className="md-item-main"><div className="md-name">{f.name}</div><div className="md-meta">{mdFmt(f.size)}{info && info.get(f) ? ' · ' + info.get(f) : ''}</div></div>
+                            {reorder ? <><button type="button" className="md-x" aria-label="Move up" onClick={() => mv(i, -1)}>↑</button><button type="button" className="md-x" aria-label="Move down" onClick={() => mv(i, 1)}>↓</button></> : null}
+                            <button type="button" className="md-x" aria-label={'Remove ' + f.name} onClick={() => setFiles((o) => o.filter((z, k) => k !== i))}>×</button>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+        function MdResults({ results, onClear, eng }) {
+            const [zipping, setZipping] = useState(false);
+            if (!results.length) return null;
+            const tot0 = results.reduce((s, r) => s + (r.from || 0), 0), tot1 = results.reduce((s, r) => s + r.blob.size, 0);
+            const pct = tot0 ? Math.round((1 - tot1 / tot0) * 100) : 0;
+            return (
+                <div className="card md-res">
+                    <div className="md-res-h"><div className="card-title" style={{ margin: 0 }}>Ready</div>{tot0 ? <div className={'md-badge' + (pct > 0 ? ' ok' : '')}>{mdFmt(tot0)} → {mdFmt(tot1)}{pct > 0 ? '  (' + pct + '% smaller)' : pct < 0 ? '  (' + -pct + '% larger)' : ''}</div> : null}</div>
+                    {results.map((r, i) => (
+                        <div className="md-item" key={i}>
+                            {r.thumb ? <img className="md-thumb" src={r.thumb} alt="" /> : null}
+                            <div className="md-item-main"><div className="md-name">{r.name}</div><div className="md-meta">{r.from ? mdFmt(r.from) + ' → ' : ''}{mdFmt(r.blob.size)}{r.extra ? ' · ' + r.extra : ''}{r.note ? <span className="md-note"> · {r.note}</span> : r.from && r.blob.size > r.from * 1.02 ? <span className="md-note"> · larger than the original, try lower quality or resolution</span> : null}</div></div>
+                            <button type="button" className="btn-ghost md-dl" onClick={() => mdSave(r.blob, r.name)}>Save</button>
+                        </div>
+                    ))}
+                    <div className="md-acts">
+                        {results.length > 1 ? <button type="button" className="btn btn-primary" disabled={zipping} onClick={async () => { setZipping(true); try { const z = await eng.zipFiles(results); mdSave(z, 'meridian-media-' + new Date().toISOString().slice(0, 10) + '.zip'); } finally { setZipping(false); } }}>{zipping ? 'Packing…' : 'Save all (ZIP)'}</button> : <button type="button" className="btn btn-primary" onClick={() => mdSave(results[0].blob, results[0].name)}>Save</button>}
+                        {navigator.canShare ? <button type="button" className="btn-ghost" onClick={async () => { if (!(await mdShare(results))) alert('Sharing is not available for these files on this device. Use Save instead.'); }}>Share</button> : null}
+                        <button type="button" className="btn-ghost" onClick={onClear}>Clear results</button>
+                    </div>
+                </div>
+            );
+        }
+        function MdProgress({ job, onCancel }) {
+            if (!job) return null;
+            const pct = Math.round((job.p || 0) * 100); const el = (Date.now() - job.t0) / 1000; const eta = job.p > 0.03 ? el / job.p - el : NaN;
+            return (
+                <div className="card md-prog" role="status" aria-live="polite">
+                    <div className="md-prog-h"><span>{job.label}</span><b>{pct}%</b></div>
+                    <div className="md-bar"><i style={{ width: pct + '%' }} /></div>
+                    <div className="md-prog-f"><span className="cx-hint" style={{ margin: 0 }}>{isFinite(eta) && eta > 2 ? 'About ' + (eta > 90 ? Math.round(eta / 60) + ' min' : Math.round(eta) + ' s') + ' left' : 'Working on this device, nothing is uploaded'}</span>{onCancel ? <button type="button" className="btn-ghost" onClick={onCancel}>Cancel</button> : null}</div>
+                </div>
+            );
+        }
+        function MediaTab() {
+            const [st, setSt] = useState(mdLoad);
+            useEffect(() => { try { localStorage.setItem(MD_KEY, JSON.stringify(st)); } catch (e) {} }, [st]);
+            const [eng, setEng] = useState(null); const [engErr, setEngErr] = useState('');
+            const [files, setFiles] = useState({ photo: [], pdf: [], video: [], audio: [] });
+            const [results, setResults] = useState([]); const [job, setJob] = useState(null); const [err, setErr] = useState('');
+            const [info] = useState(() => new Map()); const [, force] = useState(0);
+            const [sup, setSup] = useState(null); const [offline, setOffline] = useState(() => { try { return localStorage.getItem('tfm_media_offline') === '1'; } catch (e) { return false; } });
+            const cancelRef = useRef(null); const vidRef = useRef(null); const [vurl, setVurl] = useState('');
+            const [trim, setTrim] = useState({ start: '', end: '' }); const [probe, setProbe] = useState(null);
+            const tool = st.tool; const s = st[tool]; const set = (k) => (v) => setSt((o) => ({ ...o, [tool]: { ...o[tool], [k]: v } }));
+            const fl = files[tool]; const setFl = (fn) => setFiles((o) => ({ ...o, [tool]: typeof fn === 'function' ? fn(o[tool]) : fn }));
+            useEffect(() => { mdLoadEngine().then((m) => { setEng(m); m.encoderSupport().then(setSup).catch(() => setSup({ webcodecs: false })); }).catch(() => setEngErr('The media engine could not be loaded. Connect once to the internet so it can be saved for offline use.')); }, []);
+            // file details
+            useEffect(() => {
+                if (!eng) return; let live = true;
+                (async () => {
+                    for (const f of fl) {
+                        if (info.has(f)) continue; info.set(f, '');
+                        const k = mdKind(f); let t = '';
+                        try {
+                            if (k === 'photo') { const r = await eng.imageInfo(f); t = r ? r.w + ' × ' + r.h : 'cannot read'; }
+                            else if (k === 'pdf') { const r = await eng.pdfInfo(f); t = r.err || r.pages + (r.pages === 1 ? ' page' : ' pages'); }
+                            else if (k === 'video' || k === 'audio') { const r = await eng.probeMedia(f); t = r.err ? r.err : [mdTime(r.duration), r.video ? r.video.w + '×' + r.video.h + (r.video.fps ? ' ' + Math.round(r.video.fps) + ' fps' : '') + ' ' + (r.video.codec || '') : '', r.audio ? (r.audio.codec || '') + ' ' + (r.audio.channels === 1 ? 'mono' : 'stereo') : ''].filter(Boolean).join(' · '); if (f === fl[0] && tool === 'video') setProbe(r); }
+                        } catch (e) { t = ''; }
+                        info.set(f, t); if (live) force((n) => n + 1);
+                    }
+                })();
+                return () => { live = false; };
+            }, [fl, eng]);
+            // preview for video and audio
+            useEffect(() => {
+                if ((tool === 'video' || tool === 'audio') && fl[0]) { const u = URL.createObjectURL(fl[0]); setVurl(u); setTrim({ start: '', end: '' }); return () => URL.revokeObjectURL(u); }
+                setVurl(''); setProbe(null);
+            }, [tool, fl[0]]);
+            const clearResults = () => { results.forEach((r) => r.thumb && URL.revokeObjectURL(r.thumb)); setResults([]); };
+            const switchTool = (k, add) => { setSt((o) => ({ ...o, tool: k })); setErr(''); if (add) setFiles((o) => ({ ...o, [k]: k === 'video' || k === 'audio' ? [...o[k], ...add] : [...o[k], ...add] })); };
+            const run = async (label, fn, cancellable) => {
+                if (!eng || job) return; setErr(''); const j = { label, p: 0, t0: Date.now() }; setJob(j);
+                let last = 0; const onP = (p) => { const now = Date.now(); if (now - last > 120 || p >= 1) { last = now; setJob((o) => (o ? { ...o, p } : o)); } };
+                try { const out = await fn(onP, (c) => { cancelRef.current = c; }); if (out && out.length) setResults((o) => [...out, ...o]); }
+                catch (e) { if (!(e && (e.name === 'AbortError' || /cancel/i.test(e.message || '')))) { console.error(e); setErr((e && e.message) || 'Something went wrong with this file.'); } }
+                finally { cancelRef.current = null; setJob(null); }
+            };
+            const sig = () => { const c = new AbortController(); cancelRef.current = () => c.abort(); return c.signal; };
+            const thumbOf = (blob) => (blob.type && blob.type.startsWith('image/') ? URL.createObjectURL(blob) : null);
+            // ---- actions ----
+            const doPhotos = () => run('Compressing ' + fl.length + (fl.length === 1 ? ' photo' : ' photos'), async (onP) => {
+                const out = []; const sg = sig();
+                for (let i = 0; i < fl.length; i++) {
+                    if (sg.aborted) break; const f = fl[i];
+                    try { const r = await eng.processImage(f, { fmt: s.fmt, q: s.q / 100, max: +s.max || 0, targetKB: +s.target || 0 }); out.push({ blob: r.blob, name: r.name, from: f.size, extra: r.w + ' × ' + r.h, note: r.kept ? 'already optimal, original kept' : '', thumb: thumbOf(r.blob) }); }
+                    catch (e) { out.push({ blob: f, name: f.name, from: f.size, note: 'could not convert: ' + (e.message || 'unreadable'), thumb: null }); }
+                    onP((i + 1) / fl.length);
+                }
+                return out;
+            }, true);
+            const doPhotoPdf = () => run('Making PDF from ' + fl.length + ' photos', async (onP) => { const b = await eng.imagesToPdf(fl, { page: s.page }, onP); return [{ blob: b, name: 'photos-' + new Date().toISOString().slice(0, 10) + '.pdf', from: fl.reduce((t, f) => t + f.size, 0), extra: fl.length + (fl.length === 1 ? ' page' : ' pages') }]; });
+            const doPdf = () => {
+                if (s.mode === 'merge') return run('Merging ' + fl.length + ' files', async (onP) => [{ blob: await eng.mergePdfs(fl, onP), name: 'merged-' + new Date().toISOString().slice(0, 10) + '.pdf', from: fl.reduce((t, f) => t + f.size, 0) }]);
+                if (s.mode === 'images') return run('Turning pages into images', async (onP) => { const out = []; const sg = sig(); for (let i = 0; i < fl.length; i++) { const r = await eng.pdfToImages(fl[i], { dpi: +s.dpi, fmt: s.ifmt }, (p) => onP((i + p) / fl.length), sg); r.forEach((x) => out.push({ ...x, thumb: thumbOf(x.blob) })); } return out; }, true);
+                return run('Compressing ' + fl.length + (fl.length === 1 ? ' PDF' : ' PDFs'), async (onP) => { const out = []; const sg = sig(); for (let i = 0; i < fl.length; i++) { const f = fl[i]; const r = await eng.compressPdf(f, { mode: s.level, targetMB: +s.target || 0 }, (p) => onP((i + p) / fl.length), sg); out.push({ blob: r.blob, name: r.name, from: f.size, note: r.kept ? 'already small, original kept' : r.note || '' }); } return out; }, true);
+            };
+            const vopts = () => ({ start: +trim.start || 0, end: +trim.end || 0 });
+            const doVideo = () => {
+                const v = st.video;
+                if (v.mode === 'gif') return run('Making GIF', async (onP) => { const out = []; for (const f of fl) { const r = await eng.videoToGif(f, { ...vopts(), width: +v.gw, fps: +v.gfps }, onP, sig()); out.push({ ...r, from: f.size, thumb: thumbOf(r.blob) }); } return out; }, true);
+                const audioOnly = v.mode === 'audio';
+                return run(audioOnly ? 'Extracting audio' : 'Converting video', async (onP, onC) => {
+                    const out = [];
+                    for (let i = 0; i < fl.length; i++) {
+                        const f = fl[i];
+                        const o = audioOnly ? { container: v.afmt, abitrate: +v.abr, ...vopts() } : { container: v.cont, quality: v.sizeMode === 'quality' ? v.quality : undefined, targetMB: v.sizeMode === 'target' ? +v.target || 0 : 0, height: +v.height || 0, fps: +v.fps || 0, mute: v.audio === 'off', mono: v.audio === 'mono', abitrate: v.audio === 'mono' ? 64000 : 128000, rotate: +v.rotate || 0, ...vopts(), suffix: v.cont === (f.name.split('.').pop() || '').toLowerCase() ? '-small' : '' };
+                        const r = await eng.convertMedia(f, o, (p) => onP((i + p) / fl.length), onC);
+                        out.push({ ...r, from: f.size });
+                    }
+                    return out;
+                }, true);
+            };
+            const doAudio = () => { const a = st.audio; return run('Converting audio', async (onP, onC) => { const out = []; for (let i = 0; i < fl.length; i++) { const f = fl[i]; const r = await eng.convertMedia(f, { container: a.fmt, abitrate: +a.abr, mono: !!a.mono, ...vopts() }, (p) => onP((i + p) / fl.length), onC); out.push({ ...r, from: f.size }); } return out; }, true); };
+            const tools = [['photo', 'Photos'], ['pdf', 'PDF'], ['video', 'Video'], ['audio', 'Audio']];
+            const noWC = sup && !sup.webcodecs;
+            const busy = !!job; const canRun = !!eng && fl.length > 0 && !busy;
+            const setFromPlayer = (k) => { const el = vidRef.current; if (el) setTrim((o) => ({ ...o, [k]: el.currentTime.toFixed(1) })); };
+            const trimUi = (tool === 'video' || tool === 'audio') && vurl ? (
+                <div className="card cx-card">
+                    <div className="card-title">Preview and trim</div>
+                    {tool === 'video' ? <video ref={vidRef} className="md-video" src={vurl} controls playsInline preload="metadata" /> : <audio ref={vidRef} className="md-audio" src={vurl} controls preload="metadata" />}
+                    <div className="cx-row">
+                        <MdField label="Start (s)"><div className="md-inl"><input className="input-field" inputMode="decimal" value={trim.start} placeholder="0" onChange={(e) => setTrim((o) => ({ ...o, start: e.target.value }))} /><button type="button" className="btn-ghost" onClick={() => setFromPlayer('start')}>From player</button></div></MdField>
+                        <MdField label="End (s)"><div className="md-inl"><input className="input-field" inputMode="decimal" value={trim.end} placeholder="end" onChange={(e) => setTrim((o) => ({ ...o, end: e.target.value }))} /><button type="button" className="btn-ghost" onClick={() => setFromPlayer('end')}>From player</button></div></MdField>
+                    </div>
+                    <div className="cx-hint">Leave empty to keep the whole file. Play to the spot and tap From player.{fl.length > 1 ? ' Trim applies to every file in the list.' : ''}</div>
+                </div>
+            ) : null;
+            const est = () => { const v = st.video; if (!probe || !probe.duration || v.mode !== 'compress') return ''; const len = Math.max(0.1, ((+trim.end || probe.duration) - (+trim.start || 0))); if (v.sizeMode === 'target') { const vb = (+v.target * 8 * 1048576 * 0.95) / len - (v.audio === 'off' ? 0 : 128000); return vb < 150000 ? 'Target is very small for ' + mdTime(len) + ' of video, the picture will be poor. Lower the resolution too.' : 'Video bitrate about ' + Math.round(vb / 1000) + ' kbps for ' + mdTime(len) + '.'; } return ''; };
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Media</h2>
+                    <div className="cx-tools" role="group" aria-label="Media type">
+                        {tools.map(([k, n]) => (<button key={k} onClick={() => switchTool(k)} style={{ ...subBtn, background: tool === k ? 'var(--accent)' : 'var(--fill-2)', color: tool === k ? 'var(--on-accent)' : 'var(--text)' }}>{n}</button>))}
+                    </div>
+                    {engErr ? <div className="card"><div className="cx-hint" style={{ color: 'var(--danger, #d70015)' }}>{engErr}</div></div> : null}
+                    <div className="cx-two">
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">{{ photo: 'Photos (JPG, PNG, WebP, HEIC)', pdf: 'PDF files', video: 'Video (MP4, MOV, MKV, WebM)', audio: 'Audio (MP3, M4A, WAV, OGG, FLAC) or video' }[tool]}</div>
+                                <MdDrop tool={tool} files={fl} setFiles={setFl} onKind={switchTool} />
+                                <MdList files={fl} setFiles={setFl} info={info} reorder={tool === 'pdf' && st.pdf.mode === 'merge'} />
+                            </div>
+                        </div>
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">Settings</div>
+                                {tool === 'photo' && <>
+                                    <MdField label="Save as"><MdSeg value={s.fmt} onChange={set('fmt')} opts={[['jpeg', 'JPG'], ['webp', 'WebP'], ['png', 'PNG'], ['same', 'Same']]} /></MdField>
+                                    <MdField label="Longest side"><select className="input-field" value={s.max} onChange={(e) => set('max')(e.target.value)}>{[['0', 'Original size'], ['4000', '4000 px'], ['2560', '2560 px'], ['1920', '1920 px (Full HD)'], ['1600', '1600 px'], ['1280', '1280 px'], ['1024', '1024 px'], ['800', '800 px'], ['640', '640 px']].map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></MdField>
+                                    <MdField label="Target file size (KB, optional)" hint="For portals that only accept files under a limit. Quality and size are lowered until it fits."><div className="md-inl"><input className="input-field" inputMode="numeric" value={s.target} placeholder="none" onChange={(e) => set('target')(e.target.value.replace(/[^\d]/g, ''))} />{['100', '200', '500', '1000'].map((k) => <button key={k} type="button" className={'md-chip' + (s.target === k ? ' on' : '')} onClick={() => set('target')(s.target === k ? '' : k)}>{k >= 1000 ? k / 1000 + ' MB' : k + ' KB'}</button>)}</div></MdField>
+                                    {!s.target && s.fmt !== 'png' ? <MdField label={'Quality ' + s.q + '%'}><input type="range" min="40" max="100" step="1" value={s.q} onChange={(e) => set('q')(+e.target.value)} className="md-range" /></MdField> : null}
+                                    <div className="cx-hint">Location and camera details are removed. Photos are turned the right way up.</div>
+                                    <div className="md-acts"><button type="button" className="btn btn-primary" disabled={!canRun} onClick={doPhotos}>Compress {fl.length || ''} {fl.length === 1 ? 'photo' : 'photos'}</button></div>
+                                    <div className="md-sub">Or combine into one PDF</div>
+                                    <div className="md-inl"><MdSeg value={s.page} onChange={set('page')} opts={[['a4', 'A4'], ['letter', 'Letter'], ['fit', 'Photo size']]} /><button type="button" className="btn-ghost" disabled={!canRun} onClick={doPhotoPdf}>Make PDF</button></div>
+                                </>}
+                                {tool === 'pdf' && <>
+                                    <MdField label="Do"><MdSeg value={s.mode} onChange={set('mode')} opts={[['compress', 'Compress'], ['images', 'To images'], ['merge', 'Merge']]} /></MdField>
+                                    {s.mode === 'compress' && <>
+                                        <MdField label="Level"><select className="input-field" value={s.level} onChange={(e) => set('level')(e.target.value)}><option value="lossless">Lossless (keeps text, small saving)</option><option value="balanced">Balanced, 150 dpi</option><option value="strong">Strong, 110 dpi</option><option value="extreme">Extreme, 80 dpi</option><option value="target">Fit a target size</option></select></MdField>
+                                        {s.level === 'target' ? <MdField label="Target size (MB)"><div className="md-inl"><input className="input-field" inputMode="decimal" value={s.target} placeholder="e.g. 2" onChange={(e) => set('target')(e.target.value)} />{['1', '2', '5', '10'].map((k) => <button key={k} type="button" className={'md-chip' + (s.target === k ? ' on' : '')} onClick={() => set('target')(k)}>{k} MB</button>)}</div></MdField> : null}
+                                        <div className="cx-hint">{s.level === 'lossless' ? 'Repacks the file without touching images or text.' : 'Pages are redrawn as images. Best for scans and photos. Text will no longer be selectable.'}</div>
+                                    </>}
+                                    {s.mode === 'images' && <>
+                                        <MdField label="Image type"><MdSeg value={s.ifmt} onChange={set('ifmt')} opts={[['jpeg', 'JPG'], ['png', 'PNG'], ['webp', 'WebP']]} /></MdField>
+                                        <MdField label="Resolution"><MdSeg value={s.dpi} onChange={set('dpi')} opts={[['100', '100 dpi'], ['150', '150'], ['200', '200'], ['300', '300']]} /></MdField>
+                                    </>}
+                                    {s.mode === 'merge' ? <div className="cx-hint">Files are joined in list order. Use the arrows to reorder. Photos added here become pages.</div> : null}
+                                    <div className="md-acts"><button type="button" className="btn btn-primary" disabled={!canRun || (s.mode === 'merge' && fl.length < 2)} onClick={doPdf}>{{ compress: 'Compress', images: 'Convert to images', merge: 'Merge into one PDF' }[s.mode]}</button></div>
+                                </>}
+                                {tool === 'video' && <>
+                                    {noWC ? <div className="cx-hint" style={{ color: 'var(--danger, #d70015)' }}>This browser cannot convert video. Use Chrome, Edge or Safari 17 or newer.</div> : null}
+                                    <MdField label="Do"><MdSeg value={s.mode} onChange={set('mode')} opts={[['compress', 'Compress / convert'], ['audio', 'Extract audio'], ['gif', 'Make GIF']]} /></MdField>
+                                    {s.mode === 'compress' && <>
+                                        <MdField label="Format"><MdSeg value={s.cont} onChange={set('cont')} opts={[['mp4', 'MP4'], ['webm', 'WebM'], ['mov', 'MOV'], ['mkv', 'MKV']]} /></MdField>
+                                        <MdField label="Size"><MdSeg value={s.sizeMode} onChange={set('sizeMode')} opts={[['quality', 'By quality'], ['target', 'Fit file size']]} /></MdField>
+                                        {s.sizeMode === 'quality' ? <MdField label="Quality"><MdSeg value={s.quality} onChange={set('quality')} opts={[['high', 'High'], ['medium', 'Medium'], ['low', 'Low'], ['vlow', 'Very low']]} /></MdField>
+                                            : <MdField label="Target size (MB)" hint={est()}><div className="md-inl"><input className="input-field" inputMode="decimal" value={s.target} onChange={(e) => set('target')(e.target.value)} />{['10', '16', '25', '50', '100'].map((k) => <button key={k} type="button" className={'md-chip' + (s.target === k ? ' on' : '')} onClick={() => set('target')(k)}>{k}</button>)}</div></MdField>}
+                                        <div className="cx-row">
+                                            <MdField label="Resolution"><select className="input-field" value={s.height} onChange={(e) => set('height')(e.target.value)}>{[['0', 'Original'], ['1080', '1080p'], ['720', '720p'], ['480', '480p'], ['360', '360p'], ['240', '240p']].map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></MdField>
+                                            <MdField label="Frame rate"><select className="input-field" value={s.fps} onChange={(e) => set('fps')(e.target.value)}>{[['', 'Original'], ['30', '30 fps'], ['25', '25 fps'], ['24', '24 fps'], ['15', '15 fps']].map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></MdField>
+                                        </div>
+                                        <div className="cx-row">
+                                            <MdField label="Sound"><select className="input-field" value={s.audio} onChange={(e) => set('audio')(e.target.value)}><option value="keep">Keep</option><option value="mono">Mono, smaller</option><option value="off">Remove</option></select></MdField>
+                                            <MdField label="Rotate"><select className="input-field" value={s.rotate} onChange={(e) => set('rotate')(e.target.value)}>{[['0', 'No'], ['90', '90° right'], ['180', '180°'], ['270', '90° left']].map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></MdField>
+                                        </div>
+                                    </>}
+                                    {s.mode === 'audio' && <div className="cx-row">
+                                        <MdField label="Format"><select className="input-field" value={s.afmt} onChange={(e) => set('afmt')(e.target.value)}><option value="mp3">MP3</option><option value="m4a">M4A (AAC)</option><option value="ogg">OGG (Opus)</option><option value="wav">WAV (no loss)</option></select></MdField>
+                                        {s.afmt !== 'wav' ? <MdField label="Bitrate"><select className="input-field" value={s.abr} onChange={(e) => set('abr')(e.target.value)}>{['64000', '96000', '128000', '192000', '256000', '320000'].map((v) => <option key={v} value={v}>{v / 1000} kbps</option>)}</select></MdField> : null}
+                                    </div>}
+                                    {s.mode === 'gif' && <><div className="cx-row">
+                                        <MdField label="Width"><select className="input-field" value={s.gw} onChange={(e) => set('gw')(e.target.value)}>{['240', '320', '480', '640', '800'].map((v) => <option key={v} value={v}>{v} px</option>)}</select></MdField>
+                                        <MdField label="Frames per second"><select className="input-field" value={s.gfps} onChange={(e) => set('gfps')(e.target.value)}>{['5', '8', '10', '12', '15'].map((v) => <option key={v} value={v}>{v}</option>)}</select></MdField>
+                                    </div><div className="cx-hint">Up to 30 seconds. Set start and end in Preview and trim. Without them the first 10 seconds are used.</div></>}
+                                    <div className="md-acts"><button type="button" className="btn btn-primary" disabled={!canRun || noWC} onClick={doVideo}>{{ compress: 'Convert', audio: 'Extract audio', gif: 'Make GIF' }[s.mode]}</button></div>
+                                    {sup && sup.webcodecs ? <div className="cx-hint">This device can make: {[sup.avc && 'H.264', sup.hevc && 'H.265', sup.vp9 && 'VP9', sup.av1 && 'AV1'].filter(Boolean).join(', ') || 'no video'} video, {[sup.aac && 'AAC', sup.opus && 'Opus', 'MP3'].filter(Boolean).join(', ')} audio. Uses the phone or computer's hardware encoder.</div> : null}
+                                </>}
+                                {tool === 'audio' && <>
+                                    {noWC ? <div className="cx-hint" style={{ color: 'var(--danger, #d70015)' }}>This browser cannot convert audio. Use Chrome, Edge or Safari 17 or newer.</div> : null}
+                                    <MdField label="Save as"><MdSeg value={s.fmt} onChange={set('fmt')} opts={[['mp3', 'MP3'], ['m4a', 'M4A'], ['ogg', 'OGG'], ['wav', 'WAV']]} /></MdField>
+                                    {s.fmt !== 'wav' ? <MdField label="Bitrate"><MdSeg value={s.abr} onChange={set('abr')} opts={[['64000', '64'], ['96000', '96'], ['128000', '128'], ['192000', '192'], ['320000', '320 kbps']]} /></MdField> : null}
+                                    <label className="cx-check md-check"><input type="checkbox" checked={!!s.mono} onChange={(e) => set('mono')(e.target.checked)} /> Mono (half the size, fine for voice)</label>
+                                    <div className="cx-hint">Video files dropped here give you their sound track.</div>
+                                    <div className="md-acts"><button type="button" className="btn btn-primary" disabled={!canRun || noWC} onClick={doAudio}>Convert {fl.length > 1 ? fl.length + ' files' : ''}</button></div>
+                                </>}
+                                {err ? <div className="md-err" role="alert">{err}</div> : null}
+                            </div>
+                            <MdProgress job={job} onCancel={cancelRef.current ? () => { try { cancelRef.current(); } catch (e) {} } : null} />
+                            {trimUi}
+                        </div>
+                    </div>
+                    <MdResults results={results} onClear={clearResults} eng={eng} />
+                    <div className="card md-off">
+                        <div className="md-item-main"><div className="md-name">Offline use</div><div className="md-meta">{offline ? 'Media engines are saved on this device and work without internet.' : 'Save the media engines (about 11 MB) so this tab works at sea without internet.'}</div></div>
+                        <button type="button" className="btn-ghost" disabled={!eng || offline === 'busy'} onClick={async () => { setOffline('busy'); try { await eng.warmOffline(); localStorage.setItem('tfm_media_offline', '1'); setOffline(true); } catch (e) { setOffline(false); } }}>{offline === 'busy' ? 'Saving…' : offline ? 'Refresh' : 'Save for offline'}</button>
+                    </div>
+                    <div className="cx-hint" style={{ textAlign: 'center' }}>All conversion happens on this device. Files are never uploaded.</div>
+                </div>
+            );
+        }
+
         const TABS = [
             { key: 'rob', label: 'ROB', c: '#0369a1', cd: '#38bdf8' },
             { key: 'eta', label: 'ETA', c: '#4f46e5', cd: '#a5b4fc' },
@@ -4864,12 +5194,13 @@ const Proof = (function () {
             { key: 'load', label: 'Load Line', c: '#0e7490', cd: '#22d3ee' },
             { key: 'garbage', label: 'Garbage', c: '#475569', cd: '#cbd5e1' },
             { key: 'calc', label: 'Calculator', c: '#7c3aed', cd: '#c4b5fd' },
-            { key: 'budget', label: 'Budget', c: '#a16207', cd: '#facc15' }
+            { key: 'budget', label: 'Budget', c: '#a16207', cd: '#facc15' },
+            { key: 'media', label: 'Media', c: '#db2777', cd: '#f472b6' }
         ];
         const TAB_GROUPS = [
             { name: 'Voyage', keys: ['rob', 'eta', 'speed', 'time', 'load'] },
             { name: 'Cargo & Stability', keys: ['vent', 'dwt', 'hydro', 'calc'] },
-            { name: "Ship's Office", keys: ['garbage', 'conv', 'proof'] },
+            { name: "Ship's Office", keys: ['garbage', 'conv', 'proof', 'media'] },
             { name: 'Personal', keys: ['budget'] }
         ];
         const TAB_DESC = {
@@ -4885,14 +5216,16 @@ const Proof = (function () {
             load: 'Load line zone and allowed draft',
             garbage: 'GMP drums per deck, Annex V',
             calc: 'DWA, days, SF, trim, roll, BWE, anchor, mooring, NRE',
-            budget: 'Salary, spending and in hand forecast'
+            budget: 'Salary, spending and in hand forecast',
+            media: 'Compress and convert photos, PDF, video, audio'
         };
         const TAB_TAGS = {
             rob: 'bunker fuel fresh water consumption', eta: 'arrival time', speed: 'required speed eta', vent: 'ventilation dew point sweat',
             conv: 'units convert', hydro: 'hydrostatics tpc mctc lcf km', dwt: 'deadweight cargo intake draft', proof: 'spelling grammar email',
             time: 'time zone clock', load: 'load line zone summer winter tropical', garbage: 'garbage marpol annex v',
             calc: 'salinity dwa fwa days contract stowage factor density trim draft rolling period gm turning heel ballast exchange anchor holding cable scope catenary windlass mooring hours lines form 5 all fast all clear nre nri tax resident',
-            budget: 'budget money salary wages expense spending savings allotment emi in hand forecast'
+            budget: 'budget money salary wages expense spending savings allotment emi in hand forecast',
+            media: 'media photo image picture jpg png webp heic pdf compress shrink reduce size convert video mp4 mov webm audio mp3 gif zip merge resize'
         };
         const ICON_PATHS = {
             rob: <><path d="M12 2.7s6 6.2 6 10.8a6 6 0 0 1-12 0C6 8.9 12 2.7 12 2.7z" /></>,
@@ -4907,6 +5240,7 @@ const Proof = (function () {
             load: <><circle cx="10" cy="12" r="6" /><path d="M2 12h16" /><path d="M18 7v10" /><path d="M18 8h4M18 12h4M18 16h4" /></>,
             garbage: <><path d="M4 7h16" /><path d="M9 7V4h6v3" /><path d="M6 7l1 13h10l1-13" /><path d="M10 11v6M14 11v6" /></>,
             budget: <><rect x="3" y="6" width="18" height="14" rx="2" /><path d="M3 10h18" /><path d="M7 6V4h10v2" /><circle cx="16.5" cy="15" r="1.3" /></>,
+            media: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m10 9.5 4.5 2.5-4.5 2.5z" /><path d="M7 5v14M17 5v14" /></>,
             calc: <><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M8 7h8" /><path d="M8 11h.01M12 11h.01M16 11h.01M8 14.5h.01M12 14.5h.01M16 14.5h.01M8 18h4M16 18h.01" /></>,
             search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
             print: <><path d="M7 9V3h10v6" /><rect x="3" y="9" width="18" height="8" rx="2" /><path d="M7 14h10v7H7z" /></>,
@@ -5698,6 +6032,7 @@ const Proof = (function () {
                             {activeTab === 10 && <GarbageTab />}
                             {activeTab === 11 && <CalcTab />}
                             {activeTab === 12 && <BudgetTab />}
+                            {activeTab === 13 && <MediaTab />}
                         </div>
                     </div>
                     </main>
