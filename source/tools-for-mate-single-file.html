@@ -1048,6 +1048,73 @@
         .md-res .md-item { margin-bottom: 6px; }
         .md-off { display: flex; align-items: center; gap: 12px; }
         .md-off .btn-ghost { margin: 0; }
+        /* ===== Crew OT tab ===== */
+        .ot-cards { display: none; }
+        @media (max-width: 760px) {
+            .ot-sheet .ot-scroll { display: none; }
+            .ot-cards { display: grid; gap: 10px; margin-top: 6px; }
+            .ot-card { background: var(--surface-2); border-radius: 12px; box-shadow: inset 0 0 0 .5px var(--border); padding: 10px; }
+            .ot-card.dim { opacity: .6; }
+            .ot-card-h { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) 34px; gap: 6px; align-items: center; }
+            .ot-card .input-field { margin: 0; min-height: 38px; padding: 5px 9px; font-size: 15px; width: 100%; background: var(--surface); box-shadow: inset 0 0 0 .5px var(--border); }
+            .ot-card .ot-n { font-weight: 700; }
+            .ot-card .input-field.ot-man { box-shadow: inset 0 0 0 1.5px var(--warn); }
+            .ot-card label span { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 3px; text-transform: uppercase; letter-spacing: .03em; }
+            .ot-top { display: block; margin-top: 8px; }
+            .ot-top .input-field { font-size: 18px !important; font-weight: 700; min-height: 44px !important; }
+            .ot-card-g { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+            .ot-card-g .input-field { text-align: center; padding: 5px 4px; }
+            .ot-card-r { display: flex; justify-content: space-between; gap: 6px; flex-wrap: wrap; margin-top: 9px; font-size: 12px; color: var(--muted); }
+            .ot-card-r b { color: var(--text); font-variant-numeric: tabular-nums; }
+            .ot-card-r .fin b { color: var(--accent); font-size: 15px; }
+            .ot-card-t { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-2); font-weight: 600; }
+            .ot-card-t b { color: var(--accent); font-size: 18px; }
+        }
+        @media print { .ot-cards { display: none !important; } .ot-sheet .ot-scroll { display: block !important; } }
+        .ot-entry { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-top: 12px; }
+        .ot-entry > div:first-child { flex: 1 1 220px; }
+        .ot-entry .bt-chips { margin: 0 0 4px; }
+        .ot-days { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 6px; margin-top: 8px; }
+        .ot-day { border-radius: 9px; background: var(--surface-2); box-shadow: inset 0 0 0 .5px var(--border); padding: 4px; display: flex; flex-direction: column; gap: 4px; }
+        .ot-day-h { border: 0; background: transparent; cursor: pointer; display: flex; align-items: baseline; justify-content: center; gap: 5px; padding: 4px 0 2px; color: var(--text); font: inherit; border-radius: 6px; }
+        .ot-day-h b { font-size: 17px; font-variant-numeric: tabular-nums; }
+        .ot-day-h span { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; }
+        .ot-day .input-field { margin: 0; min-height: 32px; padding: 3px 6px; font-size: 14px; text-align: center; width: 100%; }
+        .ot-day .input-field.ot-man { box-shadow: inset 0 0 0 1.5px var(--warn); }
+        .ot-day.hol { background: var(--bad-soft); box-shadow: inset 0 0 0 1px var(--bad); }
+        .ot-day.hol .ot-day-h, .ot-day.hol .ot-day-h span { color: var(--bad); }
+        .ot-days-f { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--text-2); margin: 8px 0 4px; }
+        .ot-days-f b { color: var(--accent); }
+        @media (max-width: 640px) { .ot-days { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+        .ot-month { display: flex; align-items: center; gap: 10px; }
+        .ot-month-t { flex: 1; text-align: center; min-width: 0; }
+        .ot-month-t b { display: block; font-size: 18px; color: var(--text); }
+        .ot-month-t span { font-size: 12px; color: var(--muted); }
+        .ot-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 4px 0 0; }
+        .ot-table { width: 100%; min-width: 900px; border-collapse: separate; border-spacing: 0; font-size: 13px; overflow: visible; }
+        .ot-table.ot-carry { min-width: 460px; }
+        .ot-table th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); text-align: right; padding: 8px 6px 6px; white-space: nowrap; border-bottom: .5px solid var(--border); vertical-align: bottom; }
+        .ot-table th small { display: block; font-size: 10px; font-weight: 500; text-transform: none; letter-spacing: 0; }
+        .ot-table td { padding: 5px 6px; text-align: right; border-bottom: .5px solid var(--border); white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text-2); }
+        .ot-table th:first-child, .ot-table td:first-child { position: sticky; left: 0; z-index: 1; text-align: left; background: var(--surface-2); box-shadow: 1px 0 0 var(--border); }
+        .ot-table .input-field { width: 70px; min-height: 34px; margin: 0; padding: 4px 8px; font-size: 14px; text-align: right; }
+        .ot-table .input-field.ot-man { box-shadow: inset 0 0 0 1.5px var(--warn); }
+        .ot-table td.nm { min-width: 128px; }
+        .ot-table td.nm .input-field { display: block; width: 124px; text-align: left; }
+        .ot-table td.nm .ot-n { font-weight: 600; }
+        .ot-table td.nm .ot-r { min-height: 26px; margin-top: 3px; font-size: 12px; padding: 2px 8px; }
+        .ot-table td.nm b { display: block; color: var(--text); }
+        .ot-table td.nm span { font-size: 11px; color: var(--muted); }
+        .ot-table .ot-v { font-weight: 600; color: var(--text); }
+        .ot-table .ot-mut { color: var(--muted); font-weight: 500; }
+        .ot-table .ot-neg { color: var(--muted); }
+        .ot-table .ot-fin { font-weight: 800; color: var(--accent); font-size: 14px; }
+        .ot-table tr.dim td { opacity: .55; }
+        .ot-table tfoot td { font-weight: 700; background: var(--surface); border-bottom: 0; color: var(--text); }
+        .ot-table tfoot td:first-child { background: var(--surface); }
+        .ot-who { min-height: var(--ctl-h, 40px); display: flex; align-items: center; font-weight: 600; color: var(--text); }
+        @media (max-width: 640px) { .ot-table td.nm { min-width: 112px; } .ot-table td.nm .input-field { width: 108px; } .ot-table .input-field { width: 62px; } .ot-month-t b { font-size: 16px; } }
+        @media print { .ot-table { min-width: 0; font-size: 10px; } .ot-table:not(.ot-carry) td:last-child, .ot-table:not(.ot-carry) th:last-child { display: none; } .ot-table .input-field { border: 0; box-shadow: none; width: auto; padding: 0; background: transparent; } }
     </style>
 </head>
 <body>
@@ -4893,6 +4960,381 @@ const Proof = (function () {
                 </div>
             );
         }
+
+        // ===== Crew OT: monthly overtime claim, records to cut-off plus estimate to month end =====
+        const OT_KEY = 'tfm_ot_v1';
+        const OT_CFG = { day: '9', reg: '8', fixed: '103', prorate: true, cutDay: '18' };
+        const OT_MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const OT_MONL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const OT_RANKS = ['C/O', '2/O', '3/O', 'C/E', '2/E', '3/E', '4/E', 'ETO', 'Bosun', 'AB', 'AB', 'AB', 'OS', 'OS', 'Fitter', 'Oiler', 'Oiler', 'Wiper', 'Ch Cook', 'Messman'];
+        let otSeq = 0;
+        const otId = () => 'c' + Date.now().toString(36) + (otSeq++).toString(36);
+        const OT_ROW = (n, r) => ({ id: otId(), n: n || '', r: r || '', rec: '', est: '', port: '', coast: '', carry: '', on: '', off: '', act: '' });
+        const otPad = (v) => String(v).padStart(2, '0');
+        const otToday = () => { const d = new Date(); return d.getFullYear() + '-' + otPad(d.getMonth() + 1) + '-' + otPad(d.getDate()); };
+        const otParse = (mk) => { const y = +mk.slice(0, 4), m = +mk.slice(5, 7); return { y, m, dim: new Date(Date.UTC(y, m, 0)).getUTCDate() }; };
+        const otAddMk = (mk, n) => { const { y, m } = otParse(mk); const d = new Date(Date.UTC(y, m - 1 + n, 1)); return d.getUTCFullYear() + '-' + otPad(d.getUTCMonth() + 1); };
+        const otMkName = (mk, long) => { const { y, m } = otParse(mk); return (long ? OT_MONL : OT_MON)[m - 1] + ' ' + y; };
+        const otDate = (s) => (/^\d{4}-\d{2}-\d{2}$/.test(s || '') ? +s.slice(8, 10) + ' ' + OT_MON[+s.slice(5, 7) - 1] + ' ' + s.slice(0, 4) : '-');
+        // hours: 12, 12.5 or 12:30, negative allowed
+        const otH = (v) => { const t = String(v == null ? '' : v).trim().replace(',', '.'); if (t === '') return NaN; const m = /^(-?)(\d+):(\d{1,2})$/.exec(t); if (m) return (m[1] ? -1 : 1) * (+m[2] + +m[3] / 60); return Number(t); };
+        const otF = (v) => (isFinite(v) ? String(Math.round(v * 10) / 10) : '-');
+        // day of month for a date string: 0 before the month, dim + 1 after it
+        const otDayIn = (s, mk, dim) => { if (!/^\d{4}-\d{2}-\d{2}$/.test(s || '')) return null; const k = s.slice(0, 7); return k < mk ? 0 : k > mk ? dim + 1 : +s.slice(8, 10); };
+        const OT_WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        function otRules(cfg) {
+            const day = isFinite(pn(cfg.day)) ? pn(cfg.day) : 9, reg = isFinite(pn(cfg.reg)) ? pn(cfg.reg) : 8;
+            return { day, wdOt: Math.max(0, day - reg), fixed: isFinite(pn(cfg.fixed)) ? pn(cfg.fixed) : 103 };
+        }
+        // remaining days after the entry date: Sat/Sun are holidays unless toggled, hours auto 1 (weekday) or 9 (holiday) unless typed
+        function otDayList(mk, M, cfg) {
+            const { y, m, dim } = otParse(mk);
+            const R = otRules(cfg);
+            let cut = otDayIn(M.cut, mk, dim); cut = cut == null ? 0 : Math.min(dim, cut);
+            const hd = M.hd || {}, dh = M.dh || {};
+            const out = [];
+            for (let d = cut + 1; d <= dim; d++) {
+                const w = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+                const wkend = w === 0 || w === 6;
+                const hol = hd[d] != null ? !!hd[d] : wkend;
+                const auto = hol ? R.day : R.wdOt;
+                const man = dh[d] != null && isFinite(otH(dh[d]));
+                out.push({ d, w, wkend, hol, auto, man, h: man ? otH(dh[d]) : auto });
+            }
+            return out;
+        }
+        function otCalc(row, mk, M, cfg) {
+            const { y, m, dim } = otParse(mk);
+            const R = otRules(cfg);
+            let cut = otDayIn(M.cut, mk, dim); cut = cut == null ? 0 : Math.min(dim, cut);
+            const onD = row.on ? otDayIn(row.on, mk, dim) : 1, offD = row.off ? otDayIn(row.off, mk, dim) : dim;
+            const a = Math.max(1, onD == null ? 1 : onD), b = Math.min(dim, offD == null ? dim : offD);
+            const days = Math.max(0, b - a + 1);
+            let we = 0, wd = 0, auto = 0;
+            otDayList(mk, M, cfg).forEach((x) => { if (x.d >= a && x.d <= b) { auto += x.h; if (x.hol) we++; else wd++; } });
+            const man = isFinite(otH(row.est));
+            const est = man ? otH(row.est) : auto;
+            const rec = otH(row.rec) || 0, port = otH(row.port) || 0, coast = otH(row.coast) || 0, carry = otH(row.carry) || 0;
+            const fx = days === 0 ? 0 : cfg.prorate ? R.fixed * days / dim : R.fixed;
+            const total = rec + est + port + coast;
+            const over = total - fx;
+            return { days, we, wd, auto, man, est, rec, port, coast, carry, fx, total, over, fin: Math.max(0, over + carry), part: est + port + coast };
+        }
+        function otNewMonth(st, mk) {
+            const prev = Object.keys(st.months || {}).filter((k) => k < mk).sort().pop();
+            const { dim } = otParse(mk);
+            const now = otToday(), nowMk = now.slice(0, 7);
+            const cd = Math.min(dim, Math.max(1, pn(st.cfg.cutDay) || 18));
+            const cut = mk === nowMk ? now : mk < nowMk ? mk + '-' + otPad(dim) : mk + '-' + otPad(cd);
+            const src = prev ? st.months[prev].rows : null;
+            const first = mk + '-01';
+            const rows = src && src.length
+                ? src.filter((r) => !(r.off && r.off < first)).map((r) => ({ ...OT_ROW(r.n, r.r), id: r.id, on: r.on && r.on >= first ? r.on : '', off: r.off || '' }))
+                : [OT_ROW()];
+            return { cut, hd: {}, dh: {}, rows: rows.length ? rows : [OT_ROW()] };
+        }
+        function otLoad() {
+            let s = null;
+            try { s = JSON.parse(localStorage.getItem(OT_KEY) || 'null'); } catch (e) {}
+            const st = s && s.months ? { view: 'sheet', ...s, cfg: { ...OT_CFG, ...(s.cfg || {}) } } : { view: 'sheet', cfg: { ...OT_CFG }, months: {}, cur: otToday().slice(0, 7) };
+            if (!/^\d{4}-\d{2}$/.test(st.cur || '')) st.cur = otToday().slice(0, 7);
+            if (!st.months[st.cur]) st.months = { ...st.months, [st.cur]: otNewMonth(st, st.cur) };
+            return st;
+        }
+        function otText(st, mk, calcs) {
+            const M = st.months[mk], { dim } = otParse(mk), R = otRules(st.cfg);
+            const cut = Math.min(dim, otDayIn(M.cut, mk, dim) || 0);
+            const L = [];
+            L.push('CREW OVERTIME ' + otMkName(mk, true).toUpperCase());
+            L.push('Records till ' + otDate(M.cut) + (cut < dim ? ', estimated ' + (cut + 1) + ' to ' + dim + ' ' + OT_MON[otParse(mk).m - 1] : ', no estimate'));
+            const hl = otDayList(mk, M, st.cfg).filter((x) => x.hol).map((x) => x.d);
+            if (hl.length) L.push('Holidays / full OT days estimated: ' + hl.join(', '));
+            L.push('Fixed OT ' + otF(R.fixed) + ' hrs/month' + (st.cfg.prorate ? ' (pro rata for days on board)' : ''));
+            L.push('');
+            const cols = [['Name', 18, 'l'], ['Rank', 8, 'l'], ['Rec', 6], ['Est', 6], ['Port', 6], ['Coast', 6], ['Total', 7], ['Fixed', 7], ['Over', 7], ['C/F', 6], ['Final', 7]];
+            const line = (v) => v.map((x, i) => (cols[i][2] === 'l' ? String(x).slice(0, cols[i][1] - 1).padEnd(cols[i][1]) : String(x).padStart(cols[i][1]))).join('');
+            L.push(line(cols.map((c) => c[0])));
+            const T = { rec: 0, est: 0, port: 0, coast: 0, total: 0, fx: 0, over: 0, carry: 0, fin: 0 };
+            M.rows.forEach((r, i) => {
+                const c = calcs[i];
+                Object.keys(T).forEach((k) => { T[k] += c[k]; });
+                L.push(line([r.n || 'Crew ' + (i + 1), r.r || '', otF(c.rec), otF(c.est), otF(c.port), otF(c.coast), otF(c.total), otF(c.fx), otF(c.over), otF(c.carry), otF(c.fin)]));
+            });
+            L.push(line(['TOTAL', '', otF(T.rec), otF(T.est), otF(T.port), otF(T.coast), otF(T.total), otF(T.fx), otF(T.over), otF(T.carry), otF(T.fin)]));
+            L.push('');
+            L.push('Rec = recorded to cut-off. Est = estimate to month end. C/F = carried over from last month. Final = Total - Fixed + C/F (not below 0).');
+            return L.join('\n');
+        }
+        function otSave(text, name, type) { const u = URL.createObjectURL(new Blob([text], { type })); const a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); }
+
+        function OtTab() {
+            const [st, setSt] = useState(otLoad);
+            const [msg, setMsg] = useState('');
+            const fileRef = useRef(null);
+            useEffect(() => { try { localStorage.setItem(OT_KEY, JSON.stringify(st)); } catch (e) {} }, [st]);
+            const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 2500); };
+            const mk = st.cur;
+            const M = st.months[mk] || otNewMonth(st, mk);
+            const { y, m, dim } = otParse(mk);
+            const R = otRules(st.cfg);
+            const setM = (patch) => setSt((o) => ({ ...o, months: { ...o.months, [o.cur]: { ...(o.months[o.cur] || M), ...patch } } }));
+            const setRow = (id, k, v) => setSt((o) => { const X = o.months[o.cur]; return { ...o, months: { ...o.months, [o.cur]: { ...X, rows: X.rows.map((r) => (r.id === id ? { ...r, [k]: v } : r)) } } }; });
+            const delRow = (id) => setSt((o) => { const X = o.months[o.cur]; const rows = X.rows.filter((r) => r.id !== id); return { ...o, months: { ...o.months, [o.cur]: { ...X, rows: rows.length ? rows : [OT_ROW()] } } }; });
+            const addRows = (list) => setSt((o) => { const X = o.months[o.cur]; const keep = X.rows.filter((r) => r.n || r.r || r.rec || r.est || r.port || r.coast || r.carry); return { ...o, months: { ...o.months, [o.cur]: { ...X, rows: [...keep, ...list] } } }; });
+            const setCfg = (k) => (v) => setSt((o) => ({ ...o, cfg: { ...o.cfg, [k]: v } }));
+            const goMonth = (n) => setSt((o) => { const k = otAddMk(o.cur, n); return { ...o, cur: k, months: o.months[k] ? o.months : { ...o.months, [k]: otNewMonth(o, k) } }; });
+            const view = st.view || 'sheet';
+
+            const calcs = M.rows.map((r) => otCalc(r, mk, M, st.cfg));
+            const T = calcs.reduce((t, c) => { ['rec', 'est', 'port', 'coast', 'total', 'fx', 'over', 'carry', 'fin'].forEach((k) => { t[k] += c[k]; }); return t; }, { rec: 0, est: 0, port: 0, coast: 0, total: 0, fx: 0, over: 0, carry: 0, fin: 0 });
+            const full = otCalc({}, mk, M, st.cfg);
+            let cutD = otDayIn(M.cut, mk, dim); cutD = cutD == null ? 0 : Math.min(dim, cutD);
+            const cutBad = M.cut && M.cut.slice(0, 7) !== mk;
+            const mon = OT_MON[m - 1];
+            const chips = [['Today', otToday()], ['18th', mk + '-18'], ['19th', mk + '-19'], ['20th', mk + '-20']].filter((c) => c[1].slice(0, 7) === mk);
+
+            const days = otDayList(mk, M, st.cfg);
+            const togHol = (d, cur) => setSt((o) => { const X = o.months[o.cur]; const dh = { ...(X.dh || {}) }; delete dh[d]; return { ...o, months: { ...o.months, [o.cur]: { ...X, hd: { ...(X.hd || {}), [d]: !cur }, dh } } }; });
+            const setDh = (d, v) => setSt((o) => { const X = o.months[o.cur]; const dh = { ...(X.dh || {}) }; if (String(v).trim() === '') delete dh[d]; else dh[d] = v; return { ...o, months: { ...o.months, [o.cur]: { ...X, dh } } }; });
+            const resetDays = () => setM({ hd: {}, dh: {} });
+            const copyText = async () => {
+                const t = otText(st, mk, calcs);
+                try { await navigator.clipboard.writeText(t); flash('Copied. Paste into your email.'); } catch (e) { otSave(t, 'crew-ot-' + mk + '.txt', 'text/plain'); flash('Saved as text file.'); }
+            };
+            const exportCsv = () => {
+                const q = (v) => '"' + String(v).replace(/"/g, '""') + '"';
+                const rows = [['Name', 'Rank', 'Sign-on', 'Sign-off', 'Days on board', 'Recorded to cut-off', 'Estimate to month end', 'Port ops', 'Coasting', 'Month total', 'Fixed OT', 'Over fixed', 'Carry over', 'Final OT']];
+                M.rows.forEach((r, i) => { const c = calcs[i]; rows.push([r.n, r.r, r.on, r.off, c.days, otF(c.rec), otF(c.est), otF(c.port), otF(c.coast), otF(c.total), otF(c.fx), otF(c.over), otF(c.carry), otF(c.fin)]); });
+                rows.push(['TOTAL', '', '', '', '', otF(T.rec), otF(T.est), otF(T.port), otF(T.coast), otF(T.total), otF(T.fx), otF(T.over), otF(T.carry), otF(T.fin)]);
+                otSave(rows.map((r) => r.map(q).join(',')).join('\r\n'), 'crew-ot-' + mk + '.csv', 'text/csv');
+            };
+            const exportJson = () => otSave(JSON.stringify(st, null, 1), 'crew-ot-backup-' + otToday() + '.json', 'application/json');
+            const importJson = (f) => {
+                if (!f) return;
+                const rd = new FileReader();
+                rd.onload = () => { try { const s = JSON.parse(rd.result); if (!s || !s.months) throw new Error(); setSt({ view: 'sheet', ...s, cfg: { ...OT_CFG, ...(s.cfg || {}) }, months: s.months[s.cur] ? s.months : { ...s.months, [s.cur]: otNewMonth(s, s.cur) } }); flash('Backup restored.'); } catch (e) { flash('Not a Crew OT backup file.'); } };
+                rd.readAsText(f);
+            };
+
+            const cellIn = (r, k, ph, extra) => (
+                <input className="input-field" inputMode="decimal" value={r[k]} placeholder={ph} onChange={(e) => setRow(r.id, k, e.target.value)} aria-label={k + ' ' + (r.n || 'crew')} {...(extra || {})} />
+            );
+
+            return (
+                <div>
+                    <div className="cx-tools">
+                        <div className="seg" role="group" aria-label="Crew OT view">
+                            {[['sheet', 'OT sheet'], ['crew', 'Sign on / off'], ['data', 'Settings & export']].map(([k, l]) => (
+                                <button key={k} type="button" aria-pressed={view === k} onClick={() => setSt((o) => ({ ...o, view: k }))}>{l}</button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="card cx-card">
+                        <div className="ot-month">
+                            <button type="button" style={subBtn} onClick={() => goMonth(-1)} aria-label="Previous month">‹</button>
+                            <div className="ot-month-t"><b>{otMkName(mk, true)}</b><span>{dim} days, fixed OT {otF(R.fixed)} h</span></div>
+                            <button type="button" style={subBtn} onClick={() => goMonth(1)} aria-label="Next month">›</button>
+                        </div>
+                        {view === 'sheet' && (
+                            <>
+                                <div className="ot-entry">
+                                    <div>
+                                        <label className="input-label">Entry date (OT records till this day)</label>
+                                        <input type="date" className="input-field" value={M.cut} min={mk + '-01'} max={mk + '-' + otPad(dim)} onChange={(e) => setM({ cut: e.target.value })} />
+                                    </div>
+                                    <div className="bt-chips">{chips.map(([l, d]) => <button key={l} type="button" style={{ ...subBtn, minHeight: 30, padding: '0 10px', fontSize: 12 }} onClick={() => setM({ cut: d })}>{l}</button>)}</div>
+                                </div>
+                                {cutBad && <div className="cx-status bad" style={{ marginTop: 8 }}>Entry date is outside {otMkName(mk)}.</div>}
+                                <div className="cx-sub">Remaining days, {cutD < dim ? (cutD + 1) + ' to ' + dim + ' ' + mon : 'none'}</div>
+                                {cutD >= dim ? (
+                                    <div className="cx-hint" style={{ marginTop: 6 }}>Records cover the full month, no estimate needed.</div>
+                                ) : (
+                                    <>
+                                        <div className="ot-days">
+                                            {days.map((x) => (
+                                                <div key={x.d} className={'ot-day' + (x.hol ? ' hol' : '')}>
+                                                    <button type="button" className="ot-day-h" onClick={() => togHol(x.d, x.hol)} aria-pressed={x.hol} title={x.hol ? 'Tap to make a normal day' : 'Tap to mark holiday'}>
+                                                        <b>{x.d}</b><span>{OT_WD[x.w]}</span>
+                                                    </button>
+                                                    <input className={'input-field' + (x.man ? ' ot-man' : '')} inputMode="decimal" value={x.man ? (M.dh || {})[x.d] : ''} placeholder={otF(x.auto)} onChange={(e) => setDh(x.d, e.target.value)} aria-label={'OT hours ' + x.d + ' ' + mon} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="ot-days-f">
+                                            <span>{full.wd} normal × {otF(R.wdOt)} h, {full.we} holidays × {otF(R.day)} h{days.some((x) => x.man) ? ', with edits' : ''} = <b>{otF(full.auto)} h</b> per crew</span>
+                                            {days.some((x) => x.man || (M.hd || {})[x.d] != null) && <button type="button" style={{ ...subBtn, minHeight: 30, fontSize: 12 }} onClick={resetDays}>Reset days</button>}
+                                        </div>
+                                        <div className="cx-hint">Tap a date to mark or unmark it as a holiday (red = full OT). Hours fill in automatically; type over any day to change it.</div>
+                                    </>
+                                )}
+                            </>
+                        )}
+                    </div>
+
+                    {msg && <div className="cx-status ok" style={{ marginBottom: 12 }}>{msg}</div>}
+
+                    {view === 'sheet' && (
+                        <>
+                            <div className="cx-grid" style={{ marginTop: 0, marginBottom: 14 }}>
+                                <div className="cx-out"><div className="l">Crew</div><div className="v">{M.rows.length}</div></div>
+                                <div className="cx-out"><div className="l">OT till entry</div><div className="v">{otF(T.rec)}<span className="u">h</span></div></div>
+                                <div className="cx-out"><div className="l">Estimated + port + coast</div><div className="v">{otF(T.est + T.port + T.coast)}<span className="u">h</span></div></div>
+                                <div className="cx-out"><div className="l">Month total</div><div className="v">{otF(T.total)}<span className="u">h</span></div><div className="s">fixed {otF(T.fx)} h</div></div>
+                                <div className="cx-out hi"><div className="l">Final OT claim</div><div className="v">{otF(T.fin)}<span className="u">h</span></div><div className="s">over fixed incl. carry over</div></div>
+                            </div>
+                            <div className="card cx-card ot-sheet">
+                                <div className="card-title">OT sheet, {otMkName(mk)}</div>
+                                <div className="ot-scroll">
+                                    <table className="ot-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Crew</th>
+                                                <th>OT till entry<small>1 to {cutD} {mon}</small></th>
+                                                <th>Estimate<small>{cutD < dim ? (cutD + 1) + ' to ' + dim : 'none'}</small></th>
+                                                <th>Port ops<small>extra est.</small></th>
+                                                <th>Coasting<small>extra est.</small></th>
+                                                <th>Total</th>
+                                                <th>Fixed</th>
+                                                <th>Over<small>fixed</small></th>
+                                                <th>Carry over<small>last month</small></th>
+                                                <th>Final OT</th>
+                                                <th aria-label="Remove"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {M.rows.map((r, i) => {
+                                                const c = calcs[i];
+                                                return (
+                                                    <tr key={r.id} className={c.days === 0 ? 'dim' : ''}>
+                                                        <td className="nm">
+                                                            <input className="input-field ot-n" value={r.n} placeholder={'Name ' + (i + 1)} onChange={(e) => setRow(r.id, 'n', e.target.value)} aria-label="Name" />
+                                                            <input className="input-field ot-r" value={r.r} placeholder="Rank" onChange={(e) => setRow(r.id, 'r', e.target.value)} aria-label="Rank" />
+                                                        </td>
+                                                        <td>{cellIn(r, 'rec', '0')}</td>
+                                                        <td>{cellIn(r, 'est', otF(c.auto), { className: 'input-field' + (c.man ? ' ot-man' : ''), title: c.man ? 'Manual estimate, clear to use auto ' + otF(c.auto) + ' h' : 'Auto: ' + c.wd + ' weekdays, ' + c.we + ' full OT days' })}</td>
+                                                        <td>{cellIn(r, 'port', '0')}</td>
+                                                        <td>{cellIn(r, 'coast', '0')}</td>
+                                                        <td className="ot-v">{otF(c.total)}</td>
+                                                        <td className="ot-v ot-mut" title={c.days + ' days on board'}>{otF(c.fx)}</td>
+                                                        <td className={'ot-v' + (c.over < 0 ? ' ot-neg' : '')}>{otF(c.over)}</td>
+                                                        <td>{cellIn(r, 'carry', '0')}</td>
+                                                        <td className="ot-v ot-fin">{otF(c.fin)}</td>
+                                                        <td><button className="icon-btn" style={{ minWidth: 32, minHeight: 32, fontSize: 15 }} onClick={() => delRow(r.id)} aria-label="Remove crew">×</button></td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td>Total</td>
+                                                <td className="ot-v">{otF(T.rec)}</td>
+                                                <td className="ot-v">{otF(T.est)}</td>
+                                                <td className="ot-v">{otF(T.port)}</td>
+                                                <td className="ot-v">{otF(T.coast)}</td>
+                                                <td className="ot-v">{otF(T.total)}</td>
+                                                <td className="ot-v">{otF(T.fx)}</td>
+                                                <td className="ot-v">{otF(T.over)}</td>
+                                                <td className="ot-v">{otF(T.carry)}</td>
+                                                <td className="ot-v ot-fin">{otF(T.fin)}</td>
+                                                <td></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                <div className="ot-cards">
+                                    {M.rows.map((r, i) => {
+                                        const c = calcs[i];
+                                        return (
+                                            <div key={r.id} className={'ot-card' + (c.days === 0 ? ' dim' : '')}>
+                                                <div className="ot-card-h">
+                                                    <input className="input-field ot-n" value={r.n} placeholder={'Name ' + (i + 1)} onChange={(e) => setRow(r.id, 'n', e.target.value)} aria-label="Name" />
+                                                    <input className="input-field ot-r" value={r.r} placeholder="Rank" onChange={(e) => setRow(r.id, 'r', e.target.value)} aria-label="Rank" />
+                                                    <button className="icon-btn" style={{ minWidth: 34, minHeight: 34, fontSize: 15 }} onClick={() => delRow(r.id)} aria-label="Remove crew">×</button>
+                                                </div>
+                                                <label className="ot-top"><span>OT till entry, 1 to {cutD} {mon}</span>{cellIn(r, 'rec', '0')}</label>
+                                                <div className="ot-card-g">
+                                                    <label><span>Estimate</span>{cellIn(r, 'est', otF(c.auto), { className: 'input-field' + (c.man ? ' ot-man' : '') })}</label>
+                                                    <label><span>Port ops</span>{cellIn(r, 'port', '0')}</label>
+                                                    <label><span>Coasting</span>{cellIn(r, 'coast', '0')}</label>
+                                                    <label><span>Carry</span>{cellIn(r, 'carry', '0')}</label>
+                                                </div>
+                                                <div className="ot-card-r">
+                                                    <span>Total <b>{otF(c.total)}</b></span>
+                                                    <span>Fixed <b>{otF(c.fx)}</b></span>
+                                                    <span>Over <b>{otF(c.over)}</b></span>
+                                                    <span className="fin">Final <b>{otF(c.fin)} h</b></span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                    <div className="ot-card ot-card-t"><span>Total final OT, {M.rows.length} crew</span><b>{otF(T.fin)} h</b></div>
+                                </div>
+                                <div className="cx-btns" style={{ marginTop: 10 }}>
+                                    <button style={subBtn} onClick={() => addRows([OT_ROW()])}>+ Add crew</button>
+                                    <button style={subBtn} onClick={() => addRows(OT_RANKS.map((rk) => OT_ROW('', rk)))}>+ Standard crew list</button>
+                                    <button style={subBtn} onClick={copyText}>Copy for email</button>
+                                    <button style={subBtn} onClick={exportCsv}>Export .csv</button>
+                                </div>
+                                <div className="cx-hint" style={{ marginTop: 8 }}>
+                                    OT till entry = each crew's OT from the records, 1st to the entry date. Estimate comes from the remaining days above; type a figure to override for one crew, clear it to go back to auto. Carry over is last month's balance, typed manually (can be negative). Port ops and Coasting are extra hours expected on top of the normal pattern. Total = OT till entry + Estimate + Port + Coasting. Final OT = Total − Fixed + Carry, not below 0. Hours take 12.5 or 12:30.
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                    {view === 'crew' && (
+                        <div className="card cx-card cx-wrap">
+                            <div className="card-title">Sign on / off in {otMkName(mk)}</div>
+                            <div className="cx-hint" style={{ marginBottom: 10 }}>Only for crew joining or leaving this month. Estimate counts only days on board{st.cfg.prorate ? ', and fixed OT is pro rata (fixed × days on board / ' + dim + ')' : ''}. Leave blank for full month.</div>
+                            {M.rows.map((r, i) => {
+                                const c = calcs[i];
+                                return (
+                                    <div key={r.id} className="bt-con">
+                                        <div className="cx-row">
+                                            <div><label className="input-label">Crew</label><div className="ot-who">{(r.n || 'Name ' + (i + 1)) + (r.r ? ', ' + r.r : '')}</div></div>
+                                            <CxField label="Signed on" type="date" value={r.on} onChange={(v) => setRow(r.id, 'on', v)} />
+                                            <CxField label="Sign-off" type="date" value={r.off} onChange={(v) => setRow(r.id, 'off', v)} />
+                                        </div>
+                                        <div className="bt-con-f"><span>{c.days} days on board, fixed {otF(c.fx)} h, estimate {otF(c.auto)} h</span></div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {view === 'data' && (
+                        <>
+                            <div className="card cx-card cx-wrap">
+                                <div className="card-title">OT rules</div>
+                                <div className="cx-row">
+                                    <CxField label="Normal working day (h)" value={st.cfg.day} onChange={setCfg('day')} hint="Sat, Sun and holidays: all of it is OT" />
+                                    <CxField label="Regular hours Mon to Fri (h)" value={st.cfg.reg} onChange={setCfg('reg')} hint={'Weekday OT = ' + otF(R.wdOt) + ' h'} />
+                                    <CxField label="Fixed OT per month (h)" value={st.cfg.fixed} onChange={setCfg('fixed')} />
+                                    <CxField label="Default cut-off day" value={st.cfg.cutDay} onChange={setCfg('cutDay')} hint="Used when you open a future month" />
+                                </div>
+                                <label className="cx-check"><input type="checkbox" checked={!!st.cfg.prorate} onChange={(e) => setCfg('prorate')(e.target.checked)} /> Pro rata fixed OT for crew joining or leaving mid-month</label>
+                            </div>
+                            <div className="card cx-card cx-wrap">
+                                <div className="card-title">Export and backup</div>
+                                <div className="cx-btns">
+                                    <button style={subBtn} onClick={copyText}>Copy {otMkName(mk)} for email</button>
+                                    <button style={subBtn} onClick={exportCsv}>Export .csv</button>
+                                    <button style={subBtn} onClick={exportJson}>Save backup (.json)</button>
+                                    <button style={subBtn} onClick={() => fileRef.current && fileRef.current.click()}>Restore backup</button>
+                                </div>
+                                <input ref={fileRef} type="file" accept="application/json,.json" style={{ display: 'none' }} onChange={(e) => { importJson(e.target.files && e.target.files[0]); e.target.value = ''; }} />
+                                <div className="cx-btns" style={{ marginTop: 8 }}>
+                                    <button style={{ ...subBtn, color: 'var(--bad)' }} onClick={() => { if (window.confirm('Clear the ' + otMkName(mk) + ' sheet? Crew names are kept.')) { setM({ rows: M.rows.map((r) => ({ ...OT_ROW(r.n, r.r), id: r.id, on: r.on, off: r.off })) }); flash('Figures cleared.'); } }}>Clear figures this month</button>
+                                    <button style={{ ...subBtn, color: 'var(--bad)' }} onClick={() => { if (window.confirm('Delete all Crew OT data on this device?')) { const s = { view: 'sheet', cfg: { ...OT_CFG }, months: {}, cur: otToday().slice(0, 7) }; s.months[s.cur] = otNewMonth(s, s.cur); setSt(s); flash('All OT data cleared.'); } }}>Delete all</button>
+                                </div>
+                                <div className="cx-hint" style={{ marginTop: 10 }}>Saved on this device. Months kept: {Object.keys(st.months).sort().map((k) => otMkName(k)).join(', ')}.</div>
+                            </div>
+                        </>
+                    )}
+                </div>
+            );
+        }
 // @@NEWTABS-END
 
         // ===== Media: convert and compress photos, PDFs, video and audio on the device =====
@@ -5195,12 +5637,13 @@ const Proof = (function () {
             { key: 'garbage', label: 'Garbage', c: '#475569', cd: '#cbd5e1' },
             { key: 'calc', label: 'Calculator', c: '#7c3aed', cd: '#c4b5fd' },
             { key: 'budget', label: 'Budget', c: '#a16207', cd: '#facc15' },
-            { key: 'media', label: 'Media', c: '#db2777', cd: '#f472b6' }
+            { key: 'media', label: 'Media', c: '#db2777', cd: '#f472b6' },
+            { key: 'ot', label: 'Crew OT', c: '#1d4ed8', cd: '#60a5fa' }
         ];
         const TAB_GROUPS = [
             { name: 'Voyage', keys: ['rob', 'eta', 'speed', 'time', 'load'] },
             { name: 'Cargo & Stability', keys: ['vent', 'dwt', 'hydro', 'calc'] },
-            { name: "Ship's Office", keys: ['garbage', 'conv', 'proof', 'media'] },
+            { name: "Ship's Office", keys: ['ot', 'garbage', 'conv', 'proof', 'media'] },
             { name: 'Personal', keys: ['budget'] }
         ];
         const TAB_DESC = {
@@ -5217,7 +5660,8 @@ const Proof = (function () {
             garbage: 'GMP drums per deck, Annex V',
             calc: 'DWA, days, SF, trim, roll, BWE, anchor, mooring, NRE',
             budget: 'Salary, spending and in hand forecast',
-            media: 'Compress and convert photos, PDF, video, audio'
+            media: 'Compress and convert photos, PDF, video, audio',
+            ot: 'Monthly crew overtime with estimate to month end'
         };
         const TAB_TAGS = {
             rob: 'bunker fuel fresh water consumption', eta: 'arrival time', speed: 'required speed eta', vent: 'ventilation dew point sweat',
@@ -5225,6 +5669,7 @@ const Proof = (function () {
             time: 'time zone clock', load: 'load line zone summer winter tropical', garbage: 'garbage marpol annex v',
             calc: 'salinity dwa fwa days contract stowage factor density trim draft rolling period gm turning heel ballast exchange anchor holding cable scope catenary windlass mooring hours lines form 5 all fast all clear nre nri tax resident',
             budget: 'budget money salary wages expense spending savings allotment emi in hand forecast',
+            ot: 'overtime ot crew hours fixed 103 extra wages payroll port coasting carry over estimate cut-off monthly',
             media: 'media photo image picture jpg png webp heic pdf compress shrink reduce size convert video mp4 mov webm audio mp3 gif zip merge resize'
         };
         const ICON_PATHS = {
@@ -5241,6 +5686,7 @@ const Proof = (function () {
             garbage: <><path d="M4 7h16" /><path d="M9 7V4h6v3" /><path d="M6 7l1 13h10l1-13" /><path d="M10 11v6M14 11v6" /></>,
             budget: <><rect x="3" y="6" width="18" height="14" rx="2" /><path d="M3 10h18" /><path d="M7 6V4h10v2" /><circle cx="16.5" cy="15" r="1.3" /></>,
             media: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m10 9.5 4.5 2.5-4.5 2.5z" /><path d="M7 5v14M17 5v14" /></>,
+            ot: <><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2.5 1.5" /><path d="M10 2h4" /><path d="M12 2v3" /></>,
             calc: <><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M8 7h8" /><path d="M8 11h.01M12 11h.01M16 11h.01M8 14.5h.01M12 14.5h.01M16 14.5h.01M8 18h4M16 18h.01" /></>,
             search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
             print: <><path d="M7 9V3h10v6" /><rect x="3" y="9" width="18" height="8" rx="2" /><path d="M7 14h10v7H7z" /></>,
@@ -6033,6 +6479,7 @@ const Proof = (function () {
                             {activeTab === 11 && <CalcTab />}
                             {activeTab === 12 && <BudgetTab />}
                             {activeTab === 13 && <MediaTab />}
+                            {activeTab === 14 && <OtTab />}
                         </div>
                     </div>
                     </main>

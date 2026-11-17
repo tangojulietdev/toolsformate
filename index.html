@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Maritime tools for the watchkeeper: ROB, ETA, speed, ventilation, converter, hydrostatics, deadweight, load line, calculator, anchor holding, garbage stowage and budget">
+    <meta name="description" content="Maritime tools for the watchkeeper: ROB, ETA, speed, ventilation, converter, hydrostatics, deadweight, load line, calculator, anchor holding, garbage stowage, budget, media and crew OT">
     <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1047,12 +1047,79 @@
         .md-res .md-item { margin-bottom: 6px; }
         .md-off { display: flex; align-items: center; gap: 12px; }
         .md-off .btn-ghost { margin: 0; }
+        /* ===== Crew OT tab ===== */
+        .ot-cards { display: none; }
+        @media (max-width: 760px) {
+            .ot-sheet .ot-scroll { display: none; }
+            .ot-cards { display: grid; gap: 10px; margin-top: 6px; }
+            .ot-card { background: var(--surface-2); border-radius: 12px; box-shadow: inset 0 0 0 .5px var(--border); padding: 10px; }
+            .ot-card.dim { opacity: .6; }
+            .ot-card-h { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) 34px; gap: 6px; align-items: center; }
+            .ot-card .input-field { margin: 0; min-height: 38px; padding: 5px 9px; font-size: 15px; width: 100%; background: var(--surface); box-shadow: inset 0 0 0 .5px var(--border); }
+            .ot-card .ot-n { font-weight: 700; }
+            .ot-card .input-field.ot-man { box-shadow: inset 0 0 0 1.5px var(--warn); }
+            .ot-card label span { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 3px; text-transform: uppercase; letter-spacing: .03em; }
+            .ot-top { display: block; margin-top: 8px; }
+            .ot-top .input-field { font-size: 18px !important; font-weight: 700; min-height: 44px !important; }
+            .ot-card-g { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+            .ot-card-g .input-field { text-align: center; padding: 5px 4px; }
+            .ot-card-r { display: flex; justify-content: space-between; gap: 6px; flex-wrap: wrap; margin-top: 9px; font-size: 12px; color: var(--muted); }
+            .ot-card-r b { color: var(--text); font-variant-numeric: tabular-nums; }
+            .ot-card-r .fin b { color: var(--accent); font-size: 15px; }
+            .ot-card-t { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-2); font-weight: 600; }
+            .ot-card-t b { color: var(--accent); font-size: 18px; }
+        }
+        @media print { .ot-cards { display: none !important; } .ot-sheet .ot-scroll { display: block !important; } }
+        .ot-entry { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-top: 12px; }
+        .ot-entry > div:first-child { flex: 1 1 220px; }
+        .ot-entry .bt-chips { margin: 0 0 4px; }
+        .ot-days { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 6px; margin-top: 8px; }
+        .ot-day { border-radius: 9px; background: var(--surface-2); box-shadow: inset 0 0 0 .5px var(--border); padding: 4px; display: flex; flex-direction: column; gap: 4px; }
+        .ot-day-h { border: 0; background: transparent; cursor: pointer; display: flex; align-items: baseline; justify-content: center; gap: 5px; padding: 4px 0 2px; color: var(--text); font: inherit; border-radius: 6px; }
+        .ot-day-h b { font-size: 17px; font-variant-numeric: tabular-nums; }
+        .ot-day-h span { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; }
+        .ot-day .input-field { margin: 0; min-height: 32px; padding: 3px 6px; font-size: 14px; text-align: center; width: 100%; }
+        .ot-day .input-field.ot-man { box-shadow: inset 0 0 0 1.5px var(--warn); }
+        .ot-day.hol { background: var(--bad-soft); box-shadow: inset 0 0 0 1px var(--bad); }
+        .ot-day.hol .ot-day-h, .ot-day.hol .ot-day-h span { color: var(--bad); }
+        .ot-days-f { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--text-2); margin: 8px 0 4px; }
+        .ot-days-f b { color: var(--accent); }
+        @media (max-width: 640px) { .ot-days { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+        .ot-month { display: flex; align-items: center; gap: 10px; }
+        .ot-month-t { flex: 1; text-align: center; min-width: 0; }
+        .ot-month-t b { display: block; font-size: 18px; color: var(--text); }
+        .ot-month-t span { font-size: 12px; color: var(--muted); }
+        .ot-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 4px 0 0; }
+        .ot-table { width: 100%; min-width: 900px; border-collapse: separate; border-spacing: 0; font-size: 13px; overflow: visible; }
+        .ot-table.ot-carry { min-width: 460px; }
+        .ot-table th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); text-align: right; padding: 8px 6px 6px; white-space: nowrap; border-bottom: .5px solid var(--border); vertical-align: bottom; }
+        .ot-table th small { display: block; font-size: 10px; font-weight: 500; text-transform: none; letter-spacing: 0; }
+        .ot-table td { padding: 5px 6px; text-align: right; border-bottom: .5px solid var(--border); white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text-2); }
+        .ot-table th:first-child, .ot-table td:first-child { position: sticky; left: 0; z-index: 1; text-align: left; background: var(--surface-2); box-shadow: 1px 0 0 var(--border); }
+        .ot-table .input-field { width: 70px; min-height: 34px; margin: 0; padding: 4px 8px; font-size: 14px; text-align: right; }
+        .ot-table .input-field.ot-man { box-shadow: inset 0 0 0 1.5px var(--warn); }
+        .ot-table td.nm { min-width: 128px; }
+        .ot-table td.nm .input-field { display: block; width: 124px; text-align: left; }
+        .ot-table td.nm .ot-n { font-weight: 600; }
+        .ot-table td.nm .ot-r { min-height: 26px; margin-top: 3px; font-size: 12px; padding: 2px 8px; }
+        .ot-table td.nm b { display: block; color: var(--text); }
+        .ot-table td.nm span { font-size: 11px; color: var(--muted); }
+        .ot-table .ot-v { font-weight: 600; color: var(--text); }
+        .ot-table .ot-mut { color: var(--muted); font-weight: 500; }
+        .ot-table .ot-neg { color: var(--muted); }
+        .ot-table .ot-fin { font-weight: 800; color: var(--accent); font-size: 14px; }
+        .ot-table tr.dim td { opacity: .55; }
+        .ot-table tfoot td { font-weight: 700; background: var(--surface); border-bottom: 0; color: var(--text); }
+        .ot-table tfoot td:first-child { background: var(--surface); }
+        .ot-who { min-height: var(--ctl-h, 40px); display: flex; align-items: center; font-weight: 600; color: var(--text); }
+        @media (max-width: 640px) { .ot-table td.nm { min-width: 112px; } .ot-table td.nm .input-field { width: 108px; } .ot-table .input-field { width: 62px; } .ot-month-t b { font-size: 16px; } }
+        @media print { .ot-table { min-width: 0; font-size: 10px; } .ot-table:not(.ot-carry) td:last-child, .ot-table:not(.ot-carry) th:last-child { display: none; } .ot-table .input-field { border: 0; box-shadow: none; width: auto; padding: 0; background: transparent; } }
     </style>
 </head>
 <body>
     <div id="root"></div>
     
-    <script src="app.js?v=16" defer></script>
+    <script src="app.js?v=17" defer></script>
 
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(e){console.log("SW failed",e)})})}</script>
 </body>
