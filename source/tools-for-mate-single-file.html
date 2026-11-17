@@ -1050,25 +1050,45 @@
         .md-off .btn-ghost { margin: 0; }
         /* ===== Crew OT tab ===== */
         .ot-cards { display: none; }
-        @media (max-width: 760px) {
+        .ot-sheet { container-type: inline-size; }
+        .ot-sheet .ot-scroll { overflow: visible; }
+        .ot-sheet .ot-table { min-width: 0; font-size: 12.5px; table-layout: auto; }
+        .ot-sheet .ot-table th { padding: 6px 3px 5px; font-size: 10px; letter-spacing: .02em; }
+        .ot-sheet .ot-table th small { font-size: 9.5px; }
+        .ot-sheet .ot-table td { padding: 4px 3px; }
+        .ot-sheet .ot-table .input-field { width: 100%; min-width: 44px; max-width: 64px; min-height: 32px; padding: 3px 5px; font-size: 13px; }
+        .ot-sheet .ot-table td.nm { min-width: 0; width: 108px; padding-left: 0; }
+        .ot-sheet .ot-table td.nm .input-field { width: 104px; max-width: 104px; }
+        .ot-sheet .ot-table td.nm .ot-r, .ot-sheet .ot-table td.ot-x .ot-r { min-height: 24px; margin-top: 3px; font-size: 11.5px; padding: 1px 5px; }
+        .ot-sheet .ot-table td.ot-x .input-field { display: block; max-width: 72px; }
+        .ot-sheet .ot-table td.ot-x .ot-r { text-align: left; }
+        .ot-sheet .ot-table .ot-hf { font-weight: 800; color: var(--text); }
+        .ot-sheet .ot-table .ot-fin { font-size: 13.5px; }
+        .ot-del { min-width: 26px !important; min-height: 26px !important; width: 26px; height: 26px; font-size: 14px; padding: 0; }
+        .ot-card-p { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) !important; }
+        .ot-card-p .input-field { text-align: center; }
+        .ot-card-p .w2 .input-field { text-align: left; }
+        .ot-card-a { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 9px; padding-top: 8px; border-top: .5px solid var(--border); font-size: 12px; color: var(--muted); }
+        .ot-card-a b { color: var(--accent); font-size: 16px; font-variant-numeric: tabular-nums; }
+        @container (max-width: 900px) {
             .ot-sheet .ot-scroll { display: none; }
-            .ot-cards { display: grid; gap: 10px; margin-top: 6px; }
-            .ot-card { background: var(--surface-2); border-radius: 12px; box-shadow: inset 0 0 0 .5px var(--border); padding: 10px; }
-            .ot-card.dim { opacity: .6; }
-            .ot-card-h { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) 34px; gap: 6px; align-items: center; }
-            .ot-card .input-field { margin: 0; min-height: 38px; padding: 5px 9px; font-size: 15px; width: 100%; background: var(--surface); box-shadow: inset 0 0 0 .5px var(--border); }
-            .ot-card .ot-n { font-weight: 700; }
-            .ot-card .input-field.ot-man { box-shadow: inset 0 0 0 1.5px var(--warn); }
-            .ot-card label span { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 3px; text-transform: uppercase; letter-spacing: .03em; }
-            .ot-top { display: block; margin-top: 8px; }
-            .ot-top .input-field { font-size: 18px !important; font-weight: 700; min-height: 44px !important; }
-            .ot-card-g { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
-            .ot-card-g .input-field { text-align: center; padding: 5px 4px; }
-            .ot-card-r { display: flex; justify-content: space-between; gap: 6px; flex-wrap: wrap; margin-top: 9px; font-size: 12px; color: var(--muted); }
-            .ot-card-r b { color: var(--text); font-variant-numeric: tabular-nums; }
-            .ot-card-r .fin b { color: var(--accent); font-size: 15px; }
-            .ot-card-t { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-2); font-weight: 600; }
-            .ot-card-t b { color: var(--accent); font-size: 18px; }
+            .ot-sheet .ot-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; margin-top: 6px; }
+            .ot-sheet .ot-card { background: var(--surface-2); border-radius: 12px; box-shadow: inset 0 0 0 .5px var(--border); padding: 10px; }
+            .ot-sheet .ot-card.dim { opacity: .6; }
+            .ot-sheet .ot-card-h { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) 34px; gap: 6px; align-items: center; }
+            .ot-sheet .ot-card .input-field { margin: 0; min-height: 38px; padding: 5px 9px; font-size: 15px; width: 100%; background: var(--surface); box-shadow: inset 0 0 0 .5px var(--border); }
+            .ot-sheet .ot-card .ot-n { font-weight: 700; }
+            .ot-sheet .ot-card .input-field.ot-man { box-shadow: inset 0 0 0 1.5px var(--warn); }
+            .ot-sheet .ot-card label span { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 3px; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .ot-sheet .ot-top { display: block; margin-top: 8px; }
+            .ot-sheet .ot-top .input-field { font-size: 18px !important; font-weight: 700; min-height: 44px !important; }
+            .ot-sheet .ot-card-g { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+            .ot-sheet .ot-card-g .input-field { text-align: center; padding: 5px 4px; }
+            .ot-sheet .ot-card-g .w2 .input-field { text-align: left; padding: 5px 9px; }
+            .ot-sheet .ot-card-r { display: flex; justify-content: space-between; gap: 6px; flex-wrap: wrap; margin-top: 9px; font-size: 12px; color: var(--muted); }
+            .ot-sheet .ot-card-r b { color: var(--text); font-variant-numeric: tabular-nums; }
+            .ot-sheet .ot-card-t { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-2); font-weight: 600; grid-column: 1 / -1; }
+            .ot-sheet .ot-card-t b { color: var(--accent); font-size: 18px; }
         }
         @media print { .ot-cards { display: none !important; } .ot-sheet .ot-scroll { display: block !important; } }
         .ot-entry { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-top: 12px; }
@@ -4963,13 +4983,13 @@ const Proof = (function () {
 
         // ===== Crew OT: monthly overtime claim, records to cut-off plus estimate to month end =====
         const OT_KEY = 'tfm_ot_v1';
-        const OT_CFG = { day: '9', reg: '8', fixed: '103', prorate: true, cutDay: '18' };
+        const OT_CFG = { day: '9', reg: '8', fixed: '103', prorate: true, cutDay: '18', cur: 'USD' };
         const OT_MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const OT_MONL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         const OT_RANKS = ['C/O', '2/O', '3/O', 'C/E', '2/E', '3/E', '4/E', 'ETO', 'Bosun', 'AB', 'AB', 'AB', 'OS', 'OS', 'Fitter', 'Oiler', 'Oiler', 'Wiper', 'Ch Cook', 'Messman'];
         let otSeq = 0;
         const otId = () => 'c' + Date.now().toString(36) + (otSeq++).toString(36);
-        const OT_ROW = (n, r) => ({ id: otId(), n: n || '', r: r || '', rec: '', est: '', port: '', coast: '', carry: '', on: '', off: '', act: '' });
+        const OT_ROW = (n, r, rate) => ({ id: otId(), n: n || '', r: r || '', rec: '', est: '', port: '', coast: '', carry: '', on: '', off: '', rate: rate || '', xamt: '', xnote: '' });
         const otPad = (v) => String(v).padStart(2, '0');
         const otToday = () => { const d = new Date(); return d.getFullYear() + '-' + otPad(d.getMonth() + 1) + '-' + otPad(d.getDate()); };
         const otParse = (mk) => { const y = +mk.slice(0, 4), m = +mk.slice(5, 7); return { y, m, dim: new Date(Date.UTC(y, m, 0)).getUTCDate() }; };
@@ -5018,7 +5038,10 @@ const Proof = (function () {
             const fx = days === 0 ? 0 : cfg.prorate ? R.fixed * days / dim : R.fixed;
             const total = rec + est + port + coast;
             const over = total - fx;
-            return { days, we, wd, auto, man, est, rec, port, coast, carry, fx, total, over, fin: Math.max(0, over + carry), part: est + port + coast };
+            const fin = Math.max(0, over + carry);
+            const rate = otH(row.rate) || 0, xamt = otH(row.xamt) || 0;
+            const pay = fin * rate;
+            return { days, we, wd, auto, man, est, rec, port, coast, carry, fx, total, over, fin, part: est + port + coast, rate, pay, xamt, amt: pay + xamt };
         }
         function otNewMonth(st, mk) {
             const prev = Object.keys(st.months || {}).filter((k) => k < mk).sort().pop();
@@ -5029,7 +5052,7 @@ const Proof = (function () {
             const src = prev ? st.months[prev].rows : null;
             const first = mk + '-01';
             const rows = src && src.length
-                ? src.filter((r) => !(r.off && r.off < first)).map((r) => ({ ...OT_ROW(r.n, r.r), id: r.id, on: r.on && r.on >= first ? r.on : '', off: r.off || '' }))
+                ? src.filter((r) => !(r.off && r.off < first)).map((r) => ({ ...OT_ROW(r.n, r.r, r.rate), id: r.id, on: r.on && r.on >= first ? r.on : '', off: r.off || '' }))
                 : [OT_ROW()];
             return { cut, hd: {}, dh: {}, rows: rows.length ? rows : [OT_ROW()] };
         }
@@ -5051,19 +5074,169 @@ const Proof = (function () {
             if (hl.length) L.push('Holidays / full OT days estimated: ' + hl.join(', '));
             L.push('Fixed OT ' + otF(R.fixed) + ' hrs/month' + (st.cfg.prorate ? ' (pro rata for days on board)' : ''));
             L.push('');
-            const cols = [['Name', 18, 'l'], ['Rank', 8, 'l'], ['Rec', 6], ['Est', 6], ['Port', 6], ['Coast', 6], ['Total', 7], ['Fixed', 7], ['Over', 7], ['C/F', 6], ['Final', 7]];
+            const cols = [['Name', 18, 'l'], ['Rank', 8, 'l'], ['Rec', 6], ['Est', 6], ['Port', 6], ['Coast', 6], ['Total', 7], ['Fixed', 7], ['Over', 7], ['C/F', 6], ['Final', 7], ['Rate', 8], ['OT amt', 10], ['Extra', 9], ['Amount', 11]];
+            const mo = (v) => (Math.round(v * 100) / 100).toFixed(2);
             const line = (v) => v.map((x, i) => (cols[i][2] === 'l' ? String(x).slice(0, cols[i][1] - 1).padEnd(cols[i][1]) : String(x).padStart(cols[i][1]))).join('');
             L.push(line(cols.map((c) => c[0])));
-            const T = { rec: 0, est: 0, port: 0, coast: 0, total: 0, fx: 0, over: 0, carry: 0, fin: 0 };
+            const T = { rec: 0, est: 0, port: 0, coast: 0, total: 0, fx: 0, over: 0, carry: 0, fin: 0, pay: 0, xamt: 0, amt: 0 };
+            const notes = [];
             M.rows.forEach((r, i) => {
                 const c = calcs[i];
                 Object.keys(T).forEach((k) => { T[k] += c[k]; });
-                L.push(line([r.n || 'Crew ' + (i + 1), r.r || '', otF(c.rec), otF(c.est), otF(c.port), otF(c.coast), otF(c.total), otF(c.fx), otF(c.over), otF(c.carry), otF(c.fin)]));
+                if (c.xamt && r.xnote) notes.push((r.n || 'Crew ' + (i + 1)) + ': extra ' + mo(c.xamt) + ' for ' + r.xnote);
+                L.push(line([r.n || 'Crew ' + (i + 1), r.r || '', otF(c.rec), otF(c.est), otF(c.port), otF(c.coast), otF(c.total), otF(c.fx), otF(c.over), otF(c.carry), otF(c.fin), c.rate ? mo(c.rate) : '-', mo(c.pay), mo(c.xamt), mo(c.amt)]));
             });
-            L.push(line(['TOTAL', '', otF(T.rec), otF(T.est), otF(T.port), otF(T.coast), otF(T.total), otF(T.fx), otF(T.over), otF(T.carry), otF(T.fin)]));
+            L.push(line(['TOTAL', '', otF(T.rec), otF(T.est), otF(T.port), otF(T.coast), otF(T.total), otF(T.fx), otF(T.over), otF(T.carry), otF(T.fin), '', mo(T.pay), mo(T.xamt), mo(T.amt)]));
+            L.push('Amounts in ' + (st.cfg.cur || 'USD') + '.');
+            if (notes.length) { L.push(''); notes.forEach((n) => L.push(n)); }
             L.push('');
-            L.push('Rec = recorded to cut-off. Est = estimate to month end. C/F = carried over from last month. Final = Total - Fixed + C/F (not below 0).');
+            L.push('Rec = recorded to cut-off. Est = estimate to month end. C/F = carried over from last month. Final = Total - Fixed + C/F (not below 0). OT amt = Final x Rate. Amount = OT amt + Extra.');
             return L.join('\n');
+        }
+        // minimal xlsx writer (stored zip, inline strings, live formulas)
+        const OTX_CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+        function otxCrc(b) { let c = 0xffffffff; for (let i = 0; i < b.length; i++) c = OTX_CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; }
+        function otxZip(files) {
+            const enc = new TextEncoder(), parts = [], cen = []; let off = 0;
+            files.forEach(([name, text]) => {
+                const n = enc.encode(name), d = enc.encode(text), crc = otxCrc(d);
+                const h = new DataView(new ArrayBuffer(30));
+                h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(8, 0, true); h.setUint16(10, 0, true); h.setUint16(12, 0x21, true);
+                h.setUint32(14, crc, true); h.setUint32(18, d.length, true); h.setUint32(22, d.length, true); h.setUint16(26, n.length, true);
+                parts.push(new Uint8Array(h.buffer), n, d);
+                const c = new DataView(new ArrayBuffer(46));
+                c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(14, 0x21, true);
+                c.setUint32(16, crc, true); c.setUint32(20, d.length, true); c.setUint32(24, d.length, true); c.setUint16(28, n.length, true); c.setUint32(42, off, true);
+                cen.push(new Uint8Array(c.buffer), n);
+                off += 30 + n.length + d.length;
+            });
+            const cs = cen.reduce((t, x) => t + x.length, 0);
+            const e = new DataView(new ArrayBuffer(22));
+            e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, cs, true); e.setUint32(16, off, true);
+            return new Blob([...parts, ...cen, new Uint8Array(e.buffer)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        }
+        const otxEsc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const otxCol = (i) => { let s = ''; i++; while (i > 0) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
+        // cell: string | number | { f, s } | { v, s } ; styles: 0 normal, 1 title, 2 header, 3 hours, 4 money, 5 hours input, 6 money input, 7 total hours, 8 total money, 9 bold label, 10 holiday, 11 total label, 12 input text
+        function otxSheet(rows, cols, opt) {
+            const o = opt || {};
+            const xml = rows.map((r, ri) => {
+                if (!r) return '';
+                const cells = r.map((c, ci) => {
+                    if (c == null || c === '') return '';
+                    const ref = otxCol(ci) + (ri + 1);
+                    const cc = typeof c === 'object' ? c : { v: c };
+                    const s = cc.s ? ' s="' + cc.s + '"' : '';
+                    if (cc.f != null) return '<c r="' + ref + '"' + s + '><f>' + otxEsc(cc.f) + '</f></c>';
+                    if (typeof cc.v === 'number' && isFinite(cc.v)) return '<c r="' + ref + '"' + s + '><v>' + cc.v + '</v></c>';
+                    return '<c r="' + ref + '"' + s + ' t="inlineStr"><is><t xml:space="preserve">' + otxEsc(cc.v) + '</t></is></c>';
+                }).join('');
+                return '<row r="' + (ri + 1) + '"' + (o.ht && o.ht[ri] ? ' ht="' + o.ht[ri] + '" customHeight="1"' : '') + '>' + cells + '</row>';
+            }).join('');
+            const pane = o.freeze ? '<sheetViews><sheetView workbookViewId="0"><pane xSplit="' + (o.freeze[0] || 0) + '" ySplit="' + o.freeze[1] + '" topLeftCell="' + otxCol(o.freeze[0] || 0) + (o.freeze[1] + 1) + '" activePane="bottomRight" state="frozen"/></sheetView></sheetViews>' : '';
+            return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' + pane +
+                '<cols>' + cols.map((w, i) => '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>').join('') + '</cols><sheetData>' + xml + '</sheetData>' +
+                (o.merge ? '<mergeCells count="' + o.merge.length + '">' + o.merge.map((m) => '<mergeCell ref="' + m + '"/>').join('') + '</mergeCells>' : '') +
+                '<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/><pageSetup orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>';
+        }
+        function otxBook(sheets) {
+            const ns = 'http://schemas.openxmlformats.org/';
+            const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="' + ns + 'spreadsheetml/2006/main">' +
+                '<numFmts count="2"><numFmt numFmtId="164" formatCode="0.0"/><numFmt numFmtId="165" formatCode="#,##0.00"/></numFmts>' +
+                '<fonts count="4"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="14"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFC00000"/><name val="Calibri"/></font></fonts>' +
+                '<fills count="6"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>' +
+                '<fill><patternFill patternType="solid"><fgColor rgb="FFDCE6F2"/><bgColor rgb="FFDCE6F2"/></patternFill></fill>' +
+                '<fill><patternFill patternType="solid"><fgColor rgb="FFFFF2CC"/><bgColor rgb="FFFFF2CC"/></patternFill></fill>' +
+                '<fill><patternFill patternType="solid"><fgColor rgb="FFF2F2F2"/><bgColor rgb="FFF2F2F2"/></patternFill></fill>' +
+                '<fill><patternFill patternType="solid"><fgColor rgb="FFFCE4E4"/><bgColor rgb="FFFCE4E4"/></patternFill></fill></fills>' +
+                '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FFBFBFBF"/></left><right style="thin"><color rgb="FFBFBFBF"/></right><top style="thin"><color rgb="FFBFBFBF"/></top><bottom style="thin"><color rgb="FFBFBFBF"/></bottom><diagonal/></border></borders>' +
+                '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="13">' +
+                '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
+                '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>' +
+                '<xf numFmtId="0" fontId="2" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment wrapText="1" vertical="center" horizontal="center"/></xf>' +
+                '<xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/>' +
+                '<xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/>' +
+                '<xf numFmtId="164" fontId="0" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1"/>' +
+                '<xf numFmtId="165" fontId="0" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1"/>' +
+                '<xf numFmtId="164" fontId="2" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/>' +
+                '<xf numFmtId="165" fontId="2" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/>' +
+                '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/>' +
+                '<xf numFmtId="0" fontId="3" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>' +
+                '<xf numFmtId="0" fontId="2" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>' +
+                '<xf numFmtId="0" fontId="0" fillId="3" borderId="1" xfId="0" applyFill="1" applyBorder="1"/>' +
+                '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+            const files = [
+                ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="' + ns + 'package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' + sheets.map((s, i) => '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join('') + '</Types>'],
+                ['_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="' + ns + 'package/2006/relationships"><Relationship Id="rId1" Type="' + ns + 'officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+                ['xl/workbook.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="' + ns + 'spreadsheetml/2006/main" xmlns:r="' + ns + 'officeDocument/2006/relationships"><sheets>' + sheets.map((s, i) => '<sheet name="' + otxEsc(s[0]) + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>').join('') + '</sheets><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>'],
+                ['xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="' + ns + 'package/2006/relationships">' + sheets.map((s, i) => '<Relationship Id="rId' + (i + 1) + '" Type="' + ns + 'officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>').join('') + '<Relationship Id="rId' + (sheets.length + 1) + '" Type="' + ns + 'officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'],
+                ['xl/styles.xml', styles]
+            ];
+            sheets.forEach((s, i) => files.push(['xl/worksheets/sheet' + (i + 1) + '.xml', s[1]]));
+            return otxZip(files);
+        }
+        function otExcel(st, mk, calcs) {
+            const M = st.months[mk], { dim, m } = otParse(mk), R = otRules(st.cfg), cur = st.cfg.cur || 'USD';
+            const days = otDayList(mk, M, st.cfg);
+            // sheet 2: remaining days
+            const D = [[{ v: 'Remaining days, ' + otMkName(mk, true), s: 1 }], ['Edit holiday Y/N or the hours; the OT sheet estimate follows.'], [],
+                [{ v: 'Date', s: 2 }, { v: 'Day', s: 2 }, { v: 'Holiday (Y/N)', s: 2 }, { v: 'OT hours', s: 2 }]];
+            const d0 = D.length + 1;
+            days.forEach((x) => {
+                const r = D.length + 1;
+                D.push([{ v: x.d + ' ' + OT_MON[m - 1], s: x.hol ? 10 : 0 }, { v: OT_WD[x.w], s: x.hol ? 10 : 0 }, { v: x.hol ? 'Y' : 'N', s: 12 },
+                    x.man ? { v: x.h, s: 5 } : { f: 'IF(UPPER(C' + r + ')="Y",Settings!$B$3,Settings!$B$5)', s: 5 }]);
+            });
+            const d1 = D.length;
+            const dTot = D.length + 1;
+            D.push([{ v: 'Total per crew (full month on board)', s: 11 }, { v: '', s: 11 }, { f: days.length ? 'COUNTIF(C' + d0 + ':C' + d1 + ',"Y")&" holidays"' : '"0 holidays"', s: 11 }, days.length ? { f: 'SUM(D' + d0 + ':D' + d1 + ')', s: 7 } : { v: 0, s: 7 }]);
+            // sheet 3: settings
+            const S = [[{ v: 'OT rules', s: 1 }], [],
+                [{ v: 'Holiday / Sat / Sun OT per day (h)', s: 9 }, { v: R.day, s: 5 }],
+                [{ v: 'Regular hours Mon to Fri (h)', s: 9 }, { v: pn(st.cfg.reg) || 8, s: 5 }],
+                [{ v: 'Weekday OT per day (h)', s: 9 }, { f: 'MAX(0,B3-B4)', s: 3 }],
+                [{ v: 'Fixed OT per month (h)', s: 9 }, { v: R.fixed, s: 5 }],
+                [{ v: 'Days in month', s: 9 }, { v: dim, s: 3 }],
+                [{ v: 'Pro rata fixed OT (Y/N)', s: 9 }, { v: st.cfg.prorate ? 'Y' : 'N', s: 12 }],
+                [{ v: 'Currency', s: 9 }, { v: cur, s: 12 }]];
+            // sheet 1: OT sheet
+            const H = ['Name', 'Rank', 'Days on board', 'OT till entry (h)', 'Estimate (h)', 'Port ops (h)', 'Coasting (h)', 'Month total (h)', 'Fixed OT (h)', 'Over fixed (h)', 'Carry over (h)', 'Final OT (h)', 'Rate per h (' + cur + ')', 'OT amount (' + cur + ')', 'Extra amount (' + cur + ')', 'Extra for', 'Final amount (' + cur + ')'];
+            const O = [[{ v: 'CREW OVERTIME ' + otMkName(mk, true).toUpperCase(), s: 1 }],
+                [{ v: 'Records till', s: 9 }, otDate(M.cut)],
+                [{ v: 'Fixed OT (h)', s: 9 }, { f: 'Settings!B6', s: 3 }],
+                [{ v: 'Estimate per crew (h)', s: 9 }, { f: "'Remaining days'!D" + dTot, s: 3 }],
+                [{ v: 'Yellow cells are inputs. Other figures are formulas.' }], [],
+                H.map((h) => ({ v: h, s: 2 }))];
+            const r0 = O.length + 1;
+            M.rows.forEach((r, i) => {
+                const c = calcs[i], n = O.length + 1;
+                const fullMonth = c.days === dim;
+                O.push([
+                    { v: r.n || 'Crew ' + (i + 1), s: 12 }, { v: r.r || '', s: 12 }, { v: c.days, s: 5 }, { v: c.rec, s: 5 },
+                    !c.man && fullMonth ? { f: '$B$4', s: 5 } : { v: c.est, s: 5 },
+                    { v: c.port, s: 5 }, { v: c.coast, s: 5 },
+                    { f: 'SUM(D' + n + ':G' + n + ')', s: 3 },
+                    { f: 'IF(C' + n + '<=0,0,IF(UPPER(Settings!$B$8)="Y",Settings!$B$6*C' + n + '/Settings!$B$7,Settings!$B$6))', s: 3 },
+                    { f: 'H' + n + '-I' + n, s: 3 },
+                    { v: c.carry, s: 5 },
+                    { f: 'MAX(0,J' + n + '+K' + n + ')', s: 3 },
+                    { v: c.rate, s: 6 },
+                    { f: 'L' + n + '*M' + n, s: 4 },
+                    { v: c.xamt, s: 6 }, { v: r.xnote || '', s: 12 },
+                    { f: 'N' + n + '+O' + n, s: 4 }
+                ]);
+            });
+            const r1 = O.length, t = O.length + 1;
+            const sum = (col, s) => ({ f: 'SUM(' + col + r0 + ':' + col + r1 + ')', s });
+            O.push([{ v: 'TOTAL', s: 11 }, { f: 'COUNTA(A' + r0 + ':A' + r1 + ')&" crew"', s: 11 }, { v: '', s: 11 }, sum('D', 7), sum('E', 7), sum('F', 7), sum('G', 7), sum('H', 7), sum('I', 7), sum('J', 7), sum('K', 7), sum('L', 7), { v: '', s: 11 }, sum('N', 8), sum('O', 8), { v: '', s: 11 }, sum('Q', 8)]);
+            O.push([]);
+            O.push([{ v: 'Month total = OT till entry + Estimate + Port ops + Coasting. Final OT = Month total - Fixed + Carry over (not below 0). OT amount = Final OT x Rate. Final amount = OT amount + Extra.' }]);
+            const ht = {}; ht[6] = 32;
+            return otxBook([
+                ['Crew OT', otxSheet(O, [20, 10, 8, 10, 10, 9, 9, 10, 9, 9, 9, 10, 10, 12, 12, 18, 13], { freeze: [1, 7], ht })],
+                ['Remaining days', otxSheet(D, [12, 8, 13, 10], { freeze: [0, 4] })],
+                ['Settings', otxSheet(S, [34, 10])]
+            ]);
         }
         function otSave(text, name, type) { const u = URL.createObjectURL(new Blob([text], { type })); const a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); }
 
@@ -5086,7 +5259,9 @@ const Proof = (function () {
             const view = st.view || 'sheet';
 
             const calcs = M.rows.map((r) => otCalc(r, mk, M, st.cfg));
-            const T = calcs.reduce((t, c) => { ['rec', 'est', 'port', 'coast', 'total', 'fx', 'over', 'carry', 'fin'].forEach((k) => { t[k] += c[k]; }); return t; }, { rec: 0, est: 0, port: 0, coast: 0, total: 0, fx: 0, over: 0, carry: 0, fin: 0 });
+            const T = calcs.reduce((t, c) => { Object.keys(t).forEach((k) => { t[k] += c[k]; }); return t; }, { rec: 0, est: 0, port: 0, coast: 0, total: 0, fx: 0, over: 0, carry: 0, fin: 0, pay: 0, xamt: 0, amt: 0 });
+            const CUR = st.cfg.cur || 'USD';
+            const money = (v) => (isFinite(v) ? v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-');
             const full = otCalc({}, mk, M, st.cfg);
             let cutD = otDayIn(M.cut, mk, dim); cutD = cutD == null ? 0 : Math.min(dim, cutD);
             const cutBad = M.cut && M.cut.slice(0, 7) !== mk;
@@ -5101,13 +5276,7 @@ const Proof = (function () {
                 const t = otText(st, mk, calcs);
                 try { await navigator.clipboard.writeText(t); flash('Copied. Paste into your email.'); } catch (e) { otSave(t, 'crew-ot-' + mk + '.txt', 'text/plain'); flash('Saved as text file.'); }
             };
-            const exportCsv = () => {
-                const q = (v) => '"' + String(v).replace(/"/g, '""') + '"';
-                const rows = [['Name', 'Rank', 'Sign-on', 'Sign-off', 'Days on board', 'Recorded to cut-off', 'Estimate to month end', 'Port ops', 'Coasting', 'Month total', 'Fixed OT', 'Over fixed', 'Carry over', 'Final OT']];
-                M.rows.forEach((r, i) => { const c = calcs[i]; rows.push([r.n, r.r, r.on, r.off, c.days, otF(c.rec), otF(c.est), otF(c.port), otF(c.coast), otF(c.total), otF(c.fx), otF(c.over), otF(c.carry), otF(c.fin)]); });
-                rows.push(['TOTAL', '', '', '', '', otF(T.rec), otF(T.est), otF(T.port), otF(T.coast), otF(T.total), otF(T.fx), otF(T.over), otF(T.carry), otF(T.fin)]);
-                otSave(rows.map((r) => r.map(q).join(',')).join('\r\n'), 'crew-ot-' + mk + '.csv', 'text/csv');
-            };
+            const exportXlsx = () => { try { const blob = otExcel(st, mk, calcs); const u = URL.createObjectURL(blob); const el = document.createElement('a'); el.href = u; el.download = 'crew-ot-' + mk + '.xlsx'; document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); flash('Excel saved with formulas.'); } catch (e) { flash('Excel export failed.'); } };
             const exportJson = () => otSave(JSON.stringify(st, null, 1), 'crew-ot-backup-' + otToday() + '.json', 'application/json');
             const importJson = (f) => {
                 if (!f) return;
@@ -5179,9 +5348,10 @@ const Proof = (function () {
                             <div className="cx-grid" style={{ marginTop: 0, marginBottom: 14 }}>
                                 <div className="cx-out"><div className="l">Crew</div><div className="v">{M.rows.length}</div></div>
                                 <div className="cx-out"><div className="l">OT till entry</div><div className="v">{otF(T.rec)}<span className="u">h</span></div></div>
-                                <div className="cx-out"><div className="l">Estimated + port + coast</div><div className="v">{otF(T.est + T.port + T.coast)}<span className="u">h</span></div></div>
+                                <div className="cx-out"><div className="l">Est + port + coast</div><div className="v">{otF(T.est + T.port + T.coast)}<span className="u">h</span></div></div>
                                 <div className="cx-out"><div className="l">Month total</div><div className="v">{otF(T.total)}<span className="u">h</span></div><div className="s">fixed {otF(T.fx)} h</div></div>
-                                <div className="cx-out hi"><div className="l">Final OT claim</div><div className="v">{otF(T.fin)}<span className="u">h</span></div><div className="s">over fixed incl. carry over</div></div>
+                                <div className="cx-out"><div className="l">Final OT claim</div><div className="v">{otF(T.fin)}<span className="u">h</span></div><div className="s">over fixed incl. carry over</div></div>
+                                <div className="cx-out hi"><div className="l">Final amount</div><div className="v">{money(T.amt)}<span className="u">{CUR}</span></div><div className="s">OT {money(T.pay)} + extra {money(T.xamt)}</div></div>
                             </div>
                             <div className="card cx-card ot-sheet">
                                 <div className="card-title">OT sheet, {otMkName(mk)}</div>
@@ -5190,15 +5360,19 @@ const Proof = (function () {
                                         <thead>
                                             <tr>
                                                 <th>Crew</th>
-                                                <th>OT till entry<small>1 to {cutD} {mon}</small></th>
-                                                <th>Estimate<small>{cutD < dim ? (cutD + 1) + ' to ' + dim : 'none'}</small></th>
-                                                <th>Port ops<small>extra est.</small></th>
-                                                <th>Coasting<small>extra est.</small></th>
-                                                <th>Total</th>
-                                                <th>Fixed</th>
+                                                <th>OT till entry<small>1 to {cutD}</small></th>
+                                                <th>Est.<small>{cutD < dim ? (cutD + 1) + ' to ' + dim : 'none'}</small></th>
+                                                <th>Port ops<small>h</small></th>
+                                                <th>Coasting<small>h</small></th>
+                                                <th>Total<small>h</small></th>
+                                                <th>Fixed<small>h</small></th>
                                                 <th>Over<small>fixed</small></th>
-                                                <th>Carry over<small>last month</small></th>
-                                                <th>Final OT</th>
+                                                <th>Carry<small>over</small></th>
+                                                <th>Final<small>OT h</small></th>
+                                                <th>Rate<small>{CUR}/h</small></th>
+                                                <th>OT pay<small>{CUR}</small></th>
+                                                <th>Extra<small>{CUR}, for</small></th>
+                                                <th>Amount<small>{CUR}</small></th>
                                                 <th aria-label="Remove"></th>
                                             </tr>
                                         </thead>
@@ -5212,15 +5386,22 @@ const Proof = (function () {
                                                             <input className="input-field ot-r" value={r.r} placeholder="Rank" onChange={(e) => setRow(r.id, 'r', e.target.value)} aria-label="Rank" />
                                                         </td>
                                                         <td>{cellIn(r, 'rec', '0')}</td>
-                                                        <td>{cellIn(r, 'est', otF(c.auto), { className: 'input-field' + (c.man ? ' ot-man' : ''), title: c.man ? 'Manual estimate, clear to use auto ' + otF(c.auto) + ' h' : 'Auto: ' + c.wd + ' weekdays, ' + c.we + ' full OT days' })}</td>
+                                                        <td>{cellIn(r, 'est', otF(c.auto), { className: 'input-field' + (c.man ? ' ot-man' : ''), title: c.man ? 'Manual estimate, clear to use auto ' + otF(c.auto) + ' h' : 'Auto: ' + c.wd + ' normal days, ' + c.we + ' holidays' })}</td>
                                                         <td>{cellIn(r, 'port', '0')}</td>
                                                         <td>{cellIn(r, 'coast', '0')}</td>
                                                         <td className="ot-v">{otF(c.total)}</td>
                                                         <td className="ot-v ot-mut" title={c.days + ' days on board'}>{otF(c.fx)}</td>
                                                         <td className={'ot-v' + (c.over < 0 ? ' ot-neg' : '')}>{otF(c.over)}</td>
                                                         <td>{cellIn(r, 'carry', '0')}</td>
-                                                        <td className="ot-v ot-fin">{otF(c.fin)}</td>
-                                                        <td><button className="icon-btn" style={{ minWidth: 32, minHeight: 32, fontSize: 15 }} onClick={() => delRow(r.id)} aria-label="Remove crew">×</button></td>
+                                                        <td className="ot-v ot-hf">{otF(c.fin)}</td>
+                                                        <td>{cellIn(r, 'rate', '0.00')}</td>
+                                                        <td className="ot-v">{money(c.pay)}</td>
+                                                        <td className="ot-x">
+                                                            {cellIn(r, 'xamt', '0')}
+                                                            <input className="input-field ot-r" value={r.xnote} placeholder="for" onChange={(e) => setRow(r.id, 'xnote', e.target.value)} aria-label="Extra for" title="e.g. hold cleaning" />
+                                                        </td>
+                                                        <td className="ot-v ot-fin">{money(c.amt)}</td>
+                                                        <td><button className="icon-btn ot-del" onClick={() => delRow(r.id)} aria-label="Remove crew">×</button></td>
                                                     </tr>
                                                 );
                                             })}
@@ -5236,7 +5417,11 @@ const Proof = (function () {
                                                 <td className="ot-v">{otF(T.fx)}</td>
                                                 <td className="ot-v">{otF(T.over)}</td>
                                                 <td className="ot-v">{otF(T.carry)}</td>
-                                                <td className="ot-v ot-fin">{otF(T.fin)}</td>
+                                                <td className="ot-v ot-hf">{otF(T.fin)}</td>
+                                                <td></td>
+                                                <td className="ot-v">{money(T.pay)}</td>
+                                                <td className="ot-v">{money(T.xamt)}</td>
+                                                <td className="ot-v ot-fin">{money(T.amt)}</td>
                                                 <td></td>
                                             </tr>
                                         </tfoot>
@@ -5259,25 +5444,31 @@ const Proof = (function () {
                                                     <label><span>Coasting</span>{cellIn(r, 'coast', '0')}</label>
                                                     <label><span>Carry</span>{cellIn(r, 'carry', '0')}</label>
                                                 </div>
+                                                <div className="ot-card-g ot-card-p">
+                                                    <label><span>Rate {CUR}/h</span>{cellIn(r, 'rate', '0.00')}</label>
+                                                    <label><span>Extra {CUR}</span>{cellIn(r, 'xamt', '0')}</label>
+                                                    <label className="w2"><span>Extra for</span><input className="input-field" value={r.xnote} placeholder="e.g. hold cleaning" onChange={(e) => setRow(r.id, 'xnote', e.target.value)} /></label>
+                                                </div>
                                                 <div className="ot-card-r">
                                                     <span>Total <b>{otF(c.total)}</b></span>
                                                     <span>Fixed <b>{otF(c.fx)}</b></span>
                                                     <span>Over <b>{otF(c.over)}</b></span>
-                                                    <span className="fin">Final <b>{otF(c.fin)} h</b></span>
+                                                    <span>Final <b>{otF(c.fin)} h</b></span>
                                                 </div>
+                                                <div className="ot-card-a"><span>OT {money(c.pay)} + extra {money(c.xamt)}</span><b>{money(c.amt)} {CUR}</b></div>
                                             </div>
                                         );
                                     })}
-                                    <div className="ot-card ot-card-t"><span>Total final OT, {M.rows.length} crew</span><b>{otF(T.fin)} h</b></div>
+                                    <div className="ot-card ot-card-t"><span>{M.rows.length} crew, final OT {otF(T.fin)} h</span><b>{money(T.amt)} {CUR}</b></div>
                                 </div>
                                 <div className="cx-btns" style={{ marginTop: 10 }}>
                                     <button style={subBtn} onClick={() => addRows([OT_ROW()])}>+ Add crew</button>
                                     <button style={subBtn} onClick={() => addRows(OT_RANKS.map((rk) => OT_ROW('', rk)))}>+ Standard crew list</button>
                                     <button style={subBtn} onClick={copyText}>Copy for email</button>
-                                    <button style={subBtn} onClick={exportCsv}>Export .csv</button>
+                                    <button style={subBtn} onClick={exportXlsx}>Export Excel</button>
                                 </div>
                                 <div className="cx-hint" style={{ marginTop: 8 }}>
-                                    OT till entry = each crew's OT from the records, 1st to the entry date. Estimate comes from the remaining days above; type a figure to override for one crew, clear it to go back to auto. Carry over is last month's balance, typed manually (can be negative). Port ops and Coasting are extra hours expected on top of the normal pattern. Total = OT till entry + Estimate + Port + Coasting. Final OT = Total − Fixed + Carry, not below 0. Hours take 12.5 or 12:30.
+                                    OT till entry = each crew's OT from the records, 1st to the entry date. Estimate comes from the remaining days above; type a figure to override for one crew, clear it to go back to auto. Carry over is last month's balance, typed manually (can be negative). Rate is per OT hour; Extra is any other payment (hold cleaning etc) with what it is for. Port ops and Coasting are extra hours expected on top of the normal pattern. Total = OT till entry + Estimate + Port + Coasting. Final OT = Total − Fixed + Carry, not below 0. Amount = Final OT × Rate + Extra. Excel export keeps these as live formulas. Hours take 12.5 or 12:30.
                                 </div>
                             </div>
                         </>
@@ -5311,7 +5502,8 @@ const Proof = (function () {
                                     <CxField label="Normal working day (h)" value={st.cfg.day} onChange={setCfg('day')} hint="Sat, Sun and holidays: all of it is OT" />
                                     <CxField label="Regular hours Mon to Fri (h)" value={st.cfg.reg} onChange={setCfg('reg')} hint={'Weekday OT = ' + otF(R.wdOt) + ' h'} />
                                     <CxField label="Fixed OT per month (h)" value={st.cfg.fixed} onChange={setCfg('fixed')} />
-                                    <CxField label="Default cut-off day" value={st.cfg.cutDay} onChange={setCfg('cutDay')} hint="Used when you open a future month" />
+                                    <CxField label="Default entry day" value={st.cfg.cutDay} onChange={setCfg('cutDay')} hint="Used when you open a future month" />
+                                    <CxField label="Pay currency" type="text" value={st.cfg.cur} onChange={setCfg('cur')} placeholder="USD" hint="Rate per hour and amounts" />
                                 </div>
                                 <label className="cx-check"><input type="checkbox" checked={!!st.cfg.prorate} onChange={(e) => setCfg('prorate')(e.target.checked)} /> Pro rata fixed OT for crew joining or leaving mid-month</label>
                             </div>
@@ -5319,13 +5511,13 @@ const Proof = (function () {
                                 <div className="card-title">Export and backup</div>
                                 <div className="cx-btns">
                                     <button style={subBtn} onClick={copyText}>Copy {otMkName(mk)} for email</button>
-                                    <button style={subBtn} onClick={exportCsv}>Export .csv</button>
+                                    <button style={subBtn} onClick={exportXlsx}>Export Excel</button>
                                     <button style={subBtn} onClick={exportJson}>Save backup (.json)</button>
                                     <button style={subBtn} onClick={() => fileRef.current && fileRef.current.click()}>Restore backup</button>
                                 </div>
                                 <input ref={fileRef} type="file" accept="application/json,.json" style={{ display: 'none' }} onChange={(e) => { importJson(e.target.files && e.target.files[0]); e.target.value = ''; }} />
                                 <div className="cx-btns" style={{ marginTop: 8 }}>
-                                    <button style={{ ...subBtn, color: 'var(--bad)' }} onClick={() => { if (window.confirm('Clear the ' + otMkName(mk) + ' sheet? Crew names are kept.')) { setM({ rows: M.rows.map((r) => ({ ...OT_ROW(r.n, r.r), id: r.id, on: r.on, off: r.off })) }); flash('Figures cleared.'); } }}>Clear figures this month</button>
+                                    <button style={{ ...subBtn, color: 'var(--bad)' }} onClick={() => { if (window.confirm('Clear the ' + otMkName(mk) + ' sheet? Crew names are kept.')) { setM({ rows: M.rows.map((r) => ({ ...OT_ROW(r.n, r.r, r.rate), id: r.id, on: r.on, off: r.off })) }); flash('Figures cleared.'); } }}>Clear figures this month</button>
                                     <button style={{ ...subBtn, color: 'var(--bad)' }} onClick={() => { if (window.confirm('Delete all Crew OT data on this device?')) { const s = { view: 'sheet', cfg: { ...OT_CFG }, months: {}, cur: otToday().slice(0, 7) }; s.months[s.cur] = otNewMonth(s, s.cur); setSt(s); flash('All OT data cleared.'); } }}>Delete all</button>
                                 </div>
                                 <div className="cx-hint" style={{ marginTop: 10 }}>Saved on this device. Months kept: {Object.keys(st.months).sort().map((k) => otMkName(k)).join(', ')}.</div>
