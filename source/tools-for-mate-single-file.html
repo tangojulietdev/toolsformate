@@ -3323,7 +3323,7 @@ const Proof = (function () {
             const d = CX_DEFAULT();
             try {
                 const s = JSON.parse(localStorage.getItem(CX_KEY) || 'null');
-                if (s) { const o = { tool: s.tool || d.tool }; ['sal', 'days', 'sf', 'trim', 'roll', 'bwe', 'anch', 'moor', 'nre'].forEach((k) => { o[k] = { ...d[k], ...(s[k] || {}) }; }); return o; }
+                if (s) { const o = { tool: s.tool && s.tool !== 'bwe' ? s.tool : d.tool }; ['sal', 'days', 'sf', 'trim', 'roll', 'bwe', 'anch', 'moor', 'nre'].forEach((k) => { o[k] = { ...d[k], ...(s[k] || {}) }; }); return o; }
             } catch (e) {}
             return d;
         }
@@ -4039,7 +4039,7 @@ const Proof = (function () {
             const totOut = sum('out'), totIn = sum('inn'), totH = pumpsOk ? sum('h') : NaN, arrive = sum('arrive');
             const exRows = rows.filter((r) => !r.err && (r.act === 'seq' || r.act === 'ft' || r.act === 'dil'));
             const passN = exRows.filter((r) => r.ok).length, failN = exRows.length - passN;
-            const errN = rows.filter((r) => r.err).length;
+            const errN = rows.filter((r, i) => r.err && (s.tanks[i].n || String(s.tanks[i].cap || '').trim())).length;
             const dens = pn(s.dens) > 0 ? pn(s.dens) : 1.025;
             const d1 = pn(s.d1) > 0 ? Math.min(pn(s.d1), 100) : 95;
             const buf = isFinite(pn(s.buf)) ? Math.min(Math.max(pn(s.buf), 0), 100) : 0;
@@ -4596,6 +4596,31 @@ const Proof = (function () {
             );
         }
 
+        // ---------- Ballast Exchange tab (Cargo & Stability) ----------
+        const BWE_KEY = 'tfm_bwe_v1';
+        function bweLoad() {
+            const d = CX_DEFAULT().bwe;
+            try {
+                const s = JSON.parse(localStorage.getItem(BWE_KEY) || 'null');
+                if (s) return { ...d, ...s, ship: { ...BWE_SHIP0, ...(s.ship || {}) } };
+                const c = JSON.parse(localStorage.getItem(CX_KEY) || 'null');
+                if (c && c.bwe) return { ...d, ...c.bwe, ship: { ...BWE_SHIP0, ...(c.bwe.ship || {}) } };
+            } catch (e) {}
+            return d;
+        }
+        function BweTab() {
+            const [s, setS] = useState(bweLoad);
+            useEffect(() => { try { localStorage.setItem(BWE_KEY, JSON.stringify(s)); } catch (e) {} }, [s]);
+            const set = (k) => (v) => setS((o) => ({ ...o, [k]: v }));
+            const setMany = (obj) => setS((o) => ({ ...o, ...obj }));
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Ballast Water Exchange</h2>
+                    <CxBwe s={s} set={set} setMany={setMany} />
+                </div>
+            );
+        }
+
         // ---------- NRE days (Indian seafarer residential status) ----------
         function cxFyOf(ms) { const d = new Date(ms); return d.getUTCMonth() >= 3 ? d.getUTCFullYear() : d.getUTCFullYear() - 1; }
         function CxNre({ s, set, setMany }) {
@@ -5017,7 +5042,7 @@ const Proof = (function () {
                 set: (k) => (v) => setSt((o) => ({ ...o, [p]: { ...o[p], [k]: v } })),
                 setMany: (obj) => setSt((o) => ({ ...o, [p]: { ...o[p], ...obj } }))
             });
-            const tools = [['sal', 'Salinity & DWA'], ['days', 'Days'], ['sf', 'SF / Density'], ['trim', 'Trim & Draft'], ['roll', 'Rolling & Turn'], ['bwe', 'Ballast Exchange'], ['anch', 'Anchor Holding'], ['moor', 'Mooring Hours'], ['nre', 'NRE Days']];
+            const tools = [['sal', 'Salinity & DWA'], ['days', 'Days'], ['sf', 'SF / Density'], ['trim', 'Trim & Draft'], ['roll', 'Rolling & Turn'], ['anch', 'Anchor Holding'], ['moor', 'Mooring Hours'], ['nre', 'NRE Days']];
             return (
                 <div className="tab-pane">
                     <h2 className="section-title">Calculator</h2>
@@ -5031,7 +5056,6 @@ const Proof = (function () {
                     {st.tool === 'sf' && <CxSF {...part('sf')} />}
                     {st.tool === 'trim' && <CxTrim {...part('trim')} />}
                     {st.tool === 'roll' && <CxRoll {...part('roll')} />}
-                    {st.tool === 'bwe' && <CxBwe {...part('bwe')} />}
                     {st.tool === 'anch' && <CxAnchor {...part('anch')} />}
                     {st.tool === 'moor' && <CxMoor {...part('moor')} />}
                     {st.tool === 'nre' && <CxNre {...part('nre')} />}
@@ -6417,11 +6441,12 @@ const Proof = (function () {
             { key: 'calc', label: 'Calculator', c: '#7c3aed', cd: '#c4b5fd' },
             { key: 'budget', label: 'Budget', c: '#a16207', cd: '#facc15' },
             { key: 'media', label: 'Media', c: '#db2777', cd: '#f472b6' },
-            { key: 'ot', label: 'Crew OT', c: '#1d4ed8', cd: '#60a5fa' }
+            { key: 'ot', label: 'Crew OT', c: '#1d4ed8', cd: '#60a5fa' },
+            { key: 'bwe', label: 'Ballast Exchange', c: '#0e5c86', cd: '#7dd3fc' }
         ];
         const TAB_GROUPS = [
             { name: 'Voyage', keys: ['rob', 'eta', 'speed', 'time', 'load'] },
-            { name: 'Cargo & Stability', keys: ['vent', 'dwt', 'hydro', 'calc'] },
+            { name: 'Cargo & Stability', keys: ['vent', 'dwt', 'hydro', 'bwe', 'calc'] },
             { name: "Ship's Office", keys: ['ot', 'garbage', 'conv', 'proof', 'media'] },
             { name: 'Personal', keys: ['budget'] }
         ];
@@ -6437,7 +6462,8 @@ const Proof = (function () {
             time: 'Zone time and world clock',
             load: 'Load line zone and allowed draft',
             garbage: 'GMP drums per deck, Annex V',
-            calc: 'DWA, days, SF, trim, roll, BWE, anchor, mooring, NRE',
+            calc: 'DWA, days, SF, trim, roll, anchor, mooring, NRE',
+            bwe: 'Exchange plan, D-1 check, drafts, SF/BM, Excel',
             budget: 'Salary, spending and in hand forecast',
             media: 'Compress and convert photos, PDF, video, audio',
             ot: 'Monthly crew overtime with estimate to month end'
@@ -6446,9 +6472,10 @@ const Proof = (function () {
             rob: 'bunker fuel fresh water consumption', eta: 'arrival time', speed: 'required speed eta', vent: 'ventilation dew point sweat',
             conv: 'units convert', hydro: 'hydrostatics tpc mctc lcf km', dwt: 'deadweight cargo intake draft', proof: 'spelling grammar email',
             time: 'time zone clock', load: 'load line zone summer winter tropical', garbage: 'garbage marpol annex v',
-            calc: 'salinity dwa fwa days contract stowage factor density trim draft rolling period gm turning heel ballast exchange anchor holding cable scope catenary windlass mooring hours lines form 5 all fast all clear nre nri tax resident',
+            calc: 'salinity dwa fwa days contract stowage factor density trim draft rolling period gm turning heel anchor holding cable scope catenary windlass mooring hours lines form 5 all fast all clear nre nri tax resident',
             budget: 'budget money salary wages expense spending savings allotment emi in hand forecast',
             ot: 'overtime ot crew hours fixed 103 extra wages payroll port coasting carry over estimate cut-off monthly',
+            bwe: 'ballast water exchange bwe d-1 sequential flow-through dilution residual keep drafts trim sf bm gm propeller immersion bridge visibility solas v/22 g6 bwmp plan excel canada fraser',
             media: 'media photo image picture jpg png webp heic pdf compress shrink reduce size convert video mp4 mov webm audio mp3 gif zip merge resize'
         };
         const ICON_PATHS = {
@@ -6466,6 +6493,7 @@ const Proof = (function () {
             budget: <><rect x="3" y="6" width="18" height="14" rx="2" /><path d="M3 10h18" /><path d="M7 6V4h10v2" /><circle cx="16.5" cy="15" r="1.3" /></>,
             media: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m10 9.5 4.5 2.5-4.5 2.5z" /><path d="M7 5v14M17 5v14" /></>,
             ot: <><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2.5 1.5" /><path d="M10 2h4" /><path d="M12 2v3" /></>,
+            bwe: <><path d="M3 15h18l-2.5 5h-13z" /><path d="M12 15V4" /><path d="M8.5 7.5 12 4l3.5 3.5" /><path d="M2 21.5c2 0 2-1 4.5-1" /></>,
             calc: <><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M8 7h8" /><path d="M8 11h.01M12 11h.01M16 11h.01M8 14.5h.01M12 14.5h.01M16 14.5h.01M8 18h4M16 18h.01" /></>,
             search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
             print: <><path d="M7 9V3h10v6" /><rect x="3" y="9" width="18" height="8" rx="2" /><path d="M7 14h10v7H7z" /></>,
@@ -7259,6 +7287,7 @@ const Proof = (function () {
                             {activeTab === 12 && <BudgetTab />}
                             {activeTab === 13 && <MediaTab />}
                             {activeTab === 14 && <OtTab />}
+                            {activeTab === 15 && <BweTab />}
                         </div>
                     </div>
                     </main>
