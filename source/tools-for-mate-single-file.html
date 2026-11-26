@@ -977,6 +977,22 @@
         .bw-plan ul { margin: 4px 0 0; padding-left: 18px; color: var(--text-2); }
         .bw-muted { color: var(--muted); font-size: 12px; margin-left: 6px; }
         @media (max-width: 640px) { .bw-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bw-head { grid-template-columns: 24px minmax(0, 1fr) 34px 34px 34px; } .bw-head select { grid-column: 2 / -1; grid-row: 2; } }
+        .bw-f3 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr); align-items: end; }
+        .bw-pair { min-height: 38px; }
+        .bw-scroll { overflow-x: auto; margin: 0 -4px; }
+        .bw-steps { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 1300px; }
+        .bw-steps th { font-size: 11px; font-weight: 600; color: var(--muted); text-align: left; padding: 6px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .bw-steps td { padding: 5px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        .bw-steps th.n, .bw-steps td.n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .bw-steps td.nw { white-space: nowrap; }
+        .bw-steps tr.bad td { background: var(--bad-soft); }
+        .bw-steps td.bw-op { min-width: 200px; }
+        .bw-steps td.bw-chk { min-width: 170px; }
+        .bw-steps .bw-tag { white-space: normal; display: inline-block; }
+        .bw-steps .bw-lc { width: 64px; min-height: 32px; padding: 4px 6px; font-size: 13px; margin: 0; }
+        .bw-req { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; color: var(--text-2); }
+        .bw-req li { margin-bottom: 6px; }
+        @media (max-width: 640px) { .bw-f3 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .bw-f3 .bw-pair { grid-column: 1 / -1; } }
         .cx-tk-t { font-size: 13px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
         @media (max-width: 640px) { .cx-wt { grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr) minmax(0, 1fr) 32px; } .cx-tk { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 58px 32px; } .cx-wt-h { font-size: 10px; } }
         .cx-nv { display: grid; gap: 6px; align-items: center; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 60px 36px; margin-bottom: 2px; }
@@ -3300,7 +3316,7 @@ const Proof = (function () {
                 moor: { name: '', prev: '', lim: '', rows: [{ p: '', a: '', d: '' }, { p: '', a: '', d: '' }] },
                 anch: { lbp: '', t: '', at: '', al: '', wind: '', cur: '', yaw: '0', cw: '0.9', cc: '0.05', depth: '', hawse: '', len: '', lunit: 'sh', shl: '27.5', dia: '', wpm: '', grade: '3', am: '', atype: 'stockless', fac: '', bed: 'sand', la: '', lc: '', sf: '1.5' },
                 nre: { fy: '', other: '', voy: [{ on: '', off: '', elig: true }, { on: '', off: '', elig: true }] },
-                bwe: { method: 'seq', np: '2', rate: '', eff: '', sameIn: true, npIn: '', rateIn: '', vf: '3', strip: '', start: cxNowWall(cxTzMin(tz)), tz: tz, spd: '', d1: '95', buf: '10', resPct: '2', dens: '1.025', avail: '', tanks: [{ n: '', act: 'seq', cap: '', cur: '', keep: '', res: '' }, { n: '', act: 'seq', cap: '', cur: '', keep: '', res: '' }] }
+                bwe: { method: 'seq', np: '2', rate: '', eff: '', sameIn: true, npIn: '', rateIn: '', vf: '3', strip: '', start: cxNowWall(cxTzMin(tz)), tz: tz, spd: '', d1: '95', buf: '10', resPct: '2', dens: '1.025', avail: '', ship: { ...BWE_SHIP0 }, lc: {}, tanks: [{ n: '', act: 'seq', cap: '', cur: '', keep: '', res: '' }, { n: '', act: 'seq', cap: '', cur: '', keep: '', res: '' }] }
             };
         };
         function cxLoad() {
@@ -4037,7 +4053,7 @@ const Proof = (function () {
             const avail = pn(s.avail);
             const spare = avail > 0 && isFinite(totH) ? avail - totH : NaN;
             const setT = (i, k, v) => setMany({ tanks: s.tanks.map((t, j) => (j === i ? { ...t, [k]: v } : t)) });
-            const blank = { n: '', act: '', cap: '', cur: '', keep: '', res: '' };
+            const blank = { n: '', act: '', cap: '', cur: '', keep: '', res: '', lcg: '', tcg: '', pair: false };
             const move = (i, d) => { const j = i + d; if (j < 0 || j >= s.tanks.length) return; const a = [...s.tanks]; [a[i], a[j]] = [a[j], a[i]]; setMany({ tanks: a }); };
 
             const planText = () => {
@@ -4171,6 +4187,11 @@ const Proof = (function () {
                                         <div><label className="input-label">Keep on arrival m³</label><input className="input-field" inputMode="decimal" value={act === 'retain' || act === 'empty' ? '' : (t.keep ?? '')} placeholder={act === 'retain' ? 'as now' : act === 'empty' ? 'empty' : 'full'} disabled={act === 'retain' || act === 'empty'} onChange={(e) => setT(i, 'keep', e.target.value)} /></div>
                                         <div><label className="input-label">Residual m³</label><input className="input-field" inputMode="decimal" value={act === 'seq' || act === 'empty' ? (t.res ?? '') : ''} placeholder={(act === 'seq' || act === 'empty') && r.cap > 0 ? cxInt(r.res) : 'not used'} disabled={!(act === 'seq' || act === 'empty')} onChange={(e) => setT(i, 'res', e.target.value)} /></div>
                                     </div>
+                                    <div className="bw-fields bw-f3">
+                                        <div><label className="input-label">LCG m ({(s.ship && s.ship.ref) === 'midf' ? 'midships, + fwd' : (s.ship && s.ship.ref) === 'mida' ? 'midships, + aft' : 'from AP'})</label><input className="input-field" inputMode="decimal" value={t.lcg ?? ''} placeholder="for drafts" onChange={(e) => setT(i, 'lcg', e.target.value)} /></div>
+                                        <div><label className="input-label">TCG m (+S / -P)</label><input className="input-field" inputMode="decimal" value={t.tcg ?? ''} placeholder="for list" onChange={(e) => setT(i, 'tcg', e.target.value)} /></div>
+                                        <label className="cx-check bw-pair"><input type="checkbox" checked={!!t.pair} disabled={i === s.tanks.length - 1} onChange={(e) => setT(i, 'pair', e.target.checked)} /> Pair with next</label>
+                                    </div>
                                     {r.err ? <div className="bw-res err">{r.err}</div> : (
                                         <div className="bw-res">
                                             <span>Out <b>{cxInt(r.out)}</b> m³</span>
@@ -4203,7 +4224,375 @@ const Proof = (function () {
                         <div className="cx-btns"><button style={subBtn} onClick={copy}>Copy plan</button>{msg && <span className="cx-hint">{msg}</span>}</div>
                         <div className="cx-hint" style={{ marginTop: 8 }}>Canada: ballast to be discharged at a Canadian fresh water port (Fraser River east of Tilbury or Mitchell Island, Kitimat, Stewart) must be exchanged at sea and then treated through the BWMS. Retained tanks need no exchange but go on the ballast reporting form.</div>
                     </div>
+
+                    <CxBwePlan s={s} setMany={setMany} rows={rows} outR={outR} inR={inR} need={need} />
                 </div>
+            );
+        }
+
+        // ---------- Ballast exchange: condition at every step (drafts, trim, propeller, visibility, SF/BM) ----------
+        const BWE_SHIP0 = { name: '', lbp: '', ref: 'ap', df: '', da: '', disp: '', gm: '', useHyd: true, tpc: '', mct: '', lcf: '', propD: '', shaftH: '', minProp: '100', minDf: '', maxTrim: '', ls: '', eyeH: '', eyeX: '', o1H: '', o1X: '', o2H: '', o2X: '', sfLim: '100', bmLim: '100', gmMin: '0.15' };
+        const bweShort = (ms, off) => { if (!isFinite(ms)) return '-'; const d = new Date(ms + off * 60000); return cx2(d.getUTCDate()) + ' ' + CX_MON[d.getUTCMonth()] + ' ' + cx2(d.getUTCHours()) + ':' + cx2(d.getUTCMinutes()); };
+        function bwePlan(s, rows, outR, inR) {
+            const p = { ...BWE_SHIP0, ...(s.ship || {}) };
+            const L = pn(p.lbp), dens = pn(s.dens) > 0 ? pn(s.dens) : 1.025;
+            const toAP = (x) => (!isFinite(x) || !(L > 0) ? NaN : p.ref === 'ap' ? x : p.ref === 'midf' ? L / 2 + x : L / 2 - x);
+            const miss = [];
+            if (!(L > 0)) miss.push('LBP');
+            if (!(pn(p.df) > 0) || !(pn(p.da) > 0)) miss.push('drafts F and A at the start');
+            const hydOk = p.useHyd && !!cxHydroAt(5);
+            const H = (mean) => {
+                if (hydOk) { const h = cxHydroAt(mean); if (h && h.tpc > 0 && h.mct > 0 && isFinite(h.lcf)) return { tpc: h.tpc, mct: h.mct, lcf: toAP(h.lcf), src: 'table' }; }
+                return { tpc: pn(p.tpc), mct: pn(p.mct), lcf: toAP(pn(p.lcf)), src: 'manual' };
+            };
+            const h0 = H((pn(p.df) + pn(p.da)) / 2 || 5);
+            if (!(h0.tpc > 0) || !(h0.mct > 0) || !isFinite(h0.lcf)) miss.push('TPC, MCTC and LCF (or a Hydrostatics table)');
+            // groups of tanks done together
+            const groups = []; let cur = null;
+            s.tanks.forEach((t, i) => {
+                const r = rows[i];
+                if (!cur) { cur = []; groups.push(cur); }
+                cur.push(i);
+                if (!t.pair) cur = null;
+            });
+            const strip = (pn(s.strip) || 0) / 60;
+            const opsOf = (i) => {
+                const r = rows[i];
+                if (r.err || r.act === 'retain') return [];
+                if (r.act === 'seq') return [{ ph: 1, dv: -r.out, t: r.out / outR + (r.out > 0 ? strip : 0), lbl: 'Pump out to strip level' }, { ph: 2, dv: r.inn, t: r.inn / inR, lbl: 'Refill with ocean water' }];
+                if (r.act === 'empty') return [{ ph: 1, dv: -r.out, t: r.out / outR + (r.out > 0 ? strip : 0), lbl: 'Pump out, empty at sea' }];
+                const top = r.cap - r.now, thru = r.vols * r.cap, down = r.cap - r.keep;
+                return [{ ph: 1, dv: top, t: top / inR, lbl: 'Top up to full' }, { ph: 2, dv: 0, t: thru / inR + strip, lbl: (r.act === 'dil' ? 'Dilution, ' : 'Flow-through, ') + cxF(r.vols, 2) + ' volumes' }, { ph: 3, dv: -down, t: down / outR, lbl: 'Pump down to keep level' }];
+            };
+            const off = cxTzMin(s.tz);
+            let clock = cxWallToUtc(s.start, off);
+            let dF = pn(p.df), dA = pn(p.da);
+            const disp0 = pn(p.disp) > 0 ? pn(p.disp) : (hydOk && cxHydroAt((dF + dA) / 2) ? cxHydroAt((dF + dA) / 2).disp : NaN);
+            let disp = disp0, ballast = s.tanks.reduce((a, t, i) => a + (rows[i].err ? 0 : rows[i].now * dens), 0), tm = 0;
+            const lcgMiss = new Set();
+            const state = (o) => {
+                const mean = (dF + dA) / 2, trim = dA - dF;
+                const D = pn(p.propD), sh = pn(p.shaftH);
+                const prop = D > 0 && sh > 0 ? (dA - (sh - D / 2)) / D * 100 : NaN;
+                const Tat = (a) => dF + (dA - dF) * a / L;
+                const blind = (oh, ox) => {
+                    const eh = pn(p.eyeH), ex = pn(p.eyeX), h = pn(oh), x = pn(ox);
+                    if (!(eh > 0) || !(ex > 0) || !(h > 0) || !isFinite(x) || !(ex > x)) return NaN;
+                    const he = eh - Tat(ex), ho = h - Tat(x);
+                    if (he <= ho) return Infinity;
+                    return Math.max(0, (ex - x) * he / (he - ho) - ex);
+                };
+                const b1 = blind(p.o1H, p.o1X), b2 = blind(p.o2H, p.o2X);
+                const bl = [b1, b2].filter((v) => !isNaN(v));
+                const gm = pn(p.gm);
+                const heel = gm > 0 && disp > 0 && tm !== 0 ? Math.atan(tm / (disp * gm)) * 180 / Math.PI : (gm > 0 && disp > 0 ? 0 : NaN);
+                return { ...o, dF, dA, mean, trim, prop, blind: bl.length ? Math.max(...bl) : NaN, disp, ballast, heel };
+            };
+            const steps = [state({ n: 0, key: 'start', tanks: '', op: 'Start of exchange (condition from loading computer)', dv: NaN, w: NaN, t: 0, t0: clock, t1: clock })];
+            let n = 0;
+            groups.forEach((g) => {
+                const ops = g.map((i) => ({ i, ops: opsOf(i) }));
+                [1, 2, 3].forEach((ph) => {
+                    const items = ops.map((o) => ({ i: o.i, op: o.ops.find((x) => x.ph === ph) })).filter((x) => x.op && (Math.abs(x.op.dv) > 0.5 || x.op.t > 0));
+                    if (!items.length) return;
+                    n++;
+                    let W = 0, M = 0, T = 0, Mt = 0, dv = 0;
+                    items.forEach(({ i, op }) => {
+                        const t = s.tanks[i];
+                        const w = op.dv * dens, x = toAP(pn(t.lcg)), y = pn(t.tcg);
+                        if (Math.abs(w) > 0.5 && !isFinite(x)) lcgMiss.add(t.n || 'Tank ' + (i + 1));
+                        W += w; dv += op.dv; T += op.t;
+                        if (isFinite(x)) M += w * x;
+                        if (isFinite(y)) Mt += w * y;
+                    });
+                    // two-pass: hydrostatics at the mean of old and new mean draft
+                    const apply = (hh) => {
+                        const lcgW = W !== 0 ? M / W : 0;
+                        const sink = W / hh.tpc, ct = W !== 0 ? W * (hh.lcf - lcgW) / hh.mct : 0;
+                        return { nA: dA + (sink + ct * hh.lcf / L) / 100, nF: dF + (sink - ct * (L - hh.lcf) / L) / 100 };
+                    };
+                    const m0 = (dF + dA) / 2;
+                    let hh = H(m0), r1 = apply(hh);
+                    hh = H((m0 + (r1.nA + r1.nF) / 2) / 2); r1 = apply(hh);
+                    if (isFinite(r1.nA) && isFinite(r1.nF)) { dA = r1.nA; dF = r1.nF; }
+                    disp = isFinite(disp) ? disp + W : disp; ballast += W; tm += Mt;
+                    const t0 = clock; clock = isFinite(clock) ? clock + T * 3600000 : clock;
+                    const names = items.map(({ i }) => s.tanks[i].n || 'Tank ' + (i + 1));
+                    const lbls = [...new Set(items.map((x) => x.op.lbl))];
+                    steps.push(state({ n, key: names.join('+') + '|' + ph, tanks: names.join(' + '), op: lbls.join(' / '), dv, w: W, t: T, t0, t1: clock }));
+                });
+            });
+            const lim = {
+                prop: pn(p.minProp), df: pn(p.minDf), trim: pn(p.maxTrim),
+                vis: Math.min(2 * (pn(p.ls) > 0 ? pn(p.ls) : L), 500),
+                sf: pn(p.sfLim) > 0 ? pn(p.sfLim) : 100, bm: pn(p.bmLim) > 0 ? pn(p.bmLim) : 100, gm: pn(p.gmMin)
+            };
+            const lc = s.lc || {};
+            steps.forEach((st) => {
+                const v = lc[st.key] || {};
+                st.sf = pn(v.sf); st.bm = pn(v.bm); st.gmLc = pn(v.gm);
+                const f = [];
+                if (isFinite(st.prop) && lim.prop > 0 && st.prop < lim.prop) f.push('propeller ' + cxF(st.prop, 0) + '%');
+                if (lim.df > 0 && st.dF < lim.df) f.push('draft fwd below ' + cxF(lim.df, 2));
+                if (lim.trim > 0 && st.trim > lim.trim) f.push('trim over ' + cxF(lim.trim, 2));
+                if (!isNaN(st.blind) && st.blind > lim.vis) f.push('visibility ' + (isFinite(st.blind) ? cxInt(st.blind) + ' m' : 'blocked'));
+                if (isFinite(st.sf) && st.sf > lim.sf) f.push('SF ' + st.sf + '%');
+                if (isFinite(st.bm) && st.bm > lim.bm) f.push('BM ' + st.bm + '%');
+                if (isFinite(st.gmLc) && lim.gm > 0 && st.gmLc < lim.gm) f.push('GM ' + st.gmLc);
+                st.flags = f;
+            });
+            return { steps, miss, lcgMiss: [...lcgMiss], lim, hydOk, L, dens, p, off };
+        }
+
+        function bweExcel(s, rows, P, need) {
+            const p = P.p, T0 = 22;
+            const I = (v, st) => ({ v: v === '' || v == null || (typeof v === 'number' && !isFinite(v)) ? '' : v, s: st });
+            const A = [
+                [{ v: 'Ballast water exchange plan' + (p.name ? ', ' + p.name : ''), s: 1 }],
+                ['Made with Meridian Tools for Mate on ' + cxFmt(Date.now(), P.off) + '. Drafts are calculated from the hydrostatics at each step; SF, BM and GM must be entered from the loading computer.'],
+                [],
+                [{ v: 'Limits and settings (yellow = edit, the Check column follows)', s: 9 }],
+                [],
+                [{ v: 'D-1 standard %', s: 11 }, I(pn(s.d1) || 95, 5)],
+                [{ v: 'Safety buffer %', s: 11 }, I(pn(s.buf) || 0, 5)],
+                [{ v: 'Sequential target %', s: 11 }, { f: '100-(100-B6)*(1-B7/100)', s: 7 }],
+                [{ v: 'Min propeller immersion %', s: 11 }, I(P.lim.prop, 5)],
+                [{ v: 'Min draft forward m', s: 11 }, I(P.lim.df, 16)],
+                [{ v: 'Max trim by stern m', s: 11 }, I(P.lim.trim, 16)],
+                [{ v: 'Bridge visibility limit m (2L or 500 m)', s: 11 }, I(P.lim.vis, 5)],
+                [{ v: 'Max SF % (sea-going)', s: 11 }, I(P.lim.sf, 5)],
+                [{ v: 'Max BM % (sea-going)', s: 11 }, I(P.lim.bm, 5)],
+                [{ v: 'Min GM m', s: 11 }, I(P.lim.gm, 16)],
+                [{ v: 'Ballast density t/m3', s: 11 }, I(P.dens, 16)],
+                [{ v: 'LBP m', s: 11 }, I(P.L, 3)],
+                [{ v: 'Pumps out / in m3/h', s: 11 }, I(cxInt(rowsRate(s).outR) + ' / ' + cxInt(rowsRate(s).inR), 0)],
+                [],
+                [{ v: 'Steps (one row = condition at the END of the step). Drafts at perpendiculars. Trim + = by stern. List + = starboard.', s: 9 }],
+                []
+            ];
+            const hdr = ['Step', 'Start', 'End', 'Hours', 'Tanks', 'Operation', 'Volume m3 (+in / -out)', 'Weight t', 'Ballast in listed tanks t', 'Draft F m', 'Draft A m', 'Mean m', 'Trim m', 'Propeller immersion %', 'Blind distance ahead m', 'List deg', 'SF % (loading computer)', 'BM % (loading computer)', 'GM m (loading computer)', 'Check'];
+            A.push(hdr.map((h) => ({ v: h, s: 2 })));
+            P.steps.forEach((st, k) => {
+                const r = A.length + 1;
+                A.push([
+                    { v: st.n, s: 14 }, { v: bweShort(st.t0, P.off), s: 15 }, { v: bweShort(st.t1, P.off), s: 15 }, { v: Math.round(st.t * 100) / 100, s: 3 },
+                    { v: st.tanks || '-', s: 15 }, { v: st.op, s: 15 },
+                    k === 0 ? { v: '', s: 14 } : { v: Math.round(st.dv), s: 14 },
+                    k === 0 ? { v: '', s: 14 } : { f: 'G' + r + '*$B$16', s: 14 },
+                    k === 0 ? { v: Math.round(st.ballast), s: 14 } : { f: 'I' + (r - 1) + '+H' + r, s: 14 },
+                    I(Math.round(st.dF * 1000) / 1000, 13), I(Math.round(st.dA * 1000) / 1000, 13),
+                    { f: 'IF(COUNT(J' + r + ':K' + r + ')=2,(J' + r + '+K' + r + ')/2,"")', s: 13 }, { f: 'IF(COUNT(J' + r + ':K' + r + ')=2,K' + r + '-J' + r + ',"")', s: 13 },
+                    I(isFinite(st.prop) ? Math.round(st.prop * 10) / 10 : '', 3),
+                    isNaN(st.blind) ? { v: '', s: 14 } : isFinite(st.blind) ? { v: Math.round(st.blind), s: 14 } : { v: 'blocked', s: 15 },
+                    I(isFinite(st.heel) ? Math.round(st.heel * 10) / 10 : '', 3),
+                    I(isFinite(st.sf) ? st.sf : '', 5), I(isFinite(st.bm) ? st.bm : '', 5), I(isFinite(st.gmLc) ? st.gmLc : '', 16),
+                    { f: 'IF(COUNT(J' + r + ':K' + r + ')<2,"",IF(OR(AND(ISNUMBER($B$10),J' + r + '<$B$10),AND(ISNUMBER($B$11),M' + r + '>$B$11),AND(ISNUMBER(N' + r + '),ISNUMBER($B$9),N' + r + '<$B$9),AND(O' + r + '<>"",O' + r + '>$B$12),AND(ISNUMBER(Q' + r + '),Q' + r + '>$B$13),AND(ISNUMBER(R' + r + '),R' + r + '>$B$14),AND(ISNUMBER(S' + r + '),ISNUMBER($B$15),S' + r + '<$B$15)),"CHECK","OK"))', s: 15 }
+                ]);
+            });
+            const last = A.length;
+            A.push([]);
+            A.push(['Totals', '', '', { f: 'SUM(D' + (T0 + 1) + ':D' + last + ')', s: 7 }, '', '', { f: 'SUMIF(G' + (T0 + 1) + ':G' + last + ',">0")', s: 7 }, { f: 'SUMIF(G' + (T0 + 1) + ':G' + last + ',"<0")', s: 7 }]);
+            A.push(['', '', '', 'hours', '', '', 'm3 in', 'm3 out']);
+            A.push([]);
+            ['Drafts: sinkage = w / TPC and change of trim = w x (LCF - LCG) / MCTC, with TPC, MCTC and LCF taken at each step (' + (P.hydOk ? 'Hydrostatics table' : 'fixed values entered') + '). Verify on the loading computer.',
+             'Propeller immersion % = (draft aft - (shaft centre height - D/2)) / D x 100. 100% = tip at the waterline.',
+             'Blind distance = distance ahead of the bow where the line of sight from the conning position over the obstruction meets the sea. SOLAS V/22: not more than 2L or 500 m, whichever is less.',
+             'Steps marked CHECK must not be started without the Master\'s decision. See the Requirements sheet.'].forEach((x) => A.push([x]));
+            const plan = otxSheet(A, [6, 13, 13, 7, 16, 30, 12, 10, 12, 9, 9, 9, 9, 11, 11, 8, 11, 11, 11, 10], { cf: 'T' + (T0 + 1) + ':T' + last });
+
+            // Tanks sheet
+            const B = [[{ v: 'Tanks', s: 1 }], ['Sequential: New water % = (Keep - Residual) / Keep x 100, passes at the target on the Plan sheet. Flow-through and dilution pass at 3 volumes or more.'], [],
+                ['Order', 'Tank', 'Action', 'Pair with next', 'Capacity m3', 'Now m3', 'Keep m3', 'Residual m3', 'LCG m', 'TCG m', 'Pump out m3', 'Pump in m3', 'New water % / volumes', 'Hours', 'Result'].map((h) => ({ v: h, s: 2 }))];
+            s.tanks.forEach((t, i) => {
+                const r = rows[i], rr = B.length + 1;
+                const isSeq = r.act === 'seq' && !r.err;
+                B.push([{ v: i + 1, s: 14 }, { v: t.n || 'Tank ' + (i + 1), s: 15 }, { v: BWE_ACT_LONG[r.act], s: 15 }, { v: t.pair ? 'Yes' : '', s: 15 },
+                    I(r.cap, 14), I(r.now, 14), I(r.act === 'retain' || r.act === 'empty' ? '' : r.keep, 14), I(r.act === 'retain' ? '' : Math.round(r.res), 14),
+                    I(pn(t.lcg), 13), I(pn(t.tcg), 13), I(Math.round(r.out), 14), I(Math.round(r.inn), 14),
+                    isSeq ? { f: '(G' + rr + '-H' + rr + ')/G' + rr + '*100', s: 3 } : I(isFinite(r.vols) && !r.err ? Math.round(r.vols * 100) / 100 : '', 3),
+                    I(isFinite(r.h) ? Math.round(r.h * 100) / 100 : '', 3),
+                    r.err ? { v: r.err, s: 10 } : isSeq ? { f: 'IF(M' + rr + '>=Plan!$B$8,"Meets D-1","BELOW TARGET")', s: 15 } : { v: r.ok === true ? 'Meets D-1' : r.ok === false ? 'BELOW D-1' : r.act === 'retain' ? 'Retained' : 'No exchange', s: 15 }]);
+            });
+            const tanks = otxSheet(B, [7, 14, 26, 9, 11, 10, 10, 11, 9, 9, 11, 11, 13, 8, 16], { freeze: [0, 4], cf: 'O5:O' + B.length });
+
+            // Requirements sheet
+            const R = [[{ v: 'Requirements and checks during ballast water exchange', s: 1 }], [],
+                [{ v: 'Item', s: 2 }, { v: 'Requirement', s: 2 }, { v: 'Source', s: 2 }, { v: 'Checked (Y/N)', s: 2 }]];
+            const req = [
+                ['Method and areas', 'Exchange in the area and by the method in the approved BWM plan. 200 NM from land and 200 m depth; 50 NM and 200 m if that is not possible. Canada: 200 NM and 2,000 m first.', 'BWM Convention B-4; Canada SOR/2021-120 s.14'],
+                ['D-1 standard', 'Sequential: at least 95% volumetric exchange. Flow-through or dilution: 3 tank volumes pumped through.', 'BWM Convention D-1'],
+                ['Stability', 'Keep intact stability as per the approved trim and stability booklet at all times, including slack tanks.', 'G6 (MEPC.288(71))'],
+                ['Free surface and sloshing', 'Allow for free surface effect and sloshing loads in tanks that are slack during the exchange.', 'G6'],
+                ['Strength', 'Shear forces and bending moments within the permissible sea-going limits of the loading manual at every step. Consider torsion.', 'G6; loading manual'],
+                ['Drafts and trim', 'Forward and aft drafts and trim checked at every step, in particular bridge visibility, propeller immersion and minimum forward draft.', 'G6'],
+                ['Bridge visibility', 'View of the sea surface from the conning position not obscured by more than 2 ship lengths or 500 m, whichever is less, ahead of the bow to 10 deg each side.', 'SOLAS V/22.1.1'],
+                ['Propeller immersion', 'Keep the propeller immersed to the level set in the BWM plan / company procedure.', 'G6; BWM plan'],
+                ['Minimum draft forward', 'Keep at or above the minimum forward draft (slamming) in the BWM plan / loading manual.', 'G6; loading manual'],
+                ['Weather', 'Exchange only in suitable weather and sea state. Avoid freezing weather. Watch for wave-induced hull vibration.', 'G6'],
+                ['Over and under pressure', 'Air pipes and overflows open and clear. For flow-through, never pressurise a tank; watch levels, line and pump pressures.', 'G6'],
+                ['Closures', 'Any manhole or closure opened for the exchange must be re-secured.', 'G6'],
+                ['Monitoring', 'Continuous monitoring: pumps, tank levels, line and pump pressures, stability and stresses.', 'G6'],
+                ['Personnel and records', 'Trained crew, sequence briefed, every exchange recorded in the Ballast Water Record Book with positions and volumes.', 'BWM Convention; G6'],
+                ['Stopping', 'Stop or do not start if the Master decides the exchange threatens the safety of the ship or crew. Record the reason.', 'BWM Convention B-4.4; SOR/2021-120 s.15(3)']
+            ];
+            req.forEach((x) => R.push([{ v: x[0], s: 15 }, { v: x[1], s: 15 }, { v: x[2], s: 15 }, { v: '', s: 12 }]));
+            R.push([]);
+            R.push([{ v: 'If visibility, propeller immersion or minimum forward draft cannot be met for a short time', s: 9 }]);
+            ['The ship is in open water.', 'Traffic density is low.', 'An enhanced navigational watch is kept, with an extra lookout forward and good communication with the bridge if needed.', 'Manoeuvrability is not unduly impaired by the draft, trim or propeller immersion.', 'Weather and sea state are suitable and not expected to get worse.'].forEach((x) => R.push(['', { v: x, s: 15 }, { v: 'G6 guidance', s: 15 }, { v: '', s: 12 }]));
+            const reqS = otxSheet(R, [24, 90, 26, 13], {});
+            return otxBook([['Plan', plan], ['Tanks', tanks], ['Requirements', reqS]]);
+        }
+        function rowsRate(s) {
+            const effK = pn(s.eff) > 0 ? pn(s.eff) / 100 : 1;
+            const outR = (pn(s.np) || 0) * (pn(s.rate) || 0) * effK;
+            return { outR, inR: s.sameIn ? outR : (pn(s.npIn) || 0) * (pn(s.rateIn) || 0) * effK };
+        }
+
+        function CxBwePlan({ s, setMany, rows, outR, inR, need }) {
+            const [msg, setMsg] = useState('');
+            const p = { ...BWE_SHIP0, ...(s.ship || {}) };
+            const setP = (k) => (v) => setMany({ ship: { ...p, [k]: v } });
+            const P = bwePlan(s, rows, outR, inR);
+            const lc = s.lc || {};
+            const setLc = (key, k, v) => setMany({ lc: { ...lc, [key]: { ...(lc[key] || {}), [k]: v } } });
+            const refLbl = p.ref === 'ap' ? 'from AP, + fwd' : p.ref === 'midf' ? 'from midships, + fwd' : 'from midships, + aft';
+            const ready = P.miss.length === 0 && outR > 0 && inR > 0;
+            const flagged = P.steps.filter((x) => x.flags.length).length;
+            const worst = (k, f) => P.steps.reduce((a, x) => (isFinite(x[k]) && (a == null || f(x[k], a)) ? x[k] : a), null);
+            const minDf = worst('dF', (a, b) => a < b), maxTrim = worst('trim', (a, b) => a > b), minProp = worst('prop', (a, b) => a < b);
+            const maxBlind = P.steps.reduce((a, x) => (isNaN(x.blind) ? a : a == null || x.blind > a ? x.blind : a), null);
+            const exportX = () => {
+                try {
+                    const blob = bweExcel(s, rows, P, need);
+                    const u = URL.createObjectURL(blob); const el = document.createElement('a'); el.href = u;
+                    el.download = 'ballast-exchange-plan' + (p.name ? '-' + p.name.replace(/[^\w-]+/g, '-') : '') + '.xlsx';
+                    document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000);
+                    setMsg('Excel saved: Plan, Tanks and Requirements sheets, with formulas.');
+                } catch (e) { setMsg('Excel export failed.'); }
+            };
+            const cell = (st, k, ph) => <input className="input-field bw-lc" inputMode="decimal" value={(lc[st.key] || {})[k] ?? ''} placeholder={ph} onChange={(e) => setLc(st.key, k, e.target.value)} aria-label={k + ' step ' + st.n} />;
+            const red = (bad) => (bad ? { color: 'var(--bad)', fontWeight: 700 } : null);
+
+            return (
+                <>
+                    <div className="card cx-card">
+                        <div className="card-title">Condition plan: ship data</div>
+                        <div className="cx-hint" style={{ marginBottom: 10 }}>Enter the condition at the start of the exchange from the loading computer. The app then works out drafts, trim, propeller immersion, bridge visibility and list after every step. SF, BM and GM come from the loading computer and are entered per step in the table.</div>
+                        <div className="cx-row">
+                            <CxField label="Ship name" value={p.name} onChange={setP('name')} type="text" />
+                            <CxField label="LBP (m)" value={p.lbp} onChange={setP('lbp')} />
+                            <div><label className="input-label">LCG and LCF measured</label>
+                                <select className="input-field" value={p.ref} onChange={(e) => setP('ref')(e.target.value)}>
+                                    <option value="ap">From AP (+ forward)</option><option value="midf">From midships, + forward</option><option value="mida">From midships, + aft</option>
+                                </select></div>
+                        </div>
+                        <div className="cx-sub">Start condition (loading computer)</div>
+                        <div className="cx-row" style={{ marginTop: 6 }}>
+                            <CxField label="Draft F (m)" value={p.df} onChange={setP('df')} />
+                            <CxField label="Draft A (m)" value={p.da} onChange={setP('da')} />
+                            <CxField label="Displacement (t)" value={p.disp} onChange={setP('disp')} placeholder={P.hydOk ? 'from table' : ''} />
+                            <CxField label="GM fluid (m)" value={p.gm} onChange={setP('gm')} placeholder="for list" />
+                        </div>
+                        <div className="cx-sub">Hydrostatics</div>
+                        <label className="cx-check"><input type="checkbox" checked={!!p.useHyd} onChange={(e) => setP('useHyd')(e.target.checked)} /> Use the Hydrostatics tab at each step {p.useHyd && (P.hydOk ? '(table found; its LCF is read with the reference chosen above)' : '(no table, enter values below)')}</label>
+                        {(!p.useHyd || !P.hydOk) && <div className="cx-row">
+                            <CxField label="TPC (t/cm)" value={p.tpc} onChange={setP('tpc')} />
+                            <CxField label="MCTC (t·m/cm)" value={p.mct} onChange={setP('mct')} />
+                            <CxField label={'LCF (m, ' + refLbl + ')'} value={p.lcf} onChange={setP('lcf')} />
+                        </div>}
+                        <div className="cx-sub">Propeller, draft and trim limits</div>
+                        <div className="cx-row" style={{ marginTop: 6 }}>
+                            <CxField label="Propeller diameter (m)" value={p.propD} onChange={setP('propD')} />
+                            <CxField label="Shaft centre above keel (m)" value={p.shaftH} onChange={setP('shaftH')} />
+                            <CxField label="Min propeller immersion (%)" value={p.minProp} onChange={setP('minProp')} placeholder="100" />
+                        </div>
+                        <div className="cx-row">
+                            <CxField label="Min draft forward (m)" value={p.minDf} onChange={setP('minDf')} placeholder="from BWM plan" />
+                            <CxField label="Max trim by stern (m)" value={p.maxTrim} onChange={setP('maxTrim')} placeholder="optional" />
+                        </div>
+                        <div className="cx-sub">Bridge visibility (SOLAS V/22)</div>
+                        <div className="cx-row" style={{ marginTop: 6 }}>
+                            <CxField label="Ship length L for SOLAS (m)" value={p.ls} onChange={setP('ls')} placeholder="LBP if blank" />
+                            <CxField label="Eye height above keel (m)" value={p.eyeH} onChange={setP('eyeH')} />
+                            <CxField label="Conning position aft of FP (m)" value={p.eyeX} onChange={setP('eyeX')} />
+                        </div>
+                        <div className="cx-row">
+                            <CxField label="Bow / forecastle top above keel (m)" value={p.o1H} onChange={setP('o1H')} />
+                            <CxField label="Its distance aft of FP (m)" value={p.o1X} onChange={setP('o1X')} placeholder="0 = at FP" />
+                        </div>
+                        <div className="cx-row">
+                            <CxField label="Other obstruction top above keel (m)" value={p.o2H} onChange={setP('o2H')} placeholder="crane, hatch cover" />
+                            <CxField label="Its distance aft of FP (m)" value={p.o2X} onChange={setP('o2X')} />
+                        </div>
+                        <div className="cx-sub">Loading computer limits</div>
+                        <div className="cx-row" style={{ marginTop: 6 }}>
+                            <CxField label="Max SF (%)" value={p.sfLim} onChange={setP('sfLim')} placeholder="100" />
+                            <CxField label="Max BM (%)" value={p.bmLim} onChange={setP('bmLim')} placeholder="100" />
+                            <CxField label="Min GM (m)" value={p.gmMin} onChange={setP('gmMin')} placeholder="0.15" />
+                        </div>
+                        <div className="cx-hint" style={{ marginTop: 8 }}>Take every limit from the approved BWM plan, loading manual and stability booklet; the defaults are only placeholders. Sea-going SF and BM limits apply during exchange. Each tank's LCG (and TCG for list) is entered on the tank card above.</div>
+                    </div>
+
+                    <div className="card cx-card">
+                        <div className="card-title">Condition at every step</div>
+                        {!ready && <div style={noteStyle('warn')}>To calculate drafts enter: {[...P.miss, ...(outR > 0 && inR > 0 ? [] : ['pump rates'])].join(', ')}.</div>}
+                        {P.lcgMiss.length > 0 && <div style={noteStyle('warn')}>Enter the LCG for: {P.lcgMiss.join(', ')}. Without it the trim from that tank is not counted.</div>}
+                        {ready && <div className="cx-grid" style={{ marginTop: 0, marginBottom: 12 }}>
+                            <CxOut l="Steps" v={P.steps.length - 1} />
+                            <CxOut l="Lowest draft fwd" v={cxF(minDf, 2)} u="m" hi={!(P.lim.df > 0 && minDf < P.lim.df)} />
+                            <CxOut l="Largest trim" v={cxF(maxTrim, 2)} u="m" sub={maxTrim > 0 ? 'by the stern' : 'by the head'} />
+                            <CxOut l="Lowest propeller immersion" v={minProp == null ? '-' : cxF(minProp, 0)} u="%" />
+                            <CxOut l="Worst blind distance" v={maxBlind == null ? '-' : isFinite(maxBlind) ? cxInt(maxBlind) : 'blocked'} u={maxBlind != null && isFinite(maxBlind) ? 'm' : ''} sub={'limit ' + cxInt(P.lim.vis) + ' m'} />
+                            <CxOut l="Steps to check" v={flagged} hi={flagged === 0} />
+                        </div>}
+                        <div className="bw-scroll">
+                            <table className="bw-steps">
+                                <thead><tr><th>Step</th><th>Start</th><th>End</th><th>Tanks / operation</th><th className="n">Vol m³</th><th className="n">Ballast t<br />listed tanks</th><th className="n">Draft F</th><th className="n">Draft A</th><th className="n">Trim</th><th className="n">Prop %</th><th className="n">Blind m</th><th className="n">List °</th><th>SF %</th><th>BM %</th><th>GM m</th><th>Check</th></tr></thead>
+                                <tbody>
+                                    {P.steps.map((st) => (
+                                        <tr key={st.key + st.n} className={st.flags.length ? 'bad' : ''}>
+                                            <td className="n">{st.n}</td>
+                                            <td className="nw">{bweShort(st.t0, P.off)}</td>
+                                            <td className="nw">{bweShort(st.t1, P.off)}</td>
+                                            <td className="bw-op"><b>{st.tanks || 'Start'}</b><div className="bw-muted" style={{ marginLeft: 0 }}>{st.op}{st.t > 0 ? ', ' + bweHm(st.t) : ''}</div></td>
+                                            <td className="n">{st.n === 0 ? '' : (st.dv > 0 ? '+' : '') + cxInt(st.dv)}</td>
+                                            <td className="n">{cxInt(st.ballast)}</td>
+                                            <td className="n" style={red(P.lim.df > 0 && st.dF < P.lim.df)}>{cxF(st.dF, 2)}</td>
+                                            <td className="n">{cxF(st.dA, 2)}</td>
+                                            <td className="n" style={red(P.lim.trim > 0 && st.trim > P.lim.trim)}>{cxF(st.trim, 2)}</td>
+                                            <td className="n" style={red(isFinite(st.prop) && st.prop < P.lim.prop)}>{cxF(st.prop, 0)}</td>
+                                            <td className="n" style={red(!isNaN(st.blind) && st.blind > P.lim.vis)}>{isNaN(st.blind) ? '-' : isFinite(st.blind) ? cxInt(st.blind) : 'blocked'}</td>
+                                            <td className="n">{isFinite(st.heel) ? (st.heel > 0 ? 'S ' : st.heel < 0 ? 'P ' : '') + cxF(Math.abs(st.heel), 1) : '-'}</td>
+                                            <td>{cell(st, 'sf', '%')}</td>
+                                            <td>{cell(st, 'bm', '%')}</td>
+                                            <td>{cell(st, 'gm', 'm')}</td>
+                                            <td className="bw-chk">{st.flags.length ? <span className="bw-tag no">{st.flags.join(', ')}</span> : <span className="bw-tag ok">OK</span>}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="cx-btns" style={{ marginTop: 10 }}><button style={subBtn} onClick={exportX}>Export Excel plan</button>{msg && <span className="cx-hint">{msg}</span>}</div>
+                        <div className="cx-hint" style={{ marginTop: 8 }}>
+                            Each row is the condition at the END of the step. For a sequential tank the "pump out" row is the lightest moment of that tank, so it shows the lowest draft forward and the worst trim and visibility for that tank. Tick "Pair with next" on a tank card to run two tanks (P and S) in one step.<br />
+                            Drafts at the perpendiculars: sinkage = w / TPC, change of trim = w × (LCF - LCG) / MCTC, with TPC, MCTC and LCF re-read at each step. Propeller immersion % = (draft A - (shaft centre - D/2)) / D × 100; 100% = tip at the waterline. Blind distance = how far ahead of the bow the sight line from the conning position over the obstruction meets the sea; SOLAS V/22 limit is 2L or 500 m, whichever is less. List = atan(Σ w × TCG / (Δ × GM)), start upright, GM kept constant, no free surface. These are planning figures: run each step on the loading computer and enter its SF, BM and GM before starting.
+                        </div>
+                    </div>
+
+                    <div className="card cx-card">
+                        <div className="card-title">Requirements during the exchange</div>
+                        <ul className="bw-req">
+                            <li><b>Stability</b> kept to the approved trim and stability booklet at every step, including free surface and sloshing in slack tanks (G6).</li>
+                            <li><b>Strength:</b> SF and BM within the sea-going limits of the loading manual at every step; consider torsion (G6).</li>
+                            <li><b>Drafts and trim</b> checked for bridge visibility, propeller immersion and minimum forward draft (G6).</li>
+                            <li><b>Bridge visibility:</b> sea surface not hidden more than 2L or 500 m, whichever is less, ahead of the bow to 10° each side, under all conditions of draft and trim (SOLAS V/22).</li>
+                            <li><b>Weather:</b> only in suitable weather and sea state; avoid freezing weather; watch for wave-induced hull vibration (G6).</li>
+                            <li><b>Tanks:</b> air pipes and overflows clear, no over or under pressure; re-secure any manhole opened; monitor pumps, levels, line pressures, stability and stresses throughout (G6).</li>
+                            <li><b>If visibility, propeller immersion or minimum draft forward cannot be met for a short time,</b> proceed only in open water, in low traffic, with an enhanced watch (extra lookout forward if needed), without unduly impaired manoeuvrability, and in weather that is suitable and not getting worse (G6 guidance).</li>
+                            <li><b>Stop</b> if the Master decides the exchange threatens the ship or crew, and record the reason in the BWRB (BWM Convention B-4.4).</li>
+                        </ul>
+                    </div>
+                </>
             );
         }
 
@@ -5329,12 +5718,13 @@ const Proof = (function () {
             return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' + pane +
                 '<cols>' + cols.map((w, i) => '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>').join('') + '</cols><sheetData>' + xml + '</sheetData>' +
                 (o.merge ? '<mergeCells count="' + o.merge.length + '">' + o.merge.map((m) => '<mergeCell ref="' + m + '"/>').join('') + '</mergeCells>' : '') +
+                (o.cf ? '<conditionalFormatting sqref="' + o.cf + '"><cfRule type="containsText" dxfId="0" priority="1" operator="containsText" text="CHECK"><formula>NOT(ISERROR(SEARCH("CHECK",' + o.cf.split(':')[0] + ')))</formula></cfRule><cfRule type="containsText" dxfId="0" priority="2" operator="containsText" text="BELOW"><formula>NOT(ISERROR(SEARCH("BELOW",' + o.cf.split(':')[0] + ')))</formula></cfRule><cfRule type="containsText" dxfId="1" priority="3" operator="containsText" text="OK"><formula>NOT(ISERROR(SEARCH("OK",' + o.cf.split(':')[0] + ')))</formula></cfRule><cfRule type="containsText" dxfId="1" priority="4" operator="containsText" text="Meets"><formula>NOT(ISERROR(SEARCH("Meets",' + o.cf.split(':')[0] + ')))</formula></cfRule></conditionalFormatting>' : '') +
                 '<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/><pageSetup orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>';
         }
         function otxBook(sheets) {
             const ns = 'http://schemas.openxmlformats.org/';
             const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="' + ns + 'spreadsheetml/2006/main">' +
-                '<numFmts count="2"><numFmt numFmtId="164" formatCode="0.0"/><numFmt numFmtId="165" formatCode="#,##0.00"/></numFmts>' +
+                '<numFmts count="4"><numFmt numFmtId="164" formatCode="0.0"/><numFmt numFmtId="165" formatCode="#,##0.00"/><numFmt numFmtId="166" formatCode="0.000"/><numFmt numFmtId="167" formatCode="#,##0"/></numFmts>' +
                 '<fonts count="4"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="14"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFC00000"/><name val="Calibri"/></font></fonts>' +
                 '<fills count="6"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>' +
                 '<fill><patternFill patternType="solid"><fgColor rgb="FFDCE6F2"/><bgColor rgb="FFDCE6F2"/></patternFill></fill>' +
@@ -5342,7 +5732,7 @@ const Proof = (function () {
                 '<fill><patternFill patternType="solid"><fgColor rgb="FFF2F2F2"/><bgColor rgb="FFF2F2F2"/></patternFill></fill>' +
                 '<fill><patternFill patternType="solid"><fgColor rgb="FFFCE4E4"/><bgColor rgb="FFFCE4E4"/></patternFill></fill></fills>' +
                 '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FFBFBFBF"/></left><right style="thin"><color rgb="FFBFBFBF"/></right><top style="thin"><color rgb="FFBFBFBF"/></top><bottom style="thin"><color rgb="FFBFBFBF"/></bottom><diagonal/></border></borders>' +
-                '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="13">' +
+                '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="17">' +
                 '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
                 '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>' +
                 '<xf numFmtId="0" fontId="2" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment wrapText="1" vertical="center" horizontal="center"/></xf>' +
@@ -5356,7 +5746,12 @@ const Proof = (function () {
                 '<xf numFmtId="0" fontId="3" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>' +
                 '<xf numFmtId="0" fontId="2" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>' +
                 '<xf numFmtId="0" fontId="0" fillId="3" borderId="1" xfId="0" applyFill="1" applyBorder="1"/>' +
-                '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+                '<xf numFmtId="166" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/>' +
+                '<xf numFmtId="167" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/>' +
+                '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment wrapText="1" vertical="top"/></xf>' +
+                '<xf numFmtId="166" fontId="0" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1"/>' +
+                '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
+                '<dxfs count="2"><dxf><font><b/><color rgb="FFC00000"/></font><fill><patternFill patternType="solid"><fgColor rgb="FFFCE4E4"/><bgColor rgb="FFFCE4E4"/></patternFill></fill></dxf><dxf><font><b/><color rgb="FF047857"/></font><fill><patternFill patternType="solid"><fgColor rgb="FFD9F5E8"/><bgColor rgb="FFD9F5E8"/></patternFill></fill></dxf></dxfs></styleSheet>';
             const files = [
                 ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="' + ns + 'package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' + sheets.map((s, i) => '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join('') + '</Types>'],
                 ['_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="' + ns + 'package/2006/relationships"><Relationship Id="rId1" Type="' + ns + 'officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],

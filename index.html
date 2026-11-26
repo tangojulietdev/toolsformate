@@ -976,6 +976,22 @@
         .bw-plan ul { margin: 4px 0 0; padding-left: 18px; color: var(--text-2); }
         .bw-muted { color: var(--muted); font-size: 12px; margin-left: 6px; }
         @media (max-width: 640px) { .bw-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bw-head { grid-template-columns: 24px minmax(0, 1fr) 34px 34px 34px; } .bw-head select { grid-column: 2 / -1; grid-row: 2; } }
+        .bw-f3 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr); align-items: end; }
+        .bw-pair { min-height: 38px; }
+        .bw-scroll { overflow-x: auto; margin: 0 -4px; }
+        .bw-steps { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 1300px; }
+        .bw-steps th { font-size: 11px; font-weight: 600; color: var(--muted); text-align: left; padding: 6px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .bw-steps td { padding: 5px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        .bw-steps th.n, .bw-steps td.n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .bw-steps td.nw { white-space: nowrap; }
+        .bw-steps tr.bad td { background: var(--bad-soft); }
+        .bw-steps td.bw-op { min-width: 200px; }
+        .bw-steps td.bw-chk { min-width: 170px; }
+        .bw-steps .bw-tag { white-space: normal; display: inline-block; }
+        .bw-steps .bw-lc { width: 64px; min-height: 32px; padding: 4px 6px; font-size: 13px; margin: 0; }
+        .bw-req { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; color: var(--text-2); }
+        .bw-req li { margin-bottom: 6px; }
+        @media (max-width: 640px) { .bw-f3 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .bw-f3 .bw-pair { grid-column: 1 / -1; } }
         .cx-tk-t { font-size: 13px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
         @media (max-width: 640px) { .cx-wt { grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr) minmax(0, 1fr) 32px; } .cx-tk { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 58px 32px; } .cx-wt-h { font-size: 10px; } }
         .cx-nv { display: grid; gap: 6px; align-items: center; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 60px 36px; margin-bottom: 2px; }
@@ -1161,7 +1177,7 @@
 <body>
     <div id="root"></div>
     
-    <script src="app.js?v=19" defer></script>
+    <script src="app.js?v=20" defer></script>
 
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(e){console.log("SW failed",e)})})}</script>
 </body>
