@@ -954,6 +954,28 @@
         .cx-tk { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr) 70px 36px; }
         .cx-wt .input-field, .cx-tk .input-field { margin: 0; min-height: 38px; padding: 6px 9px; font-size: 14px; }
         .cx-wt-h { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: 4px; }
+        .bw-tank { border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 10px; background: transparent; }
+        .bw-tank.good { border-color: var(--ok); }
+        .bw-tank.bad { border-color: var(--bad); }
+        .bw-head { display: grid; grid-template-columns: 26px minmax(0, 1.2fr) minmax(0, 1fr) 36px 36px 36px; gap: 6px; align-items: center; }
+        .bw-head .icon-btn { min-width: 36px; min-height: 36px; font-size: 16px; }
+        .bw-head .icon-btn:disabled { opacity: .35; cursor: default; }
+        .bw-no { font-weight: 700; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums; }
+        .bw-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+        .bw-tank .input-field { margin: 0; min-height: 38px; padding: 6px 9px; font-size: 14px; }
+        .bw-tank .input-field:disabled { opacity: .5; }
+        .bw-tank .input-label { font-size: 11px; margin-bottom: 3px; }
+        .bw-res { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin-top: 8px; font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+        .bw-res b { color: var(--text); }
+        .bw-res.err { color: var(--bad); font-weight: 600; }
+        .bw-tag { font-size: 12px; font-weight: 700; padding: 1px 9px; border-radius: 20px; background: var(--fill-2); color: var(--muted); }
+        .bw-tag.ok { background: var(--ok-soft); color: var(--ok); }
+        .bw-tag.no { background: var(--bad-soft); color: var(--bad); }
+        .bw-plan { margin: 0; padding-left: 22px; font-size: 14px; }
+        .bw-plan > li { margin-bottom: 10px; }
+        .bw-plan ul { margin: 4px 0 0; padding-left: 18px; color: var(--text-2); }
+        .bw-muted { color: var(--muted); font-size: 12px; margin-left: 6px; }
+        @media (max-width: 640px) { .bw-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bw-head { grid-template-columns: 24px minmax(0, 1fr) 34px 34px 34px; } .bw-head select { grid-column: 2 / -1; grid-row: 2; } }
         .cx-tk-t { font-size: 13px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
         @media (max-width: 640px) { .cx-wt { grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr) minmax(0, 1fr) 32px; } .cx-tk { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 58px 32px; } .cx-wt-h { font-size: 10px; } }
         .cx-nv { display: grid; gap: 6px; align-items: center; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 60px 36px; margin-bottom: 2px; }
@@ -1139,7 +1161,7 @@
 <body>
     <div id="root"></div>
     
-    <script src="app.js?v=18" defer></script>
+    <script src="app.js?v=19" defer></script>
 
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(e){console.log("SW failed",e)})})}</script>
 </body>

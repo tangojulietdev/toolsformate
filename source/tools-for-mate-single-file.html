@@ -955,6 +955,28 @@
         .cx-tk { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr) 70px 36px; }
         .cx-wt .input-field, .cx-tk .input-field { margin: 0; min-height: 38px; padding: 6px 9px; font-size: 14px; }
         .cx-wt-h { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: 4px; }
+        .bw-tank { border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 10px; background: transparent; }
+        .bw-tank.good { border-color: var(--ok); }
+        .bw-tank.bad { border-color: var(--bad); }
+        .bw-head { display: grid; grid-template-columns: 26px minmax(0, 1.2fr) minmax(0, 1fr) 36px 36px 36px; gap: 6px; align-items: center; }
+        .bw-head .icon-btn { min-width: 36px; min-height: 36px; font-size: 16px; }
+        .bw-head .icon-btn:disabled { opacity: .35; cursor: default; }
+        .bw-no { font-weight: 700; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums; }
+        .bw-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+        .bw-tank .input-field { margin: 0; min-height: 38px; padding: 6px 9px; font-size: 14px; }
+        .bw-tank .input-field:disabled { opacity: .5; }
+        .bw-tank .input-label { font-size: 11px; margin-bottom: 3px; }
+        .bw-res { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin-top: 8px; font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+        .bw-res b { color: var(--text); }
+        .bw-res.err { color: var(--bad); font-weight: 600; }
+        .bw-tag { font-size: 12px; font-weight: 700; padding: 1px 9px; border-radius: 20px; background: var(--fill-2); color: var(--muted); }
+        .bw-tag.ok { background: var(--ok-soft); color: var(--ok); }
+        .bw-tag.no { background: var(--bad-soft); color: var(--bad); }
+        .bw-plan { margin: 0; padding-left: 22px; font-size: 14px; }
+        .bw-plan > li { margin-bottom: 10px; }
+        .bw-plan ul { margin: 4px 0 0; padding-left: 18px; color: var(--text-2); }
+        .bw-muted { color: var(--muted); font-size: 12px; margin-left: 6px; }
+        @media (max-width: 640px) { .bw-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bw-head { grid-template-columns: 24px minmax(0, 1fr) 34px 34px 34px; } .bw-head select { grid-column: 2 / -1; grid-row: 2; } }
         .cx-tk-t { font-size: 13px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
         @media (max-width: 640px) { .cx-wt { grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr) minmax(0, 1fr) 32px; } .cx-tk { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 58px 32px; } .cx-wt-h { font-size: 10px; } }
         .cx-nv { display: grid; gap: 6px; align-items: center; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 60px 36px; margin-bottom: 2px; }
@@ -3278,7 +3300,7 @@ const Proof = (function () {
                 moor: { name: '', prev: '', lim: '', rows: [{ p: '', a: '', d: '' }, { p: '', a: '', d: '' }] },
                 anch: { lbp: '', t: '', at: '', al: '', wind: '', cur: '', yaw: '0', cw: '0.9', cc: '0.05', depth: '', hawse: '', len: '', lunit: 'sh', shl: '27.5', dia: '', wpm: '', grade: '3', am: '', atype: 'stockless', fac: '', bed: 'sand', la: '', lc: '', sf: '1.5' },
                 nre: { fy: '', other: '', voy: [{ on: '', off: '', elig: true }, { on: '', off: '', elig: true }] },
-                bwe: { method: 'seq', np: '2', rate: '', eff: '', sameIn: true, npIn: '', rateIn: '', vf: '3', strip: '', start: cxNowWall(cxTzMin(tz)), tz: tz, spd: '', tanks: [{ n: '', cap: '', cur: '' }, { n: '', cap: '', cur: '' }] }
+                bwe: { method: 'seq', np: '2', rate: '', eff: '', sameIn: true, npIn: '', rateIn: '', vf: '3', strip: '', start: cxNowWall(cxTzMin(tz)), tz: tz, spd: '', d1: '95', buf: '10', resPct: '2', dens: '1.025', avail: '', tanks: [{ n: '', act: 'seq', cap: '', cur: '', keep: '', res: '' }, { n: '', act: 'seq', cap: '', cur: '', keep: '', res: '' }] }
             };
         };
         function cxLoad() {
@@ -3916,100 +3938,270 @@ const Proof = (function () {
             );
         }
 
-        // ---------- Ballast water exchange ----------
-        function CxBwe({ s, set, setMany }) {
-            const outR = (pn(s.np) || 0) * (pn(s.rate) || 0) * (pn(s.eff) > 0 ? pn(s.eff) / 100 : 1);
-            const inR = s.sameIn ? outR : (pn(s.npIn) || 0) * (pn(s.rateIn) || 0) * (pn(s.eff) > 0 ? pn(s.eff) / 100 : 1);
+        // ---------- Ballast water exchange planner ----------
+        // Sequential: empty to the strip level, refill to the keep level. Exchanged % = new water / final volume.
+        // Flow-through / dilution: tank full, pump N tank volumes through (3 volumes is accepted as meeting D-1, BWM Convention B-4 / G6).
+        const BWE_ACTS = [['seq', 'Sequential'], ['ft', 'Flow-through'], ['dil', 'Dilution'], ['empty', 'Empty at sea'], ['retain', 'Retain']];
+        const BWE_ACT_LONG = { seq: 'Sequential exchange', ft: 'Flow-through exchange', dil: 'Dilution exchange', empty: 'Empty at sea, no exchange', retain: 'Retain on board, no exchange' };
+        function bweCalc(t, s, outR, inR) {
+            const act = t.act || s.method || 'seq';
+            const cap = pn(t.cap);
+            const now = t.cur === '' || t.cur == null ? cap : pn(t.cur);
+            const keep = t.keep === '' || t.keep == null ? cap : pn(t.keep);
+            const resPct = isFinite(pn(s.resPct)) ? pn(s.resPct) : 2;
+            const res = t.res === '' || t.res == null ? cap * resPct / 100 : pn(t.res);
+            const d1 = pn(s.d1) > 0 ? Math.min(pn(s.d1), 100) : 95;
+            const buf = isFinite(pn(s.buf)) ? Math.min(Math.max(pn(s.buf), 0), 100) : 0;
+            const need = 100 - (100 - d1) * (1 - buf / 100);
             const strip = (pn(s.strip) || 0) / 60;
-            const vol = pn(s.vf) > 0 ? pn(s.vf) : 3;
-            const rows = s.tanks.map((t) => {
-                const cap = pn(t.cap), cur = t.cur === '' ? cap : pn(t.cur);
-                let h = NaN, pumped = NaN;
-                if (cap > 0) {
-                    if (s.method === 'seq') { pumped = (cur || 0) + cap; h = outR > 0 && inR > 0 ? (cur || 0) / outR + cap / inR + strip : NaN; }
-                    else { pumped = cap * vol; h = inR > 0 ? pumped / inR + strip : NaN; }
-                }
-                return { cap, cur, h, pumped };
-            });
-            const totH = rows.reduce((a, r) => a + (isFinite(r.h) ? r.h : 0), 0);
-            const totV = rows.reduce((a, r) => a + (isFinite(r.pumped) ? r.pumped : 0), 0);
-            const totCap = rows.reduce((a, r) => a + (r.cap > 0 ? r.cap : 0), 0);
+            const r = { act, cap, now, keep, res, need, out: 0, inn: 0, eff: NaN, h: 0, ok: null, err: '', fix: '', steps: [], arrive: 0, vols: NaN };
+            if (!(cap > 0)) { r.err = 'Enter the tank capacity.'; r.h = NaN; return r; }
+            if (!(now >= 0)) { r.err = 'Enter what is in the tank now.'; r.h = NaN; return r; }
+            if (now > cap + 0.01) { r.err = 'Now (' + cxInt(now) + ') is more than capacity (' + cxInt(cap) + ').'; r.h = NaN; return r; }
+            if (act === 'retain') {
+                r.arrive = now; r.ok = null;
+                r.steps = ['Keep ' + cxInt(now) + ' m³ on board. No exchange. Must not be discharged where exchange is required; show it as retained on the ballast reporting form.'];
+                return r;
+            }
+            if (!(res >= 0)) { r.err = 'Residual must be 0 or more.'; r.h = NaN; return r; }
+            if (act === 'empty') {
+                r.out = Math.max(0, now - res); r.arrive = Math.min(now, res); r.h = r.out / outR + (r.out > 0 ? strip : 0);
+                r.steps = ['Pump out ' + cxInt(r.out) + ' m³ at sea, strip to ' + cxInt(r.arrive) + ' m³ (' + bweHm(r.out / outR) + '). Arrives empty except the unpumpable residual; do not pump that residual out in port.'];
+                return r;
+            }
+            if (!(keep >= 0)) { r.err = 'Enter how much to keep.'; r.h = NaN; return r; }
+            if (keep > cap + 0.01) { r.err = 'Keep (' + cxInt(keep) + ') is more than capacity (' + cxInt(cap) + ').'; r.h = NaN; return r; }
+            r.arrive = keep;
+            if (act === 'seq') {
+                if (keep <= 0) { r.err = 'Keep is 0. Use Empty at sea for a tank that arrives empty.'; r.h = NaN; return r; }
+                if (res >= keep) { r.err = 'Residual (' + cxInt(res) + ') must be less than Keep (' + cxInt(keep) + ').'; r.h = NaN; return r; }
+                r.out = Math.max(0, now - res);
+                const start = Math.min(now, res);
+                r.inn = keep - start;
+                r.eff = (keep - start) / keep * 100;
+                r.ok = r.eff >= need - 1e-9;
+                r.h = r.out / outR + r.inn / inR + strip;
+                const maxRes = keep * (1 - need / 100);
+                const minKeep = need < 100 ? res / (1 - need / 100) : NaN;
+                if (!r.ok) r.fix = 'Strip to ' + cxInt(Math.floor(maxRes)) + ' m³ or less' + (isFinite(minKeep) && minKeep <= cap ? ', or keep at least ' + cxInt(Math.ceil(minKeep)) + ' m³' : '') + (isFinite(minKeep) && minKeep > cap ? '; even a full tank does not reach the target, use flow-through' : '') + '.';
+                r.steps = [
+                    'Pump out ' + cxInt(r.out) + ' m³, strip down to ' + cxInt(start) + ' m³ or less (' + bweHm(r.out / outR) + ').',
+                    'Refill ' + cxInt(r.inn) + ' m³ of ocean water up to ' + cxInt(keep) + ' m³ (' + bweHm(r.inn / inR) + ').',
+                    'New water ' + cxF(r.eff, 1) + '% of the tank, target ' + cxF(need, 1) + '%: ' + (r.ok ? 'meets D-1.' : 'BELOW TARGET. ' + r.fix)
+                ];
+                return r;
+            }
+            // flow-through and dilution
+            const vf = pn(s.vf) > 0 ? pn(s.vf) : 3;
+            const vols = vf * (1 + buf / 100);
+            const top = cap - now, thru = vols * cap, down = cap - keep;
+            r.vols = vols;
+            r.inn = top + thru; r.out = thru + down;
+            r.eff = (1 - Math.exp(-vols)) * 100;
+            r.ok = vols >= 3 - 1e-9;
+            r.h = top / inR + thru / inR + down / outR + strip;
+            if (!r.ok) r.fix = 'Pump at least 3 tank volumes (' + cxInt(3 * cap) + ' m³) through. Set Flow-through volumes to 3 or more.';
+            const how = act === 'dil' ? 'filling from the top and pumping out from the bottom at the same rate, level kept constant' : 'with the tank overflowing through the air pipes or overflow';
+            r.steps = [
+                top > 0.5 ? 'Top up ' + cxInt(top) + ' m³ so the tank is full at ' + cxInt(cap) + ' m³ (' + bweHm(top / inR) + ').' : 'Tank is already full at ' + cxInt(cap) + ' m³.',
+                'Pump ' + cxInt(thru) + ' m³ through (' + cxF(vols, 2) + ' tank volumes), ' + how + ' (' + bweHm(thru / inR) + ').',
+                down > 0.5 ? 'Pump down ' + cxInt(down) + ' m³ to the keep level of ' + cxInt(keep) + ' m³ (' + bweHm(down / outR) + ').' : 'Keep the tank full.',
+                cxF(vols, 2) + ' volumes, about ' + cxF(r.eff, 1) + '% replaced: ' + (r.ok ? 'meets D-1 (3 volumes or more).' : 'BELOW D-1. ' + r.fix)
+            ];
+            return r;
+        }
+        function bweHm(h) { if (!isFinite(h)) return '-'; if (h <= 0) return '0h 00m'; const m = Math.round(h * 60); return Math.floor(m / 60) + 'h ' + cx2(m % 60) + 'm'; }
+
+        function CxBwe({ s, set, setMany }) {
+            const [msg, setMsg] = useState('');
+            const effK = pn(s.eff) > 0 ? pn(s.eff) / 100 : 1;
+            const outR = (pn(s.np) || 0) * (pn(s.rate) || 0) * effK;
+            const inR = s.sameIn ? outR : (pn(s.npIn) || 0) * (pn(s.rateIn) || 0) * effK;
+            const pumpsOk = outR > 0 && inR > 0;
+            const rows = s.tanks.map((t) => bweCalc(t, s, pumpsOk ? outR : NaN, pumpsOk ? inR : NaN));
+            const sum = (k) => rows.reduce((a, r) => a + (isFinite(r[k]) ? r[k] : 0), 0);
+            const totOut = sum('out'), totIn = sum('inn'), totH = pumpsOk ? sum('h') : NaN, arrive = sum('arrive');
+            const exRows = rows.filter((r) => !r.err && (r.act === 'seq' || r.act === 'ft' || r.act === 'dil'));
+            const passN = exRows.filter((r) => r.ok).length, failN = exRows.length - passN;
+            const errN = rows.filter((r) => r.err).length;
+            const dens = pn(s.dens) > 0 ? pn(s.dens) : 1.025;
+            const d1 = pn(s.d1) > 0 ? Math.min(pn(s.d1), 100) : 95;
+            const buf = isFinite(pn(s.buf)) ? Math.min(Math.max(pn(s.buf), 0), 100) : 0;
+            const need = 100 - (100 - d1) * (1 - buf / 100);
+            const vf = pn(s.vf) > 0 ? pn(s.vf) : 3;
             const off = cxTzMin(s.tz);
             const start = cxWallToUtc(s.start, off);
             const finish = isFinite(start) && totH > 0 ? start + totH * 3600000 : NaN;
             const sp = pn(s.spd);
             const dist = sp > 0 && totH > 0 ? sp * totH : NaN;
-            const hm = (h) => (isFinite(h) && h > 0 ? Math.floor(h) + 'h ' + cx2(Math.round((h % 1) * 60) % 60) + 'm' : '-');
+            const avail = pn(s.avail);
+            const spare = avail > 0 && isFinite(totH) ? avail - totH : NaN;
             const setT = (i, k, v) => setMany({ tanks: s.tanks.map((t, j) => (j === i ? { ...t, [k]: v } : t)) });
+            const blank = { n: '', act: '', cap: '', cur: '', keep: '', res: '' };
+            const move = (i, d) => { const j = i + d; if (j < 0 || j >= s.tanks.length) return; const a = [...s.tanks]; [a[i], a[j]] = [a[j], a[i]]; setMany({ tanks: a }); };
+
+            const planText = () => {
+                const L = ['BALLAST WATER EXCHANGE PLAN'];
+                L.push('D-1 target ' + cxF(d1, 1) + '%, safety buffer ' + cxF(buf, 0) + '% -> sequential target ' + cxF(need, 1) + '%, flow-through ' + cxF(vf * (1 + buf / 100), 2) + ' volumes');
+                L.push('Pumps: out ' + cxInt(outR) + ' m3/h, in ' + cxInt(inR) + ' m3/h');
+                if (isFinite(start)) L.push('Start ' + cxFmt(start, off) + ' (' + s.tz.replace('GMT', 'UTC ') + '), finish ' + cxFmt(finish, off));
+                L.push('');
+                s.tanks.forEach((t, i) => {
+                    const r = rows[i];
+                    L.push((i + 1) + '. ' + (t.n || 'Tank ' + (i + 1)) + ' - ' + BWE_ACT_LONG[r.act]);
+                    if (r.err) L.push('   CHECK INPUT: ' + r.err);
+                    else r.steps.forEach((x) => L.push('   - ' + x.replace(/m³/g, 'm3')));
+                });
+                L.push('');
+                L.push('Totals: out ' + cxInt(totOut) + ' m3, in ' + cxInt(totIn) + ' m3, pumping ' + bweHm(totH) + ', arrival ballast ' + cxInt(arrive) + ' m3 = ' + cxInt(arrive * dens) + ' t');
+                L.push('Check every step on the loading computer (SF, BM, GM, drafts, propeller immersion, visibility). Follow the approved BWM plan.');
+                return L.join('\n');
+            };
+            const copy = () => { const t = planText(); try { navigator.clipboard.writeText(t).then(() => setMsg('Plan copied'), () => setMsg('Copy blocked')); } catch (e) { setMsg('Copy blocked'); } };
 
             return (
-                <div className="cx-two">
-                    <div>
-                        <div className="card cx-card">
-                            <div className="card-title">Method and pumps</div>
-                            <div className="seg" role="group" aria-label="Method" style={{ marginBottom: 12 }}>
-                                <button aria-pressed={s.method === 'seq'} onClick={() => set('method')('seq')}>Sequential</button>
-                                <button aria-pressed={s.method === 'ft'} onClick={() => set('method')('ft')}>Flow-through</button>
-                                <button aria-pressed={s.method === 'dil'} onClick={() => set('method')('dil')}>Dilution</button>
+                <div>
+                    <div className="cx-two">
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">Exchange standard and safety buffer</div>
+                                <div className="cx-row">
+                                    <CxField label="D-1 standard (% exchanged)" value={s.d1} onChange={set('d1')} placeholder="95" />
+                                    <CxField label="Safety buffer (%)" value={s.buf} onChange={set('buf')} placeholder="0" />
+                                </div>
+                                <div className="cx-row">
+                                    <CxField label="Flow-through volumes (× tank)" value={s.vf} onChange={set('vf')} placeholder="3" />
+                                    <CxField label="Default residual (% of capacity)" value={s.resPct} onChange={set('resPct')} placeholder="2" />
+                                </div>
+                                <div className="cx-grid">
+                                    <CxOut l="Sequential target" v={cxF(need, 1)} u="%" hi sub={'at most ' + cxF(100 - need, 1) + '% old water left'} />
+                                    <CxOut l="Flow-through to pump" v={cxF(vf * (1 + buf / 100), 2)} u="× tank" hi sub={vf * (1 + buf / 100) >= 3 ? 'meets 3 volumes' : 'below 3 volumes'} />
+                                </div>
+                                <div className="cx-hint" style={{ marginTop: 10 }}>The buffer adds margin on top of the legal minimum. Sequential: it cuts the old water allowed to stay in the tank (5% at 95%) by the buffer %, so a 10% buffer means 4.5% old water at most, 95.5% target. Flow-through and dilution: it adds the buffer % to the volumes pumped, so 3 volumes with 10% = 3.30 volumes. Residual = the water left after stripping (unpumpable). Use the figure from the tank table or BWM plan; you can set it per tank below.</div>
                             </div>
-                            <div className="cx-row">
-                                <CxField label={s.method === 'seq' ? 'Pumps deballasting' : 'Pumps in use'} value={s.np} onChange={set('np')} />
-                                <CxField label="Rate per pump (m³/h)" value={s.rate} onChange={set('rate')} />
-                                <CxField label="Efficiency (%)" value={s.eff} onChange={set('eff')} placeholder="100" />
+
+                            <div className="card cx-card">
+                                <div className="card-title">Pumps</div>
+                                <div className="cx-row">
+                                    <CxField label="Pumps deballasting" value={s.np} onChange={set('np')} />
+                                    <CxField label="Rate per pump (m³/h)" value={s.rate} onChange={set('rate')} />
+                                    <CxField label="Pump efficiency (%)" value={s.eff} onChange={set('eff')} placeholder="100" />
+                                </div>
+                                <label className="cx-check"><input type="checkbox" checked={s.sameIn} onChange={(e) => set('sameIn')(e.target.checked)} /> Same pumps and rate for ballasting</label>
+                                {!s.sameIn && <div className="cx-row"><CxField label="Pumps ballasting" value={s.npIn} onChange={set('npIn')} /><CxField label="Rate per pump (m³/h)" value={s.rateIn} onChange={set('rateIn')} /></div>}
+                                <div className="cx-row">
+                                    <CxField label="Stripping / changeover per tank (min)" value={s.strip} onChange={set('strip')} placeholder="0" />
+                                </div>
+                                <div className="cx-grid">
+                                    <CxOut l="Deballast rate" v={cxInt(outR)} u="m³/h" />
+                                    <CxOut l="Ballast rate" v={cxInt(inR)} u="m³/h" />
+                                </div>
+                                {!pumpsOk && <div style={noteStyle('warn')}>Enter the number of pumps and the rate per pump to get times.</div>}
                             </div>
-                            {s.method === 'seq' && (
-                                <>
-                                    <label className="cx-check"><input type="checkbox" checked={s.sameIn} onChange={(e) => set('sameIn')(e.target.checked)} /> Same pumps and rate for refilling</label>
-                                    {!s.sameIn && <div className="cx-row"><CxField label="Pumps ballasting" value={s.npIn} onChange={set('npIn')} /><CxField label="Rate per pump (m³/h)" value={s.rateIn} onChange={set('rateIn')} /></div>}
-                                </>
-                            )}
-                            <div className="cx-row">
-                                {s.method !== 'seq' && <CxField label="Volumes pumped through" value={s.vf} onChange={set('vf')} placeholder="3" hint="3 × tank volume meets D-1" />}
-                                <CxField label="Stripping / changeover per tank (min)" value={s.strip} onChange={set('strip')} placeholder="0" />
-                            </div>
-                            <div className="cx-grid">
-                                <CxOut l={s.method === 'seq' ? 'Deballast rate' : 'Effective rate'} v={cxInt(outR)} u="m³/h" />
-                                {s.method === 'seq' && <CxOut l="Ballast rate" v={cxInt(inR)} u="m³/h" />}
+
+                            <div className="card cx-card">
+                                <div className="card-title">Start and exchange area</div>
+                                <div className="cx-row">
+                                    <CxField label="Start" type="datetime-local" value={s.start} onChange={set('start')} />
+                                    <CxTz label="Time zone" value={s.tz} onChange={set('tz')} />
+                                </div>
+                                <div className="cx-row">
+                                    <CxField label="Ship's speed (kn)" value={s.spd} onChange={set('spd')} placeholder="for distance run" />
+                                    <CxField label="Hours available in area" value={s.avail} onChange={set('avail')} placeholder="optional" />
+                                    <CxField label="Ballast density (t/m³)" value={s.dens} onChange={set('dens')} placeholder="1.025" />
+                                </div>
+                                <div className="cx-btns"><button style={subBtn} onClick={() => set('start')(cxNowWall(off))}>Start = now</button></div>
                             </div>
                         </div>
 
-                        <div className="card cx-card">
-                            <div className="card-title">Start and passage</div>
-                            <div className="cx-row">
-                                <CxField label="Start" type="datetime-local" value={s.start} onChange={set('start')} />
-                                <CxTz label="Time zone" value={s.tz} onChange={set('tz')} />
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">Result</div>
+                                <div className="cx-grid" style={{ marginTop: 0 }}>
+                                    <CxOut l="Total out of tanks" v={cxInt(totOut)} u="m³" sub="pumped out + overflow" />
+                                    <CxOut l="Total into tanks" v={cxInt(totIn)} u="m³" sub="ocean water taken in" />
+                                    <CxOut l="Pumping time" v={bweHm(totH)} hi sub={isFinite(totH) && totH > 0 ? cxF(totH, 2) + ' h, one tank at a time' : null} />
+                                    <CxOut l={'Finish (' + s.tz.replace('GMT', 'UTC ') + ')'} v={cxFmt(finish, off)} hi />
+                                    <CxOut l="Finish UTC" v={cxFmt(finish, 0)} />
+                                    <CxOut l="Distance run" v={cxF(dist, 0)} u="NM" />
+                                    <CxOut l="Spare time in area" v={isFinite(spare) ? (spare < 0 ? '-' : '') + bweHm(Math.abs(spare)) : '-'} sub={isFinite(spare) ? (spare < 0 ? 'NOT ENOUGH TIME' : 'time left over') : 'enter hours available'} />
+                                    <CxOut l="Tanks meeting D-1" v={exRows.length ? passN + ' of ' + exRows.length : '-'} hi={exRows.length > 0 && failN === 0} />
+                                    <CxOut l="Ballast on arrival" v={cxInt(arrive)} u="m³" sub={cxInt(arrive * dens) + ' t at ' + cxF(dens, 3)} />
+                                </div>
+                                {errN > 0 && <div style={noteStyle('bad')}>{errN} tank{errN > 1 ? 's have' : ' has'} an input to check, shown in red below. {errN > 1 ? 'They are' : 'It is'} not counted in the totals.</div>}
+                                {failN > 0 && <div style={noteStyle('bad')}>{failN} tank{failN > 1 ? 's do' : ' does'} not meet the target. The fix is written under each tank.</div>}
+                                {isFinite(spare) && spare < 0 && <div style={noteStyle('bad')}>Pumping needs {bweHm(totH)} but only {bweHm(avail)} is available. Start earlier, run more pumps, or run tanks in parallel if the BWM plan allows.</div>}
+                                {exRows.length > 0 && failN === 0 && errN === 0 && (!isFinite(spare) || spare >= 0) && <div style={noteStyle('')}>All exchanged tanks meet D-1 with the {cxF(buf, 0)}% buffer.</div>}
                             </div>
-                            <div className="cx-row">
-                                <CxField label="Ship's speed (kn)" value={s.spd} onChange={set('spd')} placeholder="for distance run" />
+
+                            <div className="card cx-card">
+                                <div className="card-title">How it is worked out</div>
+                                <div className="cx-hint">
+                                    <b>Sequential:</b> pump out = Now - Residual. Pump in = Keep - Residual. New water % = (Keep - Residual) ÷ Keep × 100. Passes if New water % ≥ target. The residual is the old water still in the tank, so a smaller residual or a larger keep gives a higher %.<br /><br />
+                                    <b>Flow-through / dilution:</b> the tank is topped up to full, then N tank volumes are pumped through, then pumped down to the keep level. 3 volumes is accepted as meeting D-1 (BWM Convention B-4, guideline G6); fewer only if the ship can prove 95%. % replaced = 1 - e^-N, the theoretical value with full mixing (3 volumes = 95.0%). Top-up water is not counted towards N. Out includes the water leaving by the overflow.<br /><br />
+                                    <b>Empty at sea:</b> pump out to the residual, no exchange. <b>Retain:</b> nothing pumped; the tank must not be discharged where exchange is required.<br /><br />
+                                    Times: one tank at a time, pump out at the deballast rate, fill at the ballast rate, plus the changeover minutes. Exchange at least 200 NM from land in 200 m depth, or 50 NM and 200 m where that is not possible (Canada: 200 NM and 2,000 m first). Check every step on the loading computer and follow the approved BWM plan.
+                                </div>
                             </div>
-                            <div className="cx-btns"><button style={subBtn} onClick={() => set('start')(cxNowWall(off))}>Start = now</button></div>
                         </div>
                     </div>
 
-                    <div>
-                        <div className="card cx-card">
-                            <div className="card-title">Tanks</div>
-                            <div className="cx-tk cx-wt-h"><span>Tank</span><span>Capacity (m³)</span><span>{s.method === 'seq' ? 'Now in tank (m³)' : ''}</span><span>Time</span><span></span></div>
-                            {s.tanks.map((t, i) => (
-                                <div key={i} className="cx-tk">
-                                    <input className="input-field" value={t.n} placeholder={'Tank ' + (i + 1)} onChange={(e) => setT(i, 'n', e.target.value)} />
-                                    <input className="input-field" inputMode="decimal" value={t.cap} onChange={(e) => setT(i, 'cap', e.target.value)} />
-                                    {s.method === 'seq' ? <input className="input-field" inputMode="decimal" value={t.cur} placeholder="full" onChange={(e) => setT(i, 'cur', e.target.value)} /> : <span />}
-                                    <span className="cx-tk-t">{hm(rows[i].h)}</span>
-                                    <button className="icon-btn" style={{ minWidth: 36, minHeight: 36, fontSize: 16 }} onClick={() => setMany({ tanks: s.tanks.length > 1 ? s.tanks.filter((_, j) => j !== i) : [{ n: '', cap: '', cur: '' }] })} aria-label="Remove tank">×</button>
+                    <div className="card cx-card">
+                        <div className="card-title">Tanks, in the order you will exchange them</div>
+                        <div className="cx-hint" style={{ marginBottom: 10 }}>Now and Keep blank = full. Residual blank = default % of capacity. Keep = what you want in the tank on arrival. Use ↑ ↓ to set the order; work P and S pairs together to avoid a list.</div>
+                        {s.tanks.map((t, i) => {
+                            const r = rows[i];
+                            const act = t.act || s.method || 'seq';
+                            const exch = act === 'seq' || act === 'ft' || act === 'dil';
+                            return (
+                                <div key={i} className={'bw-tank' + (r.err || r.ok === false ? ' bad' : r.ok ? ' good' : '')}>
+                                    <div className="bw-head">
+                                        <span className="bw-no">{i + 1}</span>
+                                        <input className="input-field" value={t.n} placeholder={'Tank ' + (i + 1)} onChange={(e) => setT(i, 'n', e.target.value)} aria-label="Tank name" />
+                                        <select className="input-field" value={act} onChange={(e) => setT(i, 'act', e.target.value)} aria-label="Action">
+                                            {BWE_ACTS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+                                        </select>
+                                        <button className="icon-btn" onClick={() => move(i, -1)} aria-label="Move up" disabled={i === 0}>↑</button>
+                                        <button className="icon-btn" onClick={() => move(i, 1)} aria-label="Move down" disabled={i === s.tanks.length - 1}>↓</button>
+                                        <button className="icon-btn" onClick={() => setMany({ tanks: s.tanks.length > 1 ? s.tanks.filter((_, j) => j !== i) : [{ ...blank }] })} aria-label="Remove tank">×</button>
+                                    </div>
+                                    <div className="bw-fields">
+                                        <div><label className="input-label">Capacity m³</label><input className="input-field" inputMode="decimal" value={t.cap} onChange={(e) => setT(i, 'cap', e.target.value)} /></div>
+                                        <div><label className="input-label">Now m³</label><input className="input-field" inputMode="decimal" value={t.cur ?? ''} placeholder="full" onChange={(e) => setT(i, 'cur', e.target.value)} /></div>
+                                        <div><label className="input-label">Keep on arrival m³</label><input className="input-field" inputMode="decimal" value={act === 'retain' || act === 'empty' ? '' : (t.keep ?? '')} placeholder={act === 'retain' ? 'as now' : act === 'empty' ? 'empty' : 'full'} disabled={act === 'retain' || act === 'empty'} onChange={(e) => setT(i, 'keep', e.target.value)} /></div>
+                                        <div><label className="input-label">Residual m³</label><input className="input-field" inputMode="decimal" value={act === 'seq' || act === 'empty' ? (t.res ?? '') : ''} placeholder={(act === 'seq' || act === 'empty') && r.cap > 0 ? cxInt(r.res) : 'not used'} disabled={!(act === 'seq' || act === 'empty')} onChange={(e) => setT(i, 'res', e.target.value)} /></div>
+                                    </div>
+                                    {r.err ? <div className="bw-res err">{r.err}</div> : (
+                                        <div className="bw-res">
+                                            <span>Out <b>{cxInt(r.out)}</b> m³</span>
+                                            <span>In <b>{cxInt(r.inn)}</b> m³</span>
+                                            {exch && <span>{act === 'seq' ? 'New water' : 'Replaced'} <b>{cxF(r.eff, 1)}%</b>{act !== 'seq' ? ' (' + cxF(r.vols, 2) + ' vol)' : ''}</span>}
+                                            <span>Time <b>{pumpsOk ? bweHm(r.h) : '-'}</b></span>
+                                            <span className={'bw-tag' + (r.ok === true ? ' ok' : r.ok === false ? ' no' : '')}>{r.ok === true ? 'Meets D-1' : r.ok === false ? 'Below target' : act === 'retain' ? 'Retained' : 'No exchange'}</span>
+                                        </div>
+                                    )}
+                                    {!r.err && r.ok === false && <div className="bw-res err">{r.fix}</div>}
                                 </div>
-                            ))}
-                            <div className="cx-btns"><button style={subBtn} onClick={() => setMany({ tanks: [...s.tanks, { n: '', cap: '', cur: '' }] })}>+ Add tank</button></div>
-                            <div className="cx-grid">
-                                <CxOut l="Total capacity" v={cxInt(totCap)} u="m³" />
-                                <CxOut l="Volume to pump" v={cxInt(totV)} u="m³" />
-                                <CxOut l="Total time" v={hm(totH)} hi sub={totH > 0 ? cxF(totH, 2) + ' h' : null} />
-                                <CxOut l={'Finish (' + s.tz.replace('GMT', 'UTC ') + ')'} v={cxFmt(finish, off)} hi />
-                                <CxOut l="Finish UTC" v={cxFmt(finish, 0)} />
-                                <CxOut l="Distance run" v={cxF(dist, 0)} u="NM" />
-                            </div>
-                            <div className="cx-hint" style={{ marginTop: 10 }}>Tanks are done one after another with the pumps given. Regulation B-4: exchange at least 200 NM from the nearest land in at least 200 m depth, or 50 NM and 200 m where that is not possible. Sequential exchange needs 95% volumetric exchange. Check stability, strength, bending moments and propeller immersion for each step against the ship's BWM plan.</div>
-                        </div>
+                            );
+                        })}
+                        <div className="cx-btns"><button style={subBtn} onClick={() => setMany({ tanks: [...s.tanks, { ...blank, act: 'seq' }] })}>+ Add tank</button></div>
+                    </div>
+
+                    <div className="card cx-card">
+                        <div className="card-title">Exchange plan, step by step</div>
+                        <ol className="bw-plan">
+                            {s.tanks.map((t, i) => {
+                                const r = rows[i];
+                                return (
+                                    <li key={i}>
+                                        <b>{t.n || 'Tank ' + (i + 1)}</b> <span className="bw-muted">{BWE_ACT_LONG[r.act]}</span>
+                                        {r.err ? <div className="bw-res err">Check input: {r.err}</div> : <ul>{r.steps.map((x, k) => <li key={k}>{x}</li>)}</ul>}
+                                    </li>
+                                );
+                            })}
+                        </ol>
+                        <div className="cx-btns"><button style={subBtn} onClick={copy}>Copy plan</button>{msg && <span className="cx-hint">{msg}</span>}</div>
+                        <div className="cx-hint" style={{ marginTop: 8 }}>Canada: ballast to be discharged at a Canadian fresh water port (Fraser River east of Tilbury or Mitchell Island, Kitimat, Stewart) must be exchanged at sea and then treated through the BWMS. Retained tanks need no exchange but go on the ballast reporting form.</div>
                     </div>
                 </div>
             );
