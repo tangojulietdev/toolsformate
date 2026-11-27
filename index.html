@@ -1556,11 +1556,31 @@
         @media (max-width: 640px) { .er-tk { grid-template-columns: minmax(0, 1fr) 80px 34px; } .er-tk > :nth-child(3), .er-tk > :nth-child(4) { grid-row: 2; } .er-tk-h { display: none; } }
         @media (max-width: 1480px) and (min-width: 761px) { .cats .cat svg { display: none; } .cat { padding: 0 11px; } }
         @media (max-width: 1240px) and (min-width: 761px) { .cats .cat svg { display: inline; } }
+    
+        /* Bridge: compass error */
+        .ce-time { display: flex; gap: 6px; align-items: flex-start; }
+        .ce-time .input-field { flex: 1; min-width: 0; }
+        .ce-time .btn-ghost { height: var(--ctl-h); flex: none; }
+        .ce-time .btn-ghost.on { background: var(--accent); color: #fff; }
+        .ce-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+        .ce-sky { width: 100%; max-width: 460px; display: block; margin: 0 auto 8px; }
+        .ce-sky .ce-card { fill: rgba(255,255,255,.75); font: 700 12px var(--font); }
+        .ce-sky .ce-lbl { fill: rgba(255,255,255,.85); font: 500 9.5px var(--font); pointer-events: none; }
+        .ce-sky .ce-lbl.pl { fill: #fde68a; font-weight: 700; }
+        .ce-sky .ce-pt { cursor: pointer; }
+        .ce-vis { display: flex; flex-direction: column; gap: 2px; max-height: 340px; overflow-y: auto; margin-top: 6px; }
+        .ce-vrow { display: grid; grid-template-columns: minmax(0, 1fr) 64px 52px 34px; gap: 6px; align-items: center; padding: 6px 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text); text-align: left; cursor: pointer; font-size: 13px; font-variant-numeric: tabular-nums; }
+        .ce-vrow:hover { background: var(--fill); }
+        .ce-vrow.on { background: var(--accent-soft); }
+        .ce-vrow span, .ce-vrow small { text-align: right; color: var(--text-2); }
+        .ce-alm { font-size: 12.5px; }
+        .ce-alm td, .ce-alm th { padding: 4px 8px; }
+        .card .ce-alm { margin-bottom: 8px; }
     </style>
 </head>
 <body>
     <div id="root"></div>
-    <script src="app.js?v=26" defer></script>
+    <script src="app.js?v=27" defer></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(e){console.log("SW failed",e)})})}</script>
 </body>
 </html>

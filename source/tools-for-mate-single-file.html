@@ -1557,6 +1557,26 @@
         @media (max-width: 640px) { .er-tk { grid-template-columns: minmax(0, 1fr) 80px 34px; } .er-tk > :nth-child(3), .er-tk > :nth-child(4) { grid-row: 2; } .er-tk-h { display: none; } }
         @media (max-width: 1480px) and (min-width: 761px) { .cats .cat svg { display: none; } .cat { padding: 0 11px; } }
         @media (max-width: 1240px) and (min-width: 761px) { .cats .cat svg { display: inline; } }
+    
+        /* Bridge: compass error */
+        .ce-time { display: flex; gap: 6px; align-items: flex-start; }
+        .ce-time .input-field { flex: 1; min-width: 0; }
+        .ce-time .btn-ghost { height: var(--ctl-h); flex: none; }
+        .ce-time .btn-ghost.on { background: var(--accent); color: #fff; }
+        .ce-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+        .ce-sky { width: 100%; max-width: 460px; display: block; margin: 0 auto 8px; }
+        .ce-sky .ce-card { fill: rgba(255,255,255,.75); font: 700 12px var(--font); }
+        .ce-sky .ce-lbl { fill: rgba(255,255,255,.85); font: 500 9.5px var(--font); pointer-events: none; }
+        .ce-sky .ce-lbl.pl { fill: #fde68a; font-weight: 700; }
+        .ce-sky .ce-pt { cursor: pointer; }
+        .ce-vis { display: flex; flex-direction: column; gap: 2px; max-height: 340px; overflow-y: auto; margin-top: 6px; }
+        .ce-vrow { display: grid; grid-template-columns: minmax(0, 1fr) 64px 52px 34px; gap: 6px; align-items: center; padding: 6px 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text); text-align: left; cursor: pointer; font-size: 13px; font-variant-numeric: tabular-nums; }
+        .ce-vrow:hover { background: var(--fill); }
+        .ce-vrow.on { background: var(--accent-soft); }
+        .ce-vrow span, .ce-vrow small { text-align: right; color: var(--text-2); }
+        .ce-alm { font-size: 12.5px; }
+        .ce-alm td, .ce-alm th { padding: 4px 8px; }
+        .card .ce-alm { margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -7752,14 +7772,392 @@ const Proof = (function () {
             );
         }
 
-        const APP_VERSION = '3.2.0';
+        // ===== Astronomy engine: Sun, Moon, planets and navigational stars (offline) =====
+        const AD = Math.PI / 180;
+        const anrm = (x) => ((x % 360) + 360) % 360;
+        const aJD = (ms) => ms / 86400000 + 2440587.5;
+        const aTT = (ms) => (aJD(ms) + 69.2 / 86400 - 2451545) / 36525; // Julian centuries TT
+        function aGMST(ms) { const jd = aJD(ms), T = (jd - 2451545) / 36525; return anrm(280.46061837 + 360.98564736629 * (jd - 2451545) + 0.000387933 * T * T - T * T * T / 38710000); }
+        const aEps = (T) => 23.4392911 - 0.0130042 * T;
+        function aEcl2Eq(lam, bet, eps) {
+            const l = lam * AD, b = bet * AD, e = eps * AD;
+            const ra = Math.atan2(Math.sin(l) * Math.cos(e) - Math.tan(b) * Math.sin(e), Math.cos(l));
+            const dec = Math.asin(Math.sin(b) * Math.cos(e) + Math.cos(b) * Math.sin(e) * Math.sin(l));
+            return { ra: anrm(ra / AD), dec: dec / AD };
+        }
+        function aPrecess(ra0, dec0, T) { // J2000 mean to mean of date (Meeus 21.2)
+            const s = 1 / 3600;
+            const zeta = (2306.2181 * T + 0.30188 * T * T + 0.017998 * T * T * T) * s * AD;
+            const z = (2306.2181 * T + 1.09468 * T * T + 0.018203 * T * T * T) * s * AD;
+            const th = (2004.3109 * T - 0.42665 * T * T - 0.041833 * T * T * T) * s * AD;
+            const a0 = ra0 * AD, d0 = dec0 * AD;
+            const A = Math.cos(d0) * Math.sin(a0 + zeta);
+            const B = Math.cos(th) * Math.cos(d0) * Math.cos(a0 + zeta) - Math.sin(th) * Math.sin(d0);
+            const C = Math.sin(th) * Math.cos(d0) * Math.cos(a0 + zeta) + Math.cos(th) * Math.sin(d0);
+            return { ra: anrm((Math.atan2(A, B) + z) / AD), dec: Math.atan2(C, Math.sqrt(A * A + B * B)) / AD };
+        }
+        function aSun(ms) {
+            const T = aTT(ms);
+            const L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T * T;
+            const M = 357.52911 + 35999.05029 * T - 0.0001537 * T * T, Mr = M * AD;
+            const C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(Mr) + (0.019993 - 0.000101 * T) * Math.sin(2 * Mr) + 0.000289 * Math.sin(3 * Mr);
+            const e = 0.016708634 - 0.000042037 * T;
+            const nu = (M + C) * AD;
+            const R = 1.000001018 * (1 - e * e) / (1 + e * Math.cos(nu));
+            const Om = (125.04 - 1934.136 * T) * AD;
+            const lam = L0 + C - 0.00569 - 0.00478 * Math.sin(Om);
+            const eps = aEps(T) + 0.00256 * Math.cos(Om);
+            const q = aEcl2Eq(lam, 0, eps);
+            return { ...q, sd: 0.26667 / R, R };
+        }
+        function aMoon(ms) {
+            const T = aTT(ms), S = (x) => Math.sin(x * AD), Co = (x) => Math.cos(x * AD);
+            const lam = 218.32 + 481267.881 * T + 6.29 * S(135.0 + 477198.87 * T) - 1.27 * S(259.3 - 413335.36 * T) + 0.66 * S(235.7 + 890534.22 * T) + 0.21 * S(269.9 + 954397.74 * T) - 0.19 * S(357.5 + 35999.05 * T) - 0.11 * S(186.5 + 966404.03 * T);
+            const bet = 5.13 * S(93.3 + 483202.02 * T) + 0.28 * S(228.2 + 960400.89 * T) - 0.28 * S(318.3 + 6003.15 * T) - 0.17 * S(217.6 - 407332.21 * T);
+            const hp = 0.9508 + 0.0518 * Co(135.0 + 477198.87 * T) + 0.0095 * Co(259.3 - 413335.36 * T) + 0.0078 * Co(235.7 + 890534.22 * T) + 0.0028 * Co(269.9 + 954397.74 * T);
+            const q = aEcl2Eq(anrm(lam), bet, aEps(T));
+            const sun = aSun(ms);
+            const elong = Math.acos(Math.sin(q.dec * AD) * Math.sin(sun.dec * AD) + Math.cos(q.dec * AD) * Math.cos(sun.dec * AD) * Math.cos((q.ra - sun.ra) * AD)) / AD;
+            const phase = (1 - Math.cos(elong * AD)) / 2;
+            const waxing = anrm(q.ra - sun.ra) < 180;
+            return { ...q, hp, sd: 0.2725 * hp, phase, waxing };
+        }
+        // JPL approximate Keplerian elements (J2000 ecliptic), valid 1800 to 2050: a, e, I, L, long. perihelion, long. node and rates per century
+        const A_PL = {
+            Venus: [[0.72333566, 0.00677672, 3.39467605, 181.97909950, 131.60246718, 76.67984255], [0.00000390, -0.00004107, -0.00078890, 58517.81538729, 0.00268329, -0.27769418], -4.4],
+            Earth: [[1.00000261, 0.01671123, -0.00001531, 100.46457166, 102.93768193, 0], [0.00000562, -0.00004392, -0.01294668, 35999.37244981, 0.32327364, 0]],
+            Mars: [[1.52371034, 0.09339410, 1.84969142, -4.55343205, -23.94362959, 49.55953891], [0.00001847, 0.00007882, -0.00813131, 19140.30268499, 0.44441088, -0.29257343], 0.5],
+            Jupiter: [[5.20288700, 0.04838624, 1.30439695, 34.39644051, 14.72847983, 100.47390909], [-0.00011607, -0.00013253, -0.00183714, 3034.74612775, 0.21252668, 0.20469106], -2.2],
+            Saturn: [[9.53667594, 0.05386179, 2.48599187, 49.95424423, 92.59887831, 113.66242448], [-0.00125060, -0.00050991, 0.00193609, 1222.49362201, -0.41897216, -0.28867794], 0.6]
+        };
+        function aHelio(name, T) {
+            const [el0, rt] = A_PL[name];
+            const [a, e, I, L, wb, Om] = el0.map((v, i) => v + rt[i] * T);
+            let M = anrm(L - wb); if (M > 180) M -= 360;
+            const w = (wb - Om) * AD, Ir = I * AD, Or = Om * AD, Mr = M * AD;
+            let E = Mr + e * Math.sin(Mr);
+            for (let k = 0; k < 8; k++) E -= (E - e * Math.sin(E) - Mr) / (1 - e * Math.cos(E));
+            const xp = a * (Math.cos(E) - e), yp = a * Math.sqrt(1 - e * e) * Math.sin(E);
+            const cw = Math.cos(w), sw = Math.sin(w), cO = Math.cos(Or), sO = Math.sin(Or), cI = Math.cos(Ir), sI = Math.sin(Ir);
+            return [(cw * cO - sw * sO * cI) * xp + (-sw * cO - cw * sO * cI) * yp, (cw * sO + sw * cO * cI) * xp + (-sw * sO + cw * cO * cI) * yp, (sw * sI) * xp + (cw * sI) * yp];
+        }
+        function aPlanet(name, ms) {
+            const T = aTT(ms);
+            const p = aHelio(name, T), g = aHelio('Earth', T);
+            let x = p[0] - g[0], y = p[1] - g[1], z = p[2] - g[2];
+            const dist = Math.sqrt(x * x + y * y + z * z);
+            // light time
+            const T2 = T - dist * 0.0057755 / 36525;
+            const p2 = aHelio(name, T2); x = p2[0] - g[0]; y = p2[1] - g[1]; z = p2[2] - g[2];
+            const e0 = 23.4392911 * AD;
+            const ye = y * Math.cos(e0) - z * Math.sin(e0), ze = y * Math.sin(e0) + z * Math.cos(e0);
+            const ra0 = anrm(Math.atan2(ye, x) / AD), dec0 = Math.atan2(ze, Math.sqrt(x * x + ye * ye)) / AD;
+            return { ...aPrecess(ra0, dec0, T), mag: A_PL[name][2], dist };
+        }
+        // Navigational stars: name, RA J2000 (h m s), Dec J2000 (d m s), magnitude, Nautical Almanac number
+        const A_STARS = [
+            ['Alpheratz', [0, 8, 23.3], [29, 5, 26], 2.1, 1], ['Ankaa', [0, 26, 17.1], [-42, 18, 22], 2.4, 2], ['Schedar', [0, 40, 30.4], [56, 32, 14], 2.2, 3], ['Diphda', [0, 43, 35.4], [-17, 59, 12], 2.0, 4],
+            ['Achernar', [1, 37, 42.8], [-57, 14, 12], 0.5, 5], ['Hamal', [2, 7, 10.4], [23, 27, 45], 2.0, 6], ['Acamar', [2, 58, 15.7], [-40, 18, 17], 3.2, 7], ['Menkar', [3, 2, 16.8], [4, 5, 23], 2.5, 8],
+            ['Mirfak', [3, 24, 19.4], [49, 51, 40], 1.8, 9], ['Aldebaran', [4, 35, 55.2], [16, 30, 33], 0.9, 10], ['Rigel', [5, 14, 32.3], [-8, 12, 6], 0.1, 11], ['Capella', [5, 16, 41.4], [45, 59, 53], 0.1, 12],
+            ['Bellatrix', [5, 25, 7.9], [6, 20, 59], 1.6, 13], ['Elnath', [5, 26, 17.5], [28, 36, 27], 1.7, 14], ['Alnilam', [5, 36, 12.8], [-1, 12, 7], 1.7, 15], ['Betelgeuse', [5, 55, 10.3], [7, 24, 25], 0.5, 16],
+            ['Canopus', [6, 23, 57.1], [-52, 41, 45], -0.7, 17], ['Sirius', [6, 45, 8.9], [-16, 42, 58], -1.5, 18], ['Adhara', [6, 58, 37.5], [-28, 58, 20], 1.5, 19], ['Procyon', [7, 39, 18.1], [5, 13, 30], 0.4, 20],
+            ['Pollux', [7, 45, 18.9], [28, 1, 34], 1.1, 21], ['Avior', [8, 22, 30.8], [-59, 30, 34], 1.9, 22], ['Suhail', [9, 7, 59.8], [-43, 25, 57], 2.2, 23], ['Miaplacidus', [9, 13, 12.0], [-69, 43, 2], 1.7, 24],
+            ['Alphard', [9, 27, 35.2], [-8, 39, 31], 2.0, 25], ['Regulus', [10, 8, 22.3], [11, 58, 2], 1.4, 26], ['Dubhe', [11, 3, 43.7], [61, 45, 3], 1.8, 27], ['Denebola', [11, 49, 3.6], [14, 34, 19], 2.1, 28],
+            ['Gienah', [12, 15, 48.4], [-17, 32, 31], 2.6, 29], ['Acrux', [12, 26, 35.9], [-63, 5, 57], 0.8, 30], ['Gacrux', [12, 31, 10.0], [-57, 6, 48], 1.6, 31], ['Alioth', [12, 54, 1.7], [55, 57, 35], 1.8, 32],
+            ['Spica', [13, 25, 11.6], [-11, 9, 41], 1.0, 33], ['Alkaid', [13, 47, 32.4], [49, 18, 48], 1.9, 34], ['Hadar', [14, 3, 49.4], [-60, 22, 23], 0.6, 35], ['Menkent', [14, 6, 40.9], [-36, 22, 12], 2.1, 36],
+            ['Arcturus', [14, 15, 39.7], [19, 10, 57], -0.1, 37], ['Rigil Kentaurus', [14, 39, 36.5], [-60, 50, 2], -0.3, 38], ['Zubenelgenubi', [14, 50, 52.7], [-16, 2, 30], 2.8, 39], ['Kochab', [14, 50, 42.3], [74, 9, 20], 2.1, 40],
+            ['Alphecca', [15, 34, 41.3], [26, 42, 53], 2.2, 41], ['Antares', [16, 29, 24.5], [-26, 25, 55], 1.0, 42], ['Atria', [16, 48, 39.9], [-69, 1, 40], 1.9, 43], ['Sabik', [17, 10, 22.7], [-15, 43, 29], 2.4, 44],
+            ['Shaula', [17, 33, 36.5], [-37, 6, 14], 1.6, 45], ['Rasalhague', [17, 34, 56.1], [12, 33, 36], 2.1, 46], ['Eltanin', [17, 56, 36.4], [51, 29, 20], 2.2, 47], ['Kaus Australis', [18, 24, 10.3], [-34, 23, 5], 1.8, 48],
+            ['Vega', [18, 36, 56.3], [38, 47, 1], 0.0, 49], ['Nunki', [18, 55, 15.9], [-26, 17, 48], 2.0, 50], ['Altair', [19, 50, 47.0], [8, 52, 6], 0.8, 51], ['Peacock', [20, 25, 38.9], [-56, 44, 6], 1.9, 52],
+            ['Deneb', [20, 41, 25.9], [45, 16, 49], 1.3, 53], ['Enif', [21, 44, 11.2], [9, 52, 30], 2.4, 54], ['Alnair', [22, 8, 14.0], [-46, 57, 40], 1.7, 55], ['Fomalhaut', [22, 57, 39.0], [-29, 37, 20], 1.2, 56],
+            ['Markab', [23, 4, 45.7], [15, 12, 19], 2.5, 57], ['Polaris', [2, 31, 49.1], [89, 15, 51], 2.0, 0]
+        ];
+        const aHMS = ([h, m, s]) => (h + m / 60 + s / 3600) * 15;
+        const aDMS = ([d, m, s]) => (d < 0 || Object.is(d, -0) ? -1 : 1) * (Math.abs(d) + m / 60 + s / 3600);
+        function aStar(i, ms) { const st = A_STARS[i]; return { ...aPrecess(aHMS(st[1]), aDMS(st[2]), aTT(ms)), mag: st[3] }; }
+        function aBody(key, ms) { // returns { ra, dec, gha, sha, mag, sd, hp }
+            let q;
+            if (key === 'sun') q = { ...aSun(ms), mag: -26.7 };
+            else if (key === 'moon') q = { ...aMoon(ms), mag: -11 };
+            else if (key.startsWith('pl:')) q = aPlanet(key.slice(3), ms);
+            else q = aStar(+key.slice(2), ms);
+            const ari = aGMST(ms);
+            return { ...q, gha: anrm(ari - q.ra), sha: anrm(360 - q.ra), ari };
+        }
+        function aAltAz(b, lat, lon) {
+            const lha = anrm(b.gha + lon) * AD, d = b.dec * AD, f = lat * AD;
+            const h = Math.asin(Math.sin(f) * Math.sin(d) + Math.cos(f) * Math.cos(d) * Math.cos(lha)) / AD;
+            const z = anrm(Math.atan2(-Math.cos(d) * Math.sin(lha), Math.sin(d) * Math.cos(f) - Math.cos(d) * Math.sin(f) * Math.cos(lha)) / AD);
+            return { h, z, lha: lha / AD };
+        }
+        const aRefr = (h) => (h > -1.5 ? 1.02 / Math.tan((h + 10.3 / (h + 5.11)) * AD) / 60 : 0); // degrees, apparent from true
+        function aEvent(key, dayStartMs, lat, lon, h0, rising) { // first crossing of altitude h0 in 24 h
+            const f = (t) => aAltAz(aBody(key, t), lat, lon).h - h0;
+            let t0 = dayStartMs, v0 = f(t0);
+            for (let k = 1; k <= 144; k++) {
+                const t1 = dayStartMs + k * 600000, v1 = f(t1);
+                if ((rising ? v0 < 0 && v1 >= 0 : v0 > 0 && v1 <= 0)) {
+                    let a = t0, b = t1, fa = v0;
+                    for (let j = 0; j < 30; j++) { const m = (a + b) / 2, fm = f(m); if ((fa < 0) === (fm < 0)) { a = m; fa = fm; } else b = m; }
+                    return (a + b) / 2;
+                }
+                t0 = t1; v0 = v1;
+            }
+            return NaN;
+        }
+        function aFmtDM(v, pos, neg) { // 12°34.5'N
+            if (!isFinite(v)) return '-';
+            const s = v < 0 ? neg : pos, a = Math.abs(v); let d = Math.floor(a), m = Math.round((a - d) * 600) / 10; if (m >= 60) { d += 1; m = 0; }
+            return d + '°' + m.toFixed(1).padStart(4, '0') + "'" + (s ? s : '');
+        }
+        const aFmtAng = (v) => aFmtDM(anrm(v), '', '');
+        function aParse(str, posL, negL) { // "35 12.4 N", "35°12.4'S", "-35.207", "139 45.1 E"
+            const t = String(str || '').trim().toUpperCase(); if (!t) return NaN;
+            const nums = t.match(/-?\d+(?:\.\d+)?/g); if (!nums) return NaN;
+            let v = Math.abs(parseFloat(nums[0])) + (nums[1] ? parseFloat(nums[1]) / 60 : 0) + (nums[2] ? parseFloat(nums[2]) / 3600 : 0);
+            if (t.includes(negL) || t.startsWith('-')) v = -v; else if (!t.includes(posL) && parseFloat(nums[0]) < 0) v = -v;
+            return v;
+        }
+        // ===== Compass error: azimuth and amplitude, sky diagram, almanac =====
+        const CE_KEY = 'tfm_br_cerr_v1';
+        const CE_DEF = () => ({ view: 'err', lat: '', lon: '', tz: cxDevTz(), t: '', live: true, body: 'sun', method: 'az', gyro: '', mag: '', vari: '', head: '', log: [], showNames: true });
+        const CE_PL = ['Venus', 'Mars', 'Jupiter', 'Saturn'];
+        const ceName = (k) => (k === 'sun' ? 'Sun' : k === 'moon' ? 'Moon' : k.startsWith('pl:') ? k.slice(3) : (A_STARS[+k.slice(2)] || ['?'])[0]);
+        function ceErr(v, gyro) { // signed true minus compass
+            if (!isFinite(v)) return '-';
+            const a = Math.abs(v).toFixed(1);
+            if (gyro) return a + '° ' + (v > 0.05 ? 'Low' : v < -0.05 ? 'High' : '') + (Math.abs(v) >= 0.05 ? ' (' + a + '° ' + (v > 0 ? 'E' : 'W') + ')' : '');
+            return a + '° ' + (v > 0.05 ? 'E' : v < -0.05 ? 'W' : '');
+        }
+        function CerrTab() {
+            const [s, setS, set] = useErStore(CE_KEY, CE_DEF);
+            const [msg, flash] = useErMsg();
+            const [now, setNow] = useState(Date.now());
+            useEffect(() => { if (!s.live) return; const id = setInterval(() => setNow(Date.now()), 15000); return () => clearInterval(id); }, [s.live]);
+            const off = cxTzMin(s.tz);
+            const ms = s.live || !s.t ? now : cxWallToUtc(s.t, off);
+            const lat = aParse(s.lat, 'N', 'S'), lon = aParse(s.lon, 'E', 'W');
+            const posOk = isFinite(lat) && Math.abs(lat) <= 89.9 && isFinite(lon) && Math.abs(lon) <= 180;
+            const bodies = useMemo(() => {
+                if (!isFinite(ms)) return [];
+                const keys = ['sun', 'moon', ...CE_PL.map((p) => 'pl:' + p), ...A_STARS.map((_, i) => 's:' + i)];
+                return keys.map((k) => { const b = aBody(k, ms); const aa = posOk ? aAltAz(b, lat, lon) : null; return { k, n: ceName(k), b, aa }; });
+            }, [ms, lat, lon, posOk]);
+            const sun = bodies.find((x) => x.k === 'sun');
+            const sel = bodies.find((x) => x.k === s.body) || sun;
+            const pickTime = (t) => setS((o) => ({ ...o, live: false, t: new Date(t + off * 60000).toISOString().slice(0, 16) }));
+            // amplitude: Sun or Moon centre on the celestial horizon (true altitude 0)
+            const dayStart = isFinite(ms) ? Math.floor((ms + off * 60000) / 86400000) * 86400000 - off * 60000 : NaN;
+            const amp = useMemo(() => {
+                if (!posOk || !isFinite(dayStart) || !(s.body === 'sun' || s.body === 'moon')) return null;
+                const r = aEvent(s.body, dayStart, lat, lon, 0, true), st = aEvent(s.body, dayStart, lat, lon, 0, false);
+                const one = (t, rising) => { if (!isFinite(t)) return null; const b = aBody(s.body, t); const zz = aAltAz(b, lat, lon).z; const A = Math.asin(Math.min(1, Math.max(-1, Math.sin(b.dec * AD) / Math.cos(lat * AD)))) / AD; return { t, z: zz, A, dec: b.dec, rising }; };
+                return { rise: one(r, true), set: one(st, false) };
+            }, [posOk, dayStart, s.body, lat, lon]);
+            const useAmp = s.method === 'amp' && amp;
+            const ampEv = useAmp ? ((amp.rise && amp.set) ? (Math.abs(ms - amp.rise.t) <= Math.abs(ms - amp.set.t) ? amp.rise : amp.set) : (amp.rise || amp.set)) : null;
+            const trueZ = useAmp ? (ampEv ? ampEv.z : NaN) : (sel && sel.aa ? sel.aa.z : NaN);
+            const gy = pn(s.gyro), mg = pn(s.mag), vr = aParse(s.vari, 'E', 'W');
+            const dz = (a, b) => { let d = a - b; while (d > 180) d -= 360; while (d < -180) d += 360; return d; };
+            const gErr = isFinite(trueZ) && isFinite(gy) ? dz(trueZ, gy) : NaN;
+            const cErr = isFinite(trueZ) && isFinite(mg) ? dz(trueZ, mg) : NaN;
+            const dev = isFinite(cErr) && isFinite(vr) ? cErr - vr : NaN;
+            const obsMs = useAmp && ampEv ? ampEv.t : ms;
+            const fmtT = (t) => cxFmt(t, off) + ' ' + s.tz.replace('GMT', 'UTC');
+            const fmtZ = (z) => isFinite(z) ? z.toFixed(1).padStart(5, '0') + '°' : '-';
+            const logLine = (sel ? sel.n : '') + ' ' + (useAmp ? 'amplitude' : 'azimuth') + ', ' + fmtT(obsMs) + ', ' + aFmtDM(lat, 'N', 'S') + ' ' + aFmtDM(lon, 'E', 'W') + '. True ' + fmtZ(trueZ) +
+                (isFinite(gy) ? ', gyro ' + fmtZ(gy) + ', gyro error ' + ceErr(gErr, true) : '') + (isFinite(mg) ? ', compass ' + fmtZ(mg) + ', compass error ' + ceErr(cErr) + (isFinite(dev) ? ', variation ' + ceErr(vr) + ', deviation ' + ceErr(dev) + (s.head ? ' on ship\'s head ' + s.head + '° C' : '') : '') : '') + '.';
+            const save = () => { setS((o) => ({ ...o, log: [{ id: Date.now(), ms: obsMs, tz: o.tz, body: sel ? sel.n : '', m: useAmp ? 'Amp' : 'Az', tz2: trueZ, gy, gErr, mg, cErr, vr, dev, head: o.head }, ...(o.log || [])].slice(0, 200) })); flash('Saved to the log'); };
+            // best bodies: altitude 5 to 30 degrees, bright, for an accurate bearing
+            const good = bodies.filter((x) => x.aa && x.aa.h > 3 && x.aa.h < 30 && (x.k !== 'sun' || true) && (x.b.mag <= 2.1 || x.k === 'sun' || x.k === 'moon')).sort((a, b) => a.b.mag - b.b.mag).slice(0, 8);
+            const night = sun && sun.aa ? sun.aa.h < -6 : false;
+            const twilight = useMemo(() => {
+                if (!posOk || !isFinite(dayStart)) return null;
+                const ev = (h0, r) => aEvent('sun', dayStart, lat, lon, h0, r);
+                return { astR: ev(-18, true), nauR: ev(-12, true), civR: ev(-6, true), rise: ev(-0.833, true), set: ev(-0.833, false), civS: ev(-6, false), nauS: ev(-12, false), astS: ev(-18, false), mer: (() => { let t = dayStart + ((360 - anrm(aBody('sun', dayStart).gha + lon)) % 360) / 360 * 86400000; for (let k = 0; k < 2; k++) t += dz(0, anrm(aBody('sun', t).gha + lon)) / 360 * 86400000; return t; })() };
+            }, [posOk, dayStart, lat, lon]);
+            const hm = (t) => (isFinite(t) ? cxFmt(t, off).slice(-5) : '-');
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Compass Error</h2>
+                    <ErTabs tabs={[['err', 'Compass error'], ['sky', 'Sky'], ['alm', 'Almanac'], ['log', 'Log (' + (s.log || []).length + ')']]} value={s.view} onChange={set('view')} />
+                    <div className="card cx-card">
+                        <div className="cx-row">
+                            <CxField label="Latitude" value={s.lat} onChange={set('lat')} type="text" placeholder="35 12.4 N" />
+                            <CxField label="Longitude" value={s.lon} onChange={set('lon')} type="text" placeholder="139 45.1 E" />
+                            <div>
+                                <label className="input-label">Time {s.live ? '(now)' : ''}</label>
+                                <div className="ce-time">
+                                    <input type="datetime-local" className="input-field" value={s.live ? new Date(now + off * 60000).toISOString().slice(0, 16) : s.t} onChange={(e) => setS((o) => ({ ...o, t: e.target.value, live: false }))} />
+                                    <button type="button" className={'btn-ghost' + (s.live ? ' on' : '')} onClick={() => setS((o) => ({ ...o, live: true }))}>Now</button>
+                                </div>
+                            </div>
+                            <CxTz label="Zone of the time" value={s.tz} onChange={set('tz')} />
+                        </div>
+                        {!posOk && <div className="cx-hint">Enter the DR or GPS position. Examples: 35 12.4 N, 139°45.1'E, or decimals with minus for S and W.</div>}
+                        {posOk && <div className="cx-hint">UTC {cxFmt(ms, 0)} · LMT offset {(lon / 15).toFixed(2)} h · {night ? 'Night' : sun && sun.aa && sun.aa.h > 0 ? 'Day' : 'Twilight'} (Sun altitude {sun && sun.aa ? sun.aa.h.toFixed(1) : '-'}°)</div>}
+                    </div>
+
+                    {s.view === 'err' && <div className="cx-two">
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">Observation</div>
+                                <div className="cx-row">
+                                    <ErSel label="Body" value={s.body} onChange={set('body')} opts={[['sun', 'Sun'], ['moon', 'Moon'], ...CE_PL.map((p) => ['pl:' + p, p]), ['s:57', 'Polaris'], ...A_STARS.map((st, i) => [('s:' + i), st[0] + (st[4] ? ' (' + st[4] + ')' : '')]).filter((o) => o[0] !== 's:57').sort((a, b) => a[1].localeCompare(b[1]))]} />
+                                    <ErSel label="Method" value={s.method} onChange={set('method')} opts={[['az', 'Azimuth at the time of the bearing'], ['amp', 'Amplitude at rising or setting']]} />
+                                </div>
+                                {s.method === 'amp' && !(s.body === 'sun' || s.body === 'moon') && <div className="cx-status bad" style={{ marginBottom: 8 }}>Amplitudes are taken on the Sun or Moon. Choose Azimuth for stars and planets.</div>}
+                                {useAmp && <div className="cx-hint" style={{ marginBottom: 8 }}>Take the bearing when the Sun's centre is on the celestial horizon: the lower limb about half a diameter above the visible horizon. Times below are for that moment on the chosen date.</div>}
+                                <div className="cx-row">
+                                    <CxField label="Gyro bearing (°)" value={s.gyro} onChange={set('gyro')} />
+                                    <CxField label="Magnetic compass bearing (°)" value={s.mag} onChange={set('mag')} />
+                                    <CxField label="Variation" value={s.vari} onChange={set('vari')} type="text" placeholder="3.5 W" />
+                                    <CxField label="Ship's head by compass (°)" value={s.head} onChange={set('head')} />
+                                </div>
+                                {good.length > 0 && !useAmp && <><div className="cx-sub">Good for a bearing now (low and bright)</div>
+                                    <div className="ce-chips">{good.map((x) => <button key={x.k} type="button" className={'md-chip' + (x.k === s.body ? ' on' : '')} onClick={() => set('body')(x.k)}>{x.n} {fmtZ(x.aa.z)} / {x.aa.h.toFixed(0)}°</button>)}</div></>}
+                            </div>
+                        </div>
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">{sel ? sel.n : ''} {useAmp ? 'amplitude' : 'azimuth'}</div>
+                                <div className="cx-grid" style={{ marginTop: 0 }}>
+                                    <CxOut l="True bearing (Zn)" v={fmtZ(trueZ)} hi />
+                                    {useAmp ? <>
+                                        <CxOut l="Amplitude" v={ampEv ? (ampEv.rising ? 'E ' : 'W ') + Math.abs(ampEv.A).toFixed(1) + '° ' + (ampEv.dec >= 0 ? 'N' : 'S') : '-'} sub={ampEv ? (ampEv.rising ? 'at rising' : 'at setting') + ', dec ' + aFmtDM(ampEv.dec, 'N', 'S') : 'no rising or setting this day'} />
+                                        <CxOut l="Rising (centre on horizon)" v={amp && amp.rise ? hm(amp.rise.t) : '-'} sub={amp && amp.rise ? 'Zn ' + fmtZ(amp.rise.z) : ''} />
+                                        <CxOut l="Setting (centre on horizon)" v={amp && amp.set ? hm(amp.set.t) : '-'} sub={amp && amp.set ? 'Zn ' + fmtZ(amp.set.z) : ''} />
+                                    </> : <>
+                                        <CxOut l="Altitude" v={sel && sel.aa ? sel.aa.h.toFixed(1) : '-'} u="°" sub={sel && sel.aa && sel.aa.h < 0 ? 'below the horizon' : sel && sel.aa && sel.aa.h > 45 ? 'high, bearing less accurate' : ''} />
+                                        <CxOut l="LHA" v={sel && sel.aa ? aFmtAng(sel.aa.lha) : '-'} />
+                                        <CxOut l="Declination" v={sel ? aFmtDM(sel.b.dec, 'N', 'S') : '-'} />
+                                    </>}
+                                    <CxOut l="Gyro error" v={ceErr(gErr, true)} hi={isFinite(gErr)} />
+                                    <CxOut l="Compass error" v={ceErr(cErr)} />
+                                    <CxOut l="Deviation" v={ceErr(dev)} hi={isFinite(dev)} sub={isFinite(dev) && s.head ? 'on ' + s.head + '° C' : ''} />
+                                </div>
+                                {!posOk && <div className="cx-hint" style={{ marginTop: 8 }}>Enter the position above.</div>}
+                                <div className="er-note">{logLine}</div>
+                                <div className="cx-btns"><button type="button" className="btn btn-primary" style={{ marginTop: 0 }} disabled={!isFinite(trueZ)} onClick={save}>Save to log</button><button type="button" className="btn-ghost" onClick={() => erCopy(logLine, flash)}>Copy</button>{msg && <span className="cx-hint" style={{ color: 'var(--ok)' }}>{msg}</span>}</div>
+                                <div className="cx-hint">Gyro: true more than gyro means gyro reads Low (error E). Magnetic: compass least, error East. Deviation = compass error − variation.</div>
+                            </div>
+                        </div>
+                    </div>}
+
+                    {s.view === 'sky' && <div className="cx-two ce-skywrap">
+                        <div className="card cx-card">
+                            <CeSky bodies={bodies} sel={s.body} onPick={(k) => setS((o) => ({ ...o, body: k, view: o.view }))} names={s.showNames} night={night} posOk={posOk} />
+                            <div className="cx-btns" style={{ justifyContent: 'center' }}>
+                                <button type="button" className="btn-ghost" onClick={() => pickTime(ms - 3600000)}>− 1 h</button>
+                                <button type="button" className="btn-ghost" onClick={() => setS((o) => ({ ...o, live: true }))}>Now</button>
+                                <button type="button" className="btn-ghost" onClick={() => pickTime(ms + 3600000)}>+ 1 h</button>
+                                <label className="cx-check" style={{ minHeight: 0 }}><input type="checkbox" checked={!!s.showNames} onChange={(e) => set('showNames')(e.target.checked)} /> Names</label>
+                            </div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">{sel ? sel.n : ''}</div>
+                            {sel && <div className="cx-grid" style={{ marginTop: 0 }}>
+                                <CxOut l="Zn" v={sel.aa ? fmtZ(sel.aa.z) : '-'} hi />
+                                <CxOut l="Altitude" v={sel.aa ? sel.aa.h.toFixed(1) + '°' : '-'} sub={sel.aa && sel.aa.h > -1 ? 'apparent ' + (sel.aa.h + aRefr(sel.aa.h)).toFixed(1) + '°' : ''} />
+                                <CxOut l="GHA" v={aFmtAng(sel.b.gha)} />
+                                <CxOut l="Dec" v={aFmtDM(sel.b.dec, 'N', 'S')} />
+                                {sel.k.startsWith('s:') && <CxOut l="SHA" v={aFmtAng(sel.b.sha)} />}
+                                <CxOut l="Magnitude" v={sel.b.mag.toFixed(1)} />
+                            </div>}
+                            <div className="cx-btns"><button type="button" className="btn btn-primary" style={{ marginTop: 0 }} onClick={() => setS((o) => ({ ...o, view: 'err', method: 'az' }))}>Use for compass error</button></div>
+                            <div className="cx-sub">Visible now, brightest first</div>
+                            <div className="ce-vis">{bodies.filter((x) => x.aa && x.aa.h > 0 && (x.k !== 'sun' || !night)).sort((a, b) => a.b.mag - b.b.mag).slice(0, 24).map((x) => <button key={x.k} type="button" className={'ce-vrow' + (x.k === s.body ? ' on' : '')} onClick={() => set('body')(x.k)}><b>{x.n}</b><span>{fmtZ(x.aa.z)}</span><span>{x.aa.h.toFixed(1)}°</span><small>{x.b.mag.toFixed(1)}</small></button>)}</div>
+                            <div className="cx-hint" style={{ marginTop: 8 }}>Tap a star or planet on the chart to select it. Zenith in the centre, north up, rings every 30° of altitude.</div>
+                        </div>
+                    </div>}
+
+                    {s.view === 'alm' && <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="card-title">For {cxFmt(ms, 0)} UTC</div>
+                            <table className="bw-steps er-pt ce-alm"><thead><tr><th>Body</th><th className="n">GHA</th><th className="n">Dec</th><th className="n">Other</th></tr></thead>
+                                <tbody>
+                                    <tr><td><b>Aries</b></td><td className="n">{aFmtAng(sun ? sun.b.ari : NaN)}</td><td /><td /></tr>
+                                    {bodies.filter((x) => !x.k.startsWith('s:')).map((x) => <tr key={x.k}><td><b>{x.n}</b></td><td className="n">{aFmtAng(x.b.gha)}</td><td className="n">{aFmtDM(x.b.dec, 'N', 'S')}</td><td className="n">{x.k === 'sun' ? 'SD ' + (x.b.sd * 60).toFixed(1) + "'" : x.k === 'moon' ? 'HP ' + (x.b.hp * 60).toFixed(1) + "' · " + Math.round(x.b.phase * 100) + '% lit' : 'mag ' + x.b.mag.toFixed(1)}</td></tr>)}
+                                </tbody></table>
+                            <div className="cx-sub">Sun and Aries every hour, {cxFmt(dayStart + off * 60000 - off * 60000, off, false)}</div>
+                            <table className="bw-steps er-pt ce-alm"><thead><tr><th>UTC</th><th className="n">Sun GHA</th><th className="n">Sun Dec</th><th className="n">Aries GHA</th></tr></thead>
+                                <tbody>{Array.from({ length: 24 }, (_, h) => { const t = Math.floor(ms / 86400000) * 86400000 + h * 3600000; const b = aBody('sun', t); return <tr key={h}><td>{String(h).padStart(2, '0')}</td><td className="n">{aFmtAng(b.gha)}</td><td className="n">{aFmtDM(b.dec, 'N', 'S')}</td><td className="n">{aFmtAng(b.ari)}</td></tr>; })}</tbody></table>
+                        </div>
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">Sun at this position ({s.tz.replace('GMT', 'UTC')})</div>
+                                {twilight ? <div className="cx-grid" style={{ marginTop: 0 }}>
+                                    <CxOut l="Nautical twilight" v={hm(twilight.nauR)} sub="morning" />
+                                    <CxOut l="Civil twilight" v={hm(twilight.civR)} sub="morning" />
+                                    <CxOut l="Sunrise" v={hm(twilight.rise)} hi />
+                                    <CxOut l="Meridian passage" v={hm(twilight.mer)} />
+                                    <CxOut l="Sunset" v={hm(twilight.set)} hi />
+                                    <CxOut l="Civil twilight" v={hm(twilight.civS)} sub="evening" />
+                                    <CxOut l="Nautical twilight" v={hm(twilight.nauS)} sub="evening" />
+                                    <CxOut l="Astronomical" v={hm(twilight.astS)} sub="evening" />
+                                </div> : <div className="cx-hint">Enter the position for sunrise, sunset and twilights.</div>}
+                            </div>
+                            <div className="card cx-card">
+                                <div className="card-title">Navigational stars</div>
+                                <table className="bw-steps er-pt ce-alm"><thead><tr><th>No.</th><th>Star</th><th className="n">SHA</th><th className="n">Dec</th><th className="n">Mag</th></tr></thead>
+                                    <tbody>{A_STARS.map((st, i) => { const b = bodies.find((x) => x.k === 's:' + i); return b ? <tr key={i}><td>{st[4] || '-'}</td><td><b>{st[0]}</b></td><td className="n">{aFmtAng(b.b.sha)}</td><td className="n">{aFmtDM(b.b.dec, 'N', 'S')}</td><td className="n">{st[3].toFixed(1)}</td></tr> : null; })}</tbody></table>
+                            </div>
+                            <div className="cx-hint">Computed on the device from standard formulas: Sun and stars to about 0.1′, planets to about 1′, Moon to about 0.3°. Good for compass checks and planning; use the Nautical Almanac for sight reduction.</div>
+                        </div>
+                    </div>}
+
+                    {s.view === 'log' && <div className="card cx-card">
+                        <div className="card-title">Compass error log</div>
+                        {!(s.log || []).length ? <div className="cx-hint">No observations saved yet.</div> :
+                            <div className="bw-scroll"><table className="bw-steps er-pt"><thead><tr><th>Time</th><th>Body</th><th className="n">True</th><th className="n">Gyro</th><th className="n">Gyro error</th><th className="n">Compass</th><th className="n">Comp. error</th><th className="n">Var.</th><th className="n">Deviation</th><th className="n">Head</th><th /></tr></thead>
+                                <tbody>{s.log.map((r) => { const o2 = cxTzMin(r.tz); return <tr key={r.id}><td className="nw">{cxFmt(r.ms, o2)}</td><td>{r.body} {r.m}</td><td className="n">{fmtZ(r.tz2)}</td><td className="n">{fmtZ(r.gy)}</td><td className="n">{ceErr(r.gErr, true)}</td><td className="n">{fmtZ(r.mg)}</td><td className="n">{ceErr(r.cErr)}</td><td className="n">{ceErr(r.vr)}</td><td className="n"><b>{ceErr(r.dev)}</b></td><td className="n">{r.head || '-'}</td><td><button type="button" className="icon-btn" aria-label="Delete" onClick={() => setS((o) => ({ ...o, log: o.log.filter((x) => x.id !== r.id) }))}>×</button></td></tr>; })}</tbody></table></div>}
+                        {(s.log || []).length > 0 && <div className="cx-btns"><button type="button" className="btn-ghost" onClick={() => erCopy(s.log.map((r) => [cxFmt(r.ms, cxTzMin(r.tz)), r.body + ' ' + r.m, fmtZ(r.tz2), fmtZ(r.gy), ceErr(r.gErr, true), fmtZ(r.mg), ceErr(r.cErr), ceErr(r.vr), ceErr(r.dev), r.head || ''].join('\t')).join('\n'), flash)}>Copy for Excel</button>{msg && <span className="cx-hint" style={{ color: 'var(--ok)' }}>{msg}</span>}</div>}
+                        <div className="cx-hint" style={{ marginTop: 8 }}>Deviation against ship's head builds up a check of the deviation card. Take compass errors every watch where possible and after any large alteration.</div>
+                    </div>}
+                </div>
+            );
+        }
+        function CeSky({ bodies, sel, onPick, names, night, posOk }) {
+            const R = 168, C = 200;
+            const xy = (h, z) => { const r = (90 - h) / 90 * R; return [C + r * Math.sin(z * AD), C - r * Math.cos(z * AD)]; };
+            if (!posOk) return <div className="cx-hint" style={{ padding: 30, textAlign: 'center' }}>Enter the position to draw the sky.</div>;
+            const vis = bodies.filter((x) => x.aa && x.aa.h > -2);
+            const col = (x) => x.k === 'sun' ? '#ffcc00' : x.k === 'moon' ? '#e5e7eb' : x.k.startsWith('pl:') ? ({ Venus: '#fde68a', Mars: '#f87171', Jupiter: '#fdba74', Saturn: '#fcd34d' })[x.k.slice(3)] : '#ffffff';
+            return (
+                <svg className={'ce-sky' + (night ? ' night' : '')} viewBox="0 0 400 400" role="img" aria-label="Sky chart">
+                    <defs><radialGradient id="ceSkyG" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor={night ? '#0b1730' : '#3b6fb6'} /><stop offset="100%" stopColor={night ? '#020617' : '#7fb0e8'} /></radialGradient></defs>
+                    <circle cx={C} cy={C} r={R} fill="url(#ceSkyG)" />
+                    {[30, 60].map((a) => <circle key={a} cx={C} cy={C} r={(90 - a) / 90 * R} fill="none" stroke="rgba(255,255,255,.18)" strokeDasharray="3 4" />)}
+                    {[0, 45, 90, 135].map((a) => { const [x1, y1] = xy(0, a), [x2, y2] = xy(0, a + 180); return <line key={a} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,.10)" />; })}
+                    <circle cx={C} cy={C} r={R} fill="none" stroke="rgba(255,255,255,.45)" strokeWidth="1.5" />
+                    {[['N', 0], ['E', 90], ['S', 180], ['W', 270]].map(([t, a]) => { const [x, y] = xy(-11, a); return <text key={t} x={x} y={y + 4} textAnchor="middle" className="ce-card">{t}</text>; })}
+                    {vis.sort((a, b) => b.b.mag - a.b.mag).map((x) => {
+                        const [px, py] = xy(Math.max(0, x.aa.h), x.aa.z);
+                        const isP = !x.k.startsWith('s:');
+                        const r = x.k === 'sun' ? 9 : x.k === 'moon' ? 8 : Math.max(1.2, 3.8 - x.b.mag * 0.9) + (isP ? 0.8 : 0);
+                        const on = x.k === sel;
+                        return (
+                            <g key={x.k} className="ce-pt" onClick={() => onPick(x.k)}>
+                                <circle cx={px} cy={py} r={Math.max(r + 6, 10)} fill="transparent" />
+                                {on && <circle cx={px} cy={py} r={r + 5} fill="none" stroke="#38bdf8" strokeWidth="2" />}
+                                <circle cx={px} cy={py} r={r} fill={col(x)} opacity={x.aa.h < 0 ? 0.35 : 1} />
+                                {(names && (isP || x.b.mag < 1.6)) || on ? <text x={px + r + 3} y={py + 3.5} className={'ce-lbl' + (isP ? ' pl' : '')}>{x.n}</text> : null}
+                            </g>
+                        );
+                    })}
+                </svg>
+            );
+        }
+
+        const APP_VERSION = '3.3.0';
         const WHATS_NEW = [
+            ['3.3.0', ['New Bridge group with Compass Error: azimuth and amplitude by Sun, Moon, planets and 57 stars plus Polaris, gyro error, compass error and deviation, night sky chart, almanac page with sunrise and twilights, and a log', 'Alt+1 to 6 switch between the six groups']],
             ['3.2.0', ['New Engine Room group: ORB Entry Maker, Fuel Changeover (ECA), Bunker Planner, ME Performance and Engineer\'s Calculator', 'Alt+1 to 5 switch between the five groups']],
             ['3.1.0', ['i button like Meridian PDF Mate: keyboard shortcuts, quick tour, about, app guide and update', 'NRE Days is its own tool under Personal', 'Media and Proofread moved to Personal']],
             ['3.0.0', ['New interface shared with Meridian PDF Mate: glass top bar, tool groups and a tool row in colour', 'Phone dock with group switcher', 'Bridge night mode with five brightness levels', 'Search all tools with Ctrl K']]
         ];
         const TOUR = [
-            { sel: '.cats, .catsw', t: 'Tool groups', d: 'Voyage, Cargo & Stability, Engine Room, Ship\'s Office and Personal. Each group remembers the last tool you used.' },
+            { sel: '.cats, .catsw', t: 'Tool groups', d: 'Voyage, Bridge, Cargo & Stability, Engine Room, Ship\'s Office and Personal. Each group remembers the last tool you used.' },
             { sel: '.ribbon .tools, .dk-tools', t: 'Tools', d: 'The tools in the chosen group, each in its own colour. Arrow keys move between them.' },
             { sel: '.tsearch, .tb-search-m', t: 'Search', d: 'Find any tool by name or by what it does, for example "dew point" or "salary". Ctrl K opens it.' },
             { sel: '[aria-label="Bridge night mode"]', t: 'Bridge night mode', d: 'Red on black so you keep your night vision. Tap the moon again for five brightness levels.' },
@@ -7789,10 +8187,12 @@ const Proof = (function () {
             { key: 'fco', label: 'Fuel Changeover', c: '#0d9488', cd: '#5eead4' },
             { key: 'bunk', label: 'Bunker Planner', c: '#b91c1c', cd: '#fca5a5' },
             { key: 'perf', label: 'ME Performance', c: '#4338ca', cd: '#a5b4fc' },
-            { key: 'ecalc', label: "Engineer's Calculator", c: '#6d28d9', cd: '#c4b5fd' }
+            { key: 'ecalc', label: "Engineer's Calculator", c: '#6d28d9', cd: '#c4b5fd' },
+            { key: 'cerr', label: 'Compass Error', c: '#1e3a8a', cd: '#93c5fd' }
         ];
         const TAB_GROUPS = [
             { name: 'Voyage', icon: 'g0', keys: ['rob', 'eta', 'speed', 'time', 'load'] },
+            { name: 'Bridge', icon: 'gB', keys: ['cerr'] },
             { name: 'Cargo & Stability', short: 'Cargo', icon: 'g1', keys: ['vent', 'dwt', 'hydro', 'bwe', 'calc'] },
             { name: 'Engine Room', short: 'Engine', icon: 'gE', keys: ['orb', 'fco', 'bunk', 'perf', 'ecalc'] },
             { name: "Ship's Office", short: 'Office', icon: 'g2', keys: ['ot', 'garbage', 'conv'] },
@@ -7812,6 +8212,7 @@ const Proof = (function () {
             garbage: 'GMP drums per deck, Annex V',
             calc: 'DWA, days, SF, trim, roll, anchor, mooring',
             nre: 'Days in India and NRI status per financial year',
+            cerr: 'Azimuth and amplitude, sky chart and almanac',
             orb: 'Oil Record Book Part I entries, sludge and bilge totals',
             fco: 'ECA changeover start time, timeline and log entry',
             bunk: 'Tank plan, received quantity against the BDN',
@@ -7827,6 +8228,7 @@ const Proof = (function () {
             conv: 'units convert', hydro: 'hydrostatics tpc mctc lcf km', dwt: 'deadweight cargo intake draft', proof: 'spelling grammar email',
             time: 'time zone clock', load: 'load line zone summer winter tropical', garbage: 'garbage marpol annex v',
             calc: 'salinity dwa fwa days contract stowage factor density trim draft rolling period gm turning heel anchor holding cable scope catenary windlass mooring hours lines form 5 all fast all clear',
+            cerr: 'compass error gyro error deviation variation azimuth amplitude sun moon star polaris planet venus jupiter almanac gha dec sha aries sunrise sunset twilight meridian passage night sky chart celestial',
             orb: 'oil record book orb part i marpol annex i sludge bilge incinerator evaporation 15 ppm ows reception facility bunkering code c d e f h i 11.1 12.1 12.2 12.3 12.4 circ 736',
             fco: 'fuel changeover eca seca sulphur 0.10 mgo ulsfo hfo vlsfo switch over annex vi regulation 14 timing flush',
             bunk: 'bunker bunkering bdn vcf astm 54b density temperature tank distribution 90% topping sample marpol seal letter of protest',
@@ -7863,6 +8265,8 @@ const Proof = (function () {
             mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3.5 6.5 8.5 6.5 8.5-6.5" /></>,
             lock: <><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></>,
             offline: <><path d="M2 8.5a15 15 0 0 1 20 0" /><path d="M5.5 12a10 10 0 0 1 13 0" /><path d="M9 15.5a5 5 0 0 1 6 0" /><path d="M12 19h.01" /><path d="M3 3l18 18" /></>,
+            gB: <><path d="M4 18h16l-2 3H6z" /><path d="M12 3v12" /><path d="M12 5l6 8h-6" /><path d="M12 7l-5 6h5" /></>,
+            cerr: <><circle cx="12" cy="12" r="9" /><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21" /><path d="m12 7.5 1.6 4.5-1.6 4.5-1.6-4.5z" /></>,
             gE: <><circle cx="12" cy="12" r="3" /><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" /></>,
             orb: <><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z" /><path d="M5 17a3 3 0 0 1 3-3h11" /><path d="M9 8h6" /></>,
             fco: <><path d="M7 4v13" /><path d="m4 14 3 3 3-3" /><path d="M17 20V7" /><path d="m14 10 3-3 3 3" /></>,
@@ -7975,7 +8379,7 @@ const Proof = (function () {
                 const onKey = (e) => {
                     const mod = e.metaKey || e.ctrlKey;
                     if (mod && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); setSearchOpen(true); setTimeout(() => searchRef.current && searchRef.current.focus(), 0); return; }
-                    if (e.altKey && !mod && /^Digit[1-5]$/.test(e.code)) { e.preventDefault(); const gi = +e.code.slice(5) - 1; if (TAB_GROUPS[gi]) openTab(keyIdx(lastInGroup(gi))); return; }
+                    if (e.altKey && !mod && /^Digit[1-6]$/.test(e.code)) { e.preventDefault(); const gi = +e.code.slice(5) - 1; if (TAB_GROUPS[gi]) openTab(keyIdx(lastInGroup(gi))); return; }
                     if (e.key === 'Escape') { setMenu(null); setSheet(null); }
                 };
                 const onBip = (e) => { e.preventDefault(); setInstallEvt(e); };
@@ -8379,7 +8783,7 @@ const Proof = (function () {
                         </div>}
                         {sheet === 'about' && <div className="tm-sheet" role="dialog" aria-label="About">
                             <div className="tm-sheet-h"><div className="about-hero"><img src="icons/icon-192.png" alt="" width="52" height="52" /><div><h3>Meridian Tools for Mate</h3><small>Version {APP_VERSION} · Tango Juliet Dev</small></div></div><button type="button" className="tbtn solo" onClick={() => setSheet(null)} aria-label="Close"><Icon name="close" /></button></div>
-                            <p className="about-lead">Calculators and planners for the watchkeeper and the chief mate, plus personal tools. {TABS.length} tools in five groups.</p>
+                            <p className="about-lead">Calculators and planners for the watchkeeper and the chief mate, plus personal tools. {TABS.length} tools in six groups.</p>
                             <div className="about-facts"><span><Icon name="offline" />Works offline</span><span><Icon name="install" />No installation needed</span><span><Icon name="lock" />Data stays on this device</span></div>
                             <div className="about-mail"><div><b>Suggestions or problems</b><span>tangojulietdev@gmail.com</span></div><a className="btn btn-ghost" href={'mailto:tangojulietdev@gmail.com?subject=Meridian%20Tools%20for%20Mate%20' + APP_VERSION}><Icon name="mail" />Email</a></div>
                             <p className="about-small">Media uses Mediabunny (MPL-2.0), pdf.js (Apache-2.0), pdf-lib (MIT), heic-to (LGPL-3.0) and gifenc (MIT). Built with React (MIT).</p>
@@ -8390,7 +8794,7 @@ const Proof = (function () {
                             <div className="kgrid">
                                 <span><kbd>{isMac ? '⌘' : 'Ctrl'}</kbd><kbd>K</kbd></span><span>Search tools</span>
                                 <span><kbd>Enter</kbd></span><span>Open the first search result</span>
-                                <span><kbd>Alt</kbd><kbd>1</kbd> to <kbd>5</kbd></span><span>Voyage, Cargo & Stability, Engine Room, Ship's Office, Personal</span>
+                                <span><kbd>Alt</kbd><kbd>1</kbd> to <kbd>6</kbd></span><span>Voyage, Bridge, Cargo & Stability, Engine Room, Ship's Office, Personal</span>
                                 <span><kbd>←</kbd><kbd>→</kbd></span><span>Previous or next tool, when the tool row has focus</span>
                                 <span><kbd>{isMac ? '⌘' : 'Ctrl'}</kbd><kbd>P</kbd></span><span>Print or save as PDF</span>
                                 <span><kbd>Esc</kbd></span><span>Close menus, sheets and search</span>
@@ -8905,6 +9309,7 @@ const Proof = (function () {
                             {activeTab === 19 && <BunkerTab />}
                             {activeTab === 20 && <PerfTab />}
                             {activeTab === 21 && <EcalcTab />}
+                            {activeTab === 22 && <CerrTab />}
                         </div>
                     </div>
                     </main>
