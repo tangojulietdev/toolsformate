@@ -1619,6 +1619,39 @@
         .an-trk { fill: none; stroke: var(--accent); stroke-width: 1.5; opacity: .8; }
         .an-alarm { animation: anflash 1s steps(2) infinite; font-weight: 700; }
         @keyframes anflash { 50% { opacity: .35; } }
+    
+        /* Storm diagram and practice */
+        .trs-svg { width: 100%; max-width: 440px; display: block; margin: 8px auto; }
+        .trs-svg.compact { max-width: 320px; }
+        .trs-dang { fill: color-mix(in srgb, var(--bad) 22%, transparent); }
+        .trs-dq { fill: color-mix(in srgb, var(--bad) 22%, transparent); }
+        .trs-nav { fill: color-mix(in srgb, var(--ok) 20%, transparent); }
+        .trs-edge { fill: none; stroke: var(--text-2); stroke-width: 1.5; }
+        .trs-ring { fill: none; stroke: var(--sep-strong); stroke-dasharray: 3 4; }
+        .trs-q { stroke: var(--muted); stroke-dasharray: 6 4; }
+        .trs-trk { stroke: var(--text); stroke-width: 2.5; }
+        .trs-trkhead { fill: var(--text); }
+        .trs-path { fill: color-mix(in srgb, var(--accent) 16%, transparent); }
+        .trs-w { stroke: var(--text-2); stroke-width: 1.8; fill: none; stroke-linecap: round; }
+        .trs-eye { fill: var(--text); }
+        .trs-h { fill: var(--text); font: 700 13px var(--font); }
+        .trs-l { fill: var(--text-2); font: 500 11px var(--font); }
+        .trs-l.b { font-weight: 700; fill: var(--text); }
+        .trs-s { fill: var(--muted); font: 500 10.5px var(--font); }
+        .trs-ship { fill: var(--accent); stroke: #fff; stroke-width: 1.5; }
+        .trs-sw { stroke: #f59e0b; stroke-width: 2.5; }
+        .trs-rec { stroke: var(--ok); stroke-width: 3; }
+        .trs-obs { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-bottom: 8px; }
+        .trs-obs > div { background: var(--well); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; }
+        .trs-obs small { font-size: 11px; color: var(--muted); font-weight: 600; }
+        .trs-obs b { font-size: 15px; }
+        .trs-opts { display: flex; flex-direction: column; gap: 6px; }
+        .trs-opt { text-align: left; border: 0; border-radius: 10px; padding: 10px 12px; background: var(--fill-2); color: var(--text); font: 500 13.5px var(--font); line-height: 1.4; cursor: pointer; }
+        .trs-opt:hover:not(:disabled) { background: var(--fill-3); }
+        .trs-opt:disabled { cursor: default; opacity: .75; }
+        .trs-opt.ok { background: var(--ok-soft); color: var(--ok); opacity: 1; box-shadow: inset 0 0 0 1.5px var(--ok); }
+        .trs-opt.bad { background: var(--bad-soft); color: var(--bad); opacity: 1; box-shadow: inset 0 0 0 1.5px var(--bad); }
+        .trs-tab td { vertical-align: top; font-size: 12.5px; line-height: 1.45; }
     </style>
 </head>
 <body>
@@ -8830,7 +8863,7 @@ const Proof = (function () {
         // ---------- 8. Tropical storm avoidance ----------
         const ST_KEY = 'tfm_br_storm_v1';
         const ST_DEF = () => ({ slat: '', slon: '', sc: '', ss: '', r34: '', olat: '', olon: '', oc: '', os: '', hrs: '72', wind: '' });
-        function StormTab() {
+        function StormPlan() {
             const [s, , set] = useErStore(ST_KEY, ST_DEF);
             const sla = bLat(s.slat), slo = bLon(s.slon), ola = bLat(s.olat), olo = bLon(s.olon);
             const sc = pn(s.sc), ss = pn(s.ss), oc = pn(s.oc), os = pn(s.os), r34 = pn(s.r34) || 0, H = Math.min(120, Math.max(6, pn(s.hrs) || 72));
@@ -8852,8 +8885,7 @@ const Proof = (function () {
             const wind = pn(s.wind);
             const centre = isFinite(wind) ? anrm(wind + (NH ? 112 : -112)) : NaN;
             return (
-                <div className="tab-pane">
-                    <h2 className="section-title">Tropical Storm Avoidance</h2>
+                <div>
                     <div className="cx-two">
                         <div>
                             <div className="card cx-card">
@@ -9002,8 +9034,201 @@ const Proof = (function () {
             );
         }
 
-        const APP_VERSION = '3.4.0';
+        // ---------- Storm diagram and practice ----------
+        const TRS_IN = 22; // inflow angle of the wind towards the centre
+        const trsWindFrom = (brgFromCentre, nh) => anrm(brgFromCentre + (nh ? 90 - TRS_IN : -(90 - TRS_IN)));
+        const TRS_ZONES = {
+            dangAdv: { where: 'dang', q: 'advance', label: 'Dangerous semicircle, advance (dangerous) quadrant' },
+            dangRear: { where: 'dang', q: 'rear', label: 'Dangerous semicircle, rear quadrant' },
+            navAdv: { where: 'nav', q: 'advance', label: 'Navigable semicircle, advance quadrant' },
+            navRear: { where: 'nav', q: 'rear', label: 'Navigable semicircle, rear quadrant' },
+            ahead: { where: 'ahead', q: 'advance', label: 'In the path, ahead of the centre' },
+            behind: { where: 'behind', q: 'rear', label: 'In the path, behind the centre' }
+        };
+        const TRS_WHERE = [['dang', 'Dangerous semicircle'], ['nav', 'Navigable semicircle'], ['ahead', 'In the path, ahead of the centre'], ['behind', 'In the path, behind the centre']];
+        const TRS_ACT = {
+            dangN: 'Wind 1 to 4 points (10° to 45°) on the starboard bow, best speed, alter to starboard as the wind veers. If you cannot make way, heave to with the wind on the starboard bow.',
+            navN: 'Wind on the starboard quarter, best speed, alter to port as the wind backs.',
+            aheadN: 'Wind about 2 points (20°) on the starboard quarter, best speed, run into the navigable semicircle and then act as there.',
+            dangS: 'Wind 1 to 4 points (10° to 45°) on the port bow, best speed, alter to port as the wind backs. If you cannot make way, heave to with the wind on the port bow.',
+            navS: 'Wind on the port quarter, best speed, alter to starboard as the wind veers.',
+            aheadS: 'Wind about 2 points (20°) on the port quarter, best speed, run into the navigable semicircle and then act as there.',
+            behind: 'Keep well clear behind the storm: steer away from the centre and do not overtake it, watching for a change in its track.'
+        };
+        const trsAnswer = (where, nh) => (where === 'behind' ? 'behind' : where + (nh ? 'N' : 'S'));
+        const trsRelWind = { dang: 30, nav: 135, ahead: 160 }; // wind relative bearing, starboard (north) or port (south)
+        function trsHeading(where, nh, windFrom) {
+            if (where === 'behind') return NaN;
+            const rel = trsRelWind[where];
+            return anrm(nh ? windFrom - rel : windFrom + rel);
+        }
+        function TrsDiagram({ nh, ship, showWind = true, labels = true, compact, neutral }) {
+            const W = 460, Hh = 430, cx = 230, cy = 240, R = 150;
+            const dangRight = nh;
+            const pt = (brg, r) => [cx + r * Math.sin(brg * AD), cy - r * Math.cos(brg * AD)];
+            const arrows = showWind ? [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5].map((b) => {
+                const [x, y] = pt(b, 118); const to = anrm(trsWindFrom(b, nh) + 180);
+                const dx = Math.sin(to * AD) * 16, dy = -Math.cos(to * AD) * 16;
+                return <g key={b}><line x1={x - dx} y1={y - dy} x2={x + dx} y2={y + dy} className="trs-w" /><path d={`M${x + dx} ${y + dy} l${-dx * 0.45 + dy * 0.3} ${-dy * 0.45 - dx * 0.3} M${x + dx} ${y + dy} l${-dx * 0.45 - dy * 0.3} ${-dy * 0.45 + dx * 0.3}`} className="trs-w" /></g>;
+            }) : null;
+            return (
+                <svg className={'trs-svg' + (compact ? ' compact' : '')} viewBox={`0 0 ${W} ${Hh}`} role="img" aria-label={(nh ? 'Northern' : 'Southern') + ' hemisphere tropical storm'}>
+                    <defs>
+                        <clipPath id={'trsC' + (nh ? 'n' : 's')}><circle cx={cx} cy={cy} r={R} /></clipPath>
+                        <marker id="trsArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" className="trs-trkhead" /></marker>
+                    </defs>
+                    {!neutral && <g clipPath={`url(#trsC${nh ? 'n' : 's'})`}>
+                        <rect x={dangRight ? cx : cx - R} y={cy - R} width={R} height={2 * R} className="trs-dang" />
+                        <rect x={dangRight ? cx - R : cx} y={cy - R} width={R} height={2 * R} className="trs-nav" />
+                        <rect x={dangRight ? cx : cx - R} y={cy - R} width={R} height={R} className="trs-dq" />
+                    </g>}
+                    <circle cx={cx} cy={cy} r={R} className="trs-edge" />
+                    <circle cx={cx} cy={cy} r={R * 0.55} className="trs-ring" />
+                    <line x1={cx - R - 10} y1={cy} x2={cx + R + 10} y2={cy} className="trs-q" />
+                    <line x1={cx} y1={cy + R + 22} x2={cx} y2={cy - R - 34} className="trs-trk" markerEnd="url(#trsArr)" />
+                    {!neutral && <rect x={cx - 14} y={cy - R - 30} width={28} height={R * 2 + 44} className="trs-path" />}
+                    {arrows}
+                    <circle cx={cx} cy={cy} r={9} className="trs-eye" />
+                    {labels && <>
+                        <text x={cx} y={20} textAnchor="middle" className="trs-h">{nh ? 'Northern hemisphere: winds anticlockwise' : 'Southern hemisphere: winds clockwise'}</text>
+                        <text x={cx + 12} y={cy - R - 18} className="trs-l">Track and path</text>
+                        <text x={dangRight ? cx + R * 0.47 : cx - R * 0.47} y={cy + R * 0.44} textAnchor="middle" className="trs-l b">Dangerous</text>
+                        <text x={dangRight ? cx + R * 0.47 : cx - R * 0.47} y={cy + R * 0.44 + 13} textAnchor="middle" className="trs-l">semicircle</text>
+                        <text x={dangRight ? cx - R * 0.47 : cx + R * 0.47} y={cy + R * 0.44} textAnchor="middle" className="trs-l b">Navigable</text>
+                        <text x={dangRight ? cx - R * 0.47 : cx + R * 0.47} y={cy + R * 0.44 + 13} textAnchor="middle" className="trs-l">semicircle</text>
+                        <text x={dangRight ? cx + R * 0.47 : cx - R * 0.47} y={cy - R * 0.44} textAnchor="middle" className="trs-l b">Dangerous</text>
+                        <text x={dangRight ? cx + R * 0.47 : cx - R * 0.47} y={cy - R * 0.44 + 13} textAnchor="middle" className="trs-l">quadrant</text>
+                        <text x={cx + R + 12} y={cy - 4} className="trs-s">Advance</text>
+                        <text x={cx + R + 12} y={cy + 12} className="trs-s">Rear</text>
+                        <text x={cx + 14} y={cy + 4} className="trs-s">Eye</text>
+                        <text x={cx + 20} y={Hh - 10} textAnchor="start" className="trs-s">Wind veers here</text>
+                        <text x={cx - 20} y={Hh - 10} textAnchor="end" className="trs-s">Wind backs here</text>
+                    </>}
+                    {ship && (() => {
+                        const [sx, sy] = pt(ship.brg, Math.min(R + 20, ship.r * R));
+                        const h = ship.head;
+                        const tri = (a, l) => [sx + Math.sin((h + a) * AD) * l, sy - Math.cos((h + a) * AD) * l];
+                        const p1 = tri(0, 13), p2 = tri(140, 9), p3 = tri(-140, 9);
+                        const wf = ship.wind;
+                        const wx = Math.sin(wf * AD) * 26, wy = -Math.cos(wf * AD) * 26;
+                        return <g>
+                            {isFinite(ship.rec) && <line x1={sx} y1={sy} x2={sx + Math.sin(ship.rec * AD) * 46} y2={sy - Math.cos(ship.rec * AD) * 46} className="trs-rec" markerEnd="url(#trsArr)" />}
+                            {isFinite(wf) && <line x1={sx + wx} y1={sy + wy} x2={sx + wx * 0.35} y2={sy + wy * 0.35} className="trs-sw" markerEnd="url(#trsArr)" />}
+                            <path d={`M${p1[0]} ${p1[1]}L${p2[0]} ${p2[1]}L${p3[0]} ${p3[1]}z`} className="trs-ship" />
+                            {ship.label && <text x={sx + 14} y={sy - 10} className="trs-l b">{ship.label}</text>}
+                        </g>;
+                    })()}
+                </svg>
+            );
+        }
+        const ST_UI_KEY = 'tfm_br_storm_ui_v1';
+        const ST_UI_DEF = () => ({ view: 'plan', nh: true, mode: 'diagram', right: 0, total: 0 });
+        function trsScenario(forceNh) {
+            const nh = forceNh === undefined ? Math.random() < 0.6 : forceNh;
+            const zk = Object.keys(TRS_ZONES)[Math.floor(Math.random() * 6)];
+            const z = TRS_ZONES[zk];
+            const dangSide = nh ? 1 : -1; // +1 right of track
+            let rel; // bearing of ship from centre, track up
+            if (z.where === 'ahead') rel = (Math.random() - 0.5) * 12;
+            else if (z.where === 'behind') rel = 180 + (Math.random() - 0.5) * 12;
+            else { const side = z.where === 'dang' ? dangSide : -dangSide; const a = z.q === 'advance' ? 20 + Math.random() * 60 : 100 + Math.random() * 60; rel = side * a; }
+            const track = nh ? 280 + Math.random() * 50 : 200 + Math.random() * 40;
+            const brgTrue = anrm(track + rel);
+            const wind = Math.round(trsWindFrom(brgTrue, nh) / 5) * 5;
+            const head = Math.round(Math.random() * 72) * 5;
+            const right = anrm(rel) < 180;
+            const shift = z.where === 'ahead' || z.where === 'behind' ? 'steady in direction' : right ? 'veering' : 'backing';
+            const baro = z.q === 'advance' ? 'falling' : 'rising';
+            return { nh, zk, rel: anrm(rel), r: 0.55 + Math.random() * 0.35, track: Math.round(track), wind, head, shift, baro, opts: null, a1: null, a2: null };
+        }
+        function trsOptions(sc) {
+            const ans = trsAnswer(TRS_ZONES[sc.zk].where, sc.nh);
+            const pool = Object.keys(TRS_ACT).filter((k) => k !== ans);
+            const pick = []; while (pick.length < 3) { const k = pool[Math.floor(Math.random() * pool.length)]; if (!pick.includes(k)) pick.push(k); }
+            return [...pick, ans].sort(() => Math.random() - 0.5);
+        }
+        function StormTab() {
+            const [u, setU, setUk] = useErStore(ST_UI_KEY, ST_UI_DEF);
+            const [sc, setSc] = useState(null);
+            const next = () => { const x = trsScenario(); setSc({ ...x, opts: trsOptions(x) }); };
+            useEffect(() => { if (u.view === 'quiz' && !sc) next(); }, [u.view]);
+            let plan = null; try { plan = JSON.parse(localStorage.getItem(ST_KEY) || 'null'); } catch (e) {}
+            const mine = (() => {
+                if (!plan) return null;
+                const sla = bLat(plan.slat), slo = bLon(plan.slon), ola = bLat(plan.olat), olo = bLon(plan.olon), scs = pn(plan.sc), oc = pn(plan.oc), r34 = pn(plan.r34) || 0;
+                if (![sla, slo, ola, olo, scs].every(isFinite)) return null;
+                const [x, y] = bToXY(ola, olo, sla, slo); const d = Math.hypot(x, y); const b = anrm(Math.atan2(x, y) / AD);
+                const scale = Math.max(r34 * 1.2, d * 1.15, 100);
+                return { nh: sla >= 0, ship: { brg: anrm(b - scs), r: d / scale, head: isFinite(oc) ? anrm(oc - scs) : 0, wind: NaN, label: 'You' }, d, scale };
+            })();
+            const answered = sc && sc.a1 && sc.a2;
+            const z = sc ? TRS_ZONES[sc.zk] : null;
+            const ansAct = sc ? trsAnswer(z.where, sc.nh) : null;
+            const recH = sc ? trsHeading(z.where, sc.nh, sc.wind) : NaN;
+            const choose = (k, v) => setSc((o) => { const n = { ...o, [k]: v }; if (n.a1 && n.a2 && !(o.a1 && o.a2)) { const ok = n.a1 === TRS_ZONES[o.zk].where && n.a2 === trsAnswer(TRS_ZONES[o.zk].where, o.nh); setU((q) => ({ ...q, total: q.total + 1, right: q.right + (ok ? 1 : 0) })); } return n; });
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Tropical Storm Avoidance</h2>
+                    <ErTabs tabs={[['plan', 'Plan'], ['diag', 'Diagram'], ['quiz', 'Practice' + (u.total ? ' (' + u.right + '/' + u.total + ')' : '')]]} value={u.view} onChange={setUk('view')} />
+                    {u.view === 'plan' && <StormPlan />}
+                    {u.view === 'diag' && <div className="cx-two">
+                        <div className="card cx-card">
+                            <ErTabs tabs={[['n', 'Northern hemisphere'], ['s', 'Southern hemisphere']]} value={u.nh ? 'n' : 's'} onChange={(v) => setUk('nh')(v === 'n')} />
+                            <TrsDiagram nh={u.nh} />
+                            <div className="cx-hint">Storm moving up the page. Red: dangerous semicircle, darker red: dangerous quadrant. Green: navigable semicircle. Blue band: the path. Arrows: wind, blowing in towards the centre.</div>
+                        </div>
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">{u.nh ? 'Northern' : 'Southern'} hemisphere rules</div>
+                                <table className="bw-steps er-pt trs-tab"><thead><tr><th>Where you are</th><th>How you know</th><th>Action</th></tr></thead>
+                                    <tbody>
+                                        <tr><td><b>Dangerous semicircle</b><br /><small>{u.nh ? 'right of the track' : 'left of the track'}</small></td><td>Wind {u.nh ? 'veers' : 'backs'}. Barometer falls in the advance quadrant.</td><td>{TRS_ACT[u.nh ? 'dangN' : 'dangS']}</td></tr>
+                                        <tr><td><b>Navigable semicircle</b><br /><small>{u.nh ? 'left of the track' : 'right of the track'}</small></td><td>Wind {u.nh ? 'backs' : 'veers'}.</td><td>{TRS_ACT[u.nh ? 'navN' : 'navS']}</td></tr>
+                                        <tr><td><b>In the path, ahead</b></td><td>Wind steady in direction, increasing, barometer falling.</td><td>{TRS_ACT[u.nh ? 'aheadN' : 'aheadS']}</td></tr>
+                                        <tr><td><b>In the path, behind</b></td><td>Wind steady in direction, barometer rising.</td><td>{TRS_ACT.behind}</td></tr>
+                                    </tbody></table>
+                                <div className="cx-hint" style={{ marginTop: 8 }}>Buys Ballot: face the true wind; the centre is about 8 to 12 points ({u.nh ? 'right' : 'left'}) of you, about wind direction {u.nh ? '+' : '−'} 112°. Veering wind means the right-hand semicircle in both hemispheres. Storms in the {u.nh ? 'north usually move W to NW, then recurve N and NE' : 'south usually move W to SW, then recurve S and SE'}.</div>
+                            </div>
+                            {mine && <div className="card cx-card">
+                                <div className="card-title">Your situation from the Plan tab</div>
+                                <TrsDiagram nh={mine.nh} ship={mine.ship} showWind labels={false} compact />
+                                <div className="cx-hint">Track up, your ship and heading relative to the storm. Outer circle {mine.scale.toFixed(0)} NM.</div>
+                            </div>}
+                        </div>
+                    </div>}
+                    {u.view === 'quiz' && sc && <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="card-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>Scenario<ErTabs tabs={[['diagram', 'With diagram'], ['obs', 'Observations only']]} value={u.mode} onChange={setUk('mode')} /></div>
+                            <div className="trs-obs">
+                                <div><small>Hemisphere</small><b>{sc.nh ? 'Northern' : 'Southern'}</b></div>
+                                <div><small>True wind from</small><b>{String(sc.wind).padStart(3, '0')}°</b></div>
+                                <div><small>Wind direction</small><b>{sc.shift}</b></div>
+                                <div><small>Barometer</small><b>{sc.baro}</b></div>
+                                <div><small>Your heading</small><b>{String(sc.head).padStart(3, '0')}°</b></div>
+                                {u.mode === 'diagram' && <div><small>Storm moving</small><b>{String(sc.track).padStart(3, '0')}°</b></div>}
+                            </div>
+                            {(u.mode === 'diagram' || answered) && <TrsDiagram nh={sc.nh} labels={!!answered} neutral={!answered} ship={{ brg: sc.rel, r: sc.r, head: anrm(sc.head - sc.track), wind: anrm(sc.wind - sc.track), rec: answered && isFinite(recH) ? anrm(recH - sc.track) : NaN, label: '' }} />}
+                            {u.mode === 'diagram' && <div className="cx-hint">Track up: the storm moves up the page. Orange arrow at the ship: the wind. Semicircles are shown after you answer.</div>}
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">1. Where is the ship?</div>
+                            <div className="trs-opts">{TRS_WHERE.map(([k, l]) => <button key={k} type="button" disabled={!!sc.a1} className={'trs-opt' + (sc.a1 ? (k === z.where ? ' ok' : k === sc.a1 ? ' bad' : '') : '')} onClick={() => choose('a1', k)}>{l}</button>)}</div>
+                            <div className="card-title" style={{ marginTop: 14 }}>2. What action?</div>
+                            <div className="trs-opts">{sc.opts.map((k) => <button key={k} type="button" disabled={!!sc.a2} className={'trs-opt' + (sc.a2 ? (k === ansAct ? ' ok' : k === sc.a2 ? ' bad' : '') : '')} onClick={() => choose('a2', k)}>{TRS_ACT[k]}</button>)}</div>
+                            {answered && <div className={'cx-status ' + (sc.a1 === z.where && sc.a2 === ansAct ? 'ok' : 'bad')} style={{ marginTop: 12 }}>
+                                <b>{sc.a1 === z.where && sc.a2 === ansAct ? 'Correct.' : 'Not quite.'}</b> {z.label}. In the {sc.nh ? 'northern' : 'southern'} hemisphere a {sc.shift === 'veering' ? 'veering wind puts you in the right-hand semicircle' : sc.shift === 'backing' ? 'backing wind puts you in the left-hand semicircle' : 'steady wind direction puts you in the path'}{sc.shift !== 'steady in direction' ? ', which is ' + (z.where === 'dang' ? 'dangerous' : 'navigable') + ' here' : ''}; the {sc.baro} barometer shows the {z.q === 'advance' ? 'advance' : 'rear'} part. {isFinite(recH) ? 'Steer about ' + String(Math.round(recH)).padStart(3, '0') + '° (wind ' + trsRelWind[z.where] + '° on the ' + (sc.nh ? 'starboard' : 'port') + (z.where === 'dang' ? ' bow' : ' quarter') + '), shown by the arrow.' : 'Steer away from the centre and stay behind it.'}
+                            </div>}
+                            <div className="cx-btns" style={{ marginTop: 12 }}><button type="button" className="btn btn-primary" style={{ marginTop: 0 }} onClick={next}>{answered ? 'Next scenario' : 'Skip'}</button><button type="button" className="btn-ghost" onClick={() => setU((q) => ({ ...q, right: 0, total: 0 }))}>Reset score</button></div>
+                            <div className="cx-hint" style={{ marginTop: 8 }}>Score {u.right} of {u.total}. Observations only is the harder test, as on the bridge without a warning.</div>
+                        </div>
+                    </div>}
+                </div>
+            );
+        }
+
+        const APP_VERSION = '3.5.0';
         const WHATS_NEW = [
+            ['3.5.0', ['Storm Avoidance: diagram of the storm for both hemispheres with semicircles, quadrants, path and wind, your own situation on the diagram, and a Practice test with scenarios and avoiding actions']],
             ['3.4.0', ['Nine more Bridge tools: Celestial Fix, Great Circle, Radar Plot, UKC & Squat, Tides, Wheel Over, Light Ranges, Storm Avoidance and Anchor Watch', 'Latitude and longitude entry with degrees, minutes and an N/S or E/W drop-down, plus Use device GPS']],
             ['3.3.0', ['New Bridge group with Compass Error: azimuth and amplitude by Sun, Moon, planets and 57 stars plus Polaris, gyro error, compass error and deviation, night sky chart, almanac page with sunrise and twilights, and a log', 'Alt+1 to 6 switch between the six groups']],
             ['3.2.0', ['New Engine Room group: ORB Entry Maker, Fuel Changeover (ECA), Bunker Planner, ME Performance and Engineer\'s Calculator', 'Alt+1 to 5 switch between the five groups']],
