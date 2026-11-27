@@ -1518,6 +1518,45 @@
         .tour-acts .btn { margin-top: 0; height: 34px; padding: 0 16px; }
         @media (max-width: 760px) { .gd-b { padding-left: 14px; } .tour-card { left: 12px !important; right: 12px; width: auto; } }
         @media (prefers-reduced-motion: reduce) { .tour-spot, .tour-card { transition: none; } .about-ic.spin svg { animation: none; } }
+    
+        /* Engine Room */
+        .orb-t { width: 100%; border-collapse: collapse; font-size: 13px; box-shadow: none; background: transparent; }
+        .orb-t th { text-align: left; font-size: 11px; padding: 6px 8px; }
+        .orb-t td { padding: 6px 8px; border-bottom: .5px solid var(--sep); vertical-align: top; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; }
+        .orb-t td.nw { white-space: nowrap; }
+        .orb-t td:nth-child(2), .orb-t td:nth-child(3) { white-space: nowrap; font-weight: 700; color: var(--accent); }
+        .orb-t tbody tr:nth-child(even), .orb-t tbody tr:hover { background: transparent; }
+        .orb-sig { font-style: italic; color: var(--muted); }
+        .orb-log { padding: 10px 0; border-bottom: .5px solid var(--sep); }
+        .orb-log .cx-btns { margin-top: 6px; }
+        .er-tk { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 34px; gap: 6px; align-items: center; margin-bottom: 6px; }
+        .er-tk .input-field { margin: 0; }
+        .er-tk-h { font-size: 11px; font-weight: 600; color: var(--muted); }
+        .er-note { padding: 12px 14px; border-radius: 10px; background: var(--well); font-size: 13px; line-height: 1.55; margin: 6px 0 10px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+        .fco-curve { display: flex; align-items: flex-end; gap: 3px; height: 120px; margin: 8px 0 6px; padding: 6px; border-radius: 10px; background: var(--well); }
+        .fco-bar { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; min-width: 6px; }
+        .fco-bar span { width: 100%; border-radius: 3px 3px 0 0; background: var(--bad); opacity: .8; }
+        .fco-bar.ok span { background: var(--ok); }
+        .fco-bar small { font-size: 9.5px; color: var(--muted); height: 12px; }
+        .er-plan td .input-field, .er-cyl td .input-field { margin: 0; }
+        .bw-steps.er-plan { min-width: 860px; }
+        .bw-steps.er-cyl { min-width: 680px; }
+        .bw-steps.er-pt { min-width: 0; }
+        .er-plan td input[type="checkbox"] { width: 18px; height: 18px; min-width: 0; min-height: 0; padding: 0; margin: 0; box-shadow: none !important; background: none; }
+        .er-plan td:nth-child(2) .input-field { min-width: 130px; }
+        .er-cyl td { position: relative; }
+        .er-dev { display: block; font-size: 10.5px; color: var(--muted); text-align: right; margin-top: 1px; }
+        .er-dev.bad { color: var(--bad); font-weight: 700; }
+        .input-field.er-bad { box-shadow: 0 0 0 1.5px var(--bad) !important; }
+        .er-avg td { border-top: 1px solid var(--sep-strong); }
+        .er-disc, .er-gen { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 34px; gap: 6px; align-items: center; margin-bottom: 6px; }
+        .er-gen { grid-template-columns: 44px minmax(0, 1fr) minmax(0, 1fr) 52px 34px; }
+        .er-disc .input-field, .er-gen .input-field { margin: 0; }
+        .er-pc { font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+        .er-pc.bad { color: var(--bad); }
+        @media (max-width: 640px) { .er-tk { grid-template-columns: minmax(0, 1fr) 80px 34px; } .er-tk > :nth-child(3), .er-tk > :nth-child(4) { grid-row: 2; } .er-tk-h { display: none; } }
+        @media (max-width: 1480px) and (min-width: 761px) { .cats .cat svg { display: none; } .cat { padding: 0 11px; } }
+        @media (max-width: 1240px) and (min-width: 761px) { .cats .cat svg { display: inline; } }
     </style>
 </head>
 <body>
@@ -6791,13 +6830,936 @@ const Proof = (function () {
             );
         }
 
-        const APP_VERSION = '3.1.0';
+        // =====================================================================
+        // ===== Engine Room: ORB entries, fuel changeover, bunkering, ME performance, engineer's calculator
+        // =====================================================================
+        function useErStore(key, def) {
+            const [s, setS] = useState(() => { try { const v = JSON.parse(localStorage.getItem(key) || 'null'); if (v) return { ...def(), ...v }; } catch (e) {} return def(); });
+            useEffect(() => { try { localStorage.setItem(key, JSON.stringify(s)); } catch (e) {} }, [s]);
+            const set = (k) => (v) => setS((o) => ({ ...o, [k]: v }));
+            return [s, setS, set];
+        }
+        function erCopy(text, done) {
+            const ok = () => done && done('Copied');
+            try { navigator.clipboard.writeText(text).then(ok, () => { erCopyOld(text); ok(); }); } catch (e) { erCopyOld(text); ok(); }
+        }
+        function erCopyOld(text) { const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); } catch (e) {} t.remove(); }
+        function ErSel({ label, value, onChange, opts, hint }) {
+            return (
+                <div>
+                    {label && <label className="input-label">{label}</label>}
+                    <select className="input-field" value={value} onChange={(e) => onChange(e.target.value)}>
+                        {opts.map((o) => Array.isArray(o) ? <option key={o[0]} value={o[0]}>{o[1]}</option> : <option key={o} value={o}>{o}</option>)}
+                    </select>
+                    {hint && <div className="cx-hint">{hint}</div>}
+                </div>
+            );
+        }
+        function ErTabs({ tabs, value, onChange }) {
+            return (
+                <div className="cx-tools" role="group">
+                    {tabs.map(([k, n]) => <button key={k} type="button" onClick={() => onChange(k)} style={{ ...subBtn, background: value === k ? 'var(--accent)' : 'var(--fill-2)', color: value === k ? 'var(--on-accent)' : 'var(--text)' }}>{n}</button>)}
+                </div>
+            );
+        }
+        function useErMsg() { const [m, setM] = useState(''); const flash = (x) => { setM(x); clearTimeout(flash.t); flash.t = setTimeout(() => setM(''), 2200); }; return [m, flash]; }
+        const erRho = (v) => { const x = pn(v); return x > 0 ? (x < 2 ? x * 1000 : x) : NaN; }; // kg/m3 at 15 °C
+        // ASTM D1250 Table 54B volume correction to 15 °C (fuel oils, jet, gasoline and transition zone)
+        function vcf54b(rho15, t) {
+            if (!(rho15 > 0) || !isFinite(t)) return NaN;
+            let a;
+            if (rho15 >= 839) a = 186.9696 / (rho15 * rho15) + 0.4862 / rho15;
+            else if (rho15 >= 788) a = 594.5418 / (rho15 * rho15);
+            else if (rho15 >= 770) a = -0.00336312 + 2680.3206 / (rho15 * rho15);
+            else a = 346.4228 / (rho15 * rho15) + 0.4388 / rho15;
+            const d = t - 15;
+            return Math.round(Math.exp(-a * d * (1 + 0.8 * a * d)) * 100000) / 100000;
+        }
+        const erWcf = (rho15) => (rho15 - 1.1) / 1000; // t per m3 at 15 °C, weight in air (Table 56)
+        const erHM = (s) => (/^\d{1,2}:\d{2}$/.test(s || '') ? s : '');
+        const erDate = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : (s || ''); };
+        const erQ = (v, d = 2) => (isFinite(pn(v)) ? pn(v).toFixed(d) : '?');
+
+        // ---------- 1. ORB Part I entry maker ----------
+        const ORB_KEY = 'tfm_er_orb_v1';
+        const ORB_OPS = [
+            ['C11', 'C 11.1 to 11.3: weekly sludge tank retention'],
+            ['C114', 'C 11.4: sludge collected by manual operation'],
+            ['C121', 'C 12.1: sludge to reception facility'],
+            ['C122', 'C 12.2: sludge transferred to another tank'],
+            ['C123', 'C 12.3: sludge incinerated'],
+            ['C124', 'C 12.4: other method (water evaporated)'],
+            ['D151', 'D 13 to 15.1: bilge overboard through 15 ppm equipment'],
+            ['D152', 'D 13 to 15.2: bilge to reception facility'],
+            ['D153', 'D 13 to 15.3: bilge transferred to holding tank'],
+            ['E', 'E 16 to 18: automatic bilge pumping'],
+            ['F', 'F 19 to 21: oil filtering equipment failure'],
+            ['H', 'H 26: bunkering of fuel or bulk lube oil'],
+            ['I', 'I: additional procedures and remarks']
+        ];
+        const ORB_DEF = () => ({
+            op: 'C11', date: cxToday(),
+            tanks: [
+                { n: 'Sludge tank', cap: '', rob: '', kind: 's' },
+                { n: 'Bilge holding tank', cap: '', rob: '', kind: 'b' },
+                { n: 'Oily bilge separated oil tank', cap: '', rob: '', kind: 's' }
+            ],
+            f: {}, sign: '', log: []
+        });
+        function orbLines(op, f, tanks, date) {
+            const T = (i) => tanks[+i] || { n: '?', cap: '', rob: '' };
+            const robAfter = (i, delta) => { const t = T(i); const r = pn(t.rob); return isFinite(r) ? Math.max(0, r + delta) : NaN; };
+            const q = pn(f.q);
+            const L = []; const add = (code, item, rec) => L.push({ code, item, rec });
+            const startStop = (f.t1 || f.t2) ? 'Start ' + (erHM(f.t1) || '?') + ', stop ' + (erHM(f.t2) || '?') : '';
+            switch (op) {
+                case 'C11': {
+                    (f.multi || [f.tank || '0']).forEach((ti, k) => { const t = T(ti); add(k === 0 ? 'C' : '', '11.1', t.n); add('', '11.2', erQ(t.cap) + ' m³'); add('', '11.3', erQ(t.rob) + ' m³'); });
+                    break;
+                }
+                case 'C114': {
+                    const t = T(f.tank || '0'); const after = robAfter(f.tank || '0', q || 0);
+                    add('C', '11.1', t.n); add('', '11.2', erQ(t.cap) + ' m³'); add('', '11.3', erQ(after) + ' m³');
+                    add('', '11.4', erQ(q) + ' m³ collected by manual operation' + (f.src ? ' from ' + f.src : '') + '.');
+                    break;
+                }
+                case 'C121': {
+                    const t = T(f.tank || '0');
+                    add('C', '12.1', erQ(q) + ' m³ of oil residue (sludge) from ' + t.n + ' discharged to reception facility' + (f.fac ? ' (' + f.fac + ')' : '') + ', port of ' + (f.port || '?') + '.' + (f.rcpt ? ' Receipt No. ' + f.rcpt + '.' : ''));
+                    add('', '', erQ(robAfter(f.tank || '0', -(q || 0))) + ' m³ retained in ' + t.n + '.');
+                    break;
+                }
+                case 'C122': {
+                    const a = T(f.tank || '0'), b = T(f.tank2 || '1');
+                    add('C', '12.2', erQ(q) + ' m³ of oil residue (sludge) transferred from ' + a.n + ' to ' + b.n + '.');
+                    add('', '', erQ(robAfter(f.tank || '0', -(q || 0))) + ' m³ retained in ' + a.n + ', ' + erQ(robAfter(f.tank2 || '1', q || 0)) + ' m³ retained in ' + b.n + '.');
+                    break;
+                }
+                case 'C123': {
+                    const t = T(f.tank || '0');
+                    add('C', '12.3', erQ(q) + ' m³ of oil residue (sludge) from ' + t.n + ' incinerated in incinerator.' + (startStop ? ' ' + startStop + '.' : ''));
+                    add('', '', erQ(robAfter(f.tank || '0', -(q || 0))) + ' m³ retained in ' + t.n + '.');
+                    break;
+                }
+                case 'C124': {
+                    const t = T(f.tank || '0');
+                    add('C', '12.4', erQ(q) + ' m³ of water evaporated from ' + t.n + '.' + (startStop ? ' ' + startStop + '.' : ''));
+                    add('', '', erQ(robAfter(f.tank || '0', -(q || 0))) + ' m³ retained in ' + t.n + '.');
+                    break;
+                }
+                case 'D151': case 'D152': case 'D153': {
+                    const src = f.src || (f.fromTank ? T(f.tank || '1').n : 'machinery space bilges');
+                    add('D', '13', erQ(q) + ' m³ of bilge water from ' + src + '.');
+                    add('', '14', startStop || 'Start ?, stop ?');
+                    if (op === 'D151') add('', '15.1', 'Through 15 ppm equipment overboard. Position at start ' + (f.p1 || '?') + ', at stop ' + (f.p2 || '?') + '.');
+                    if (op === 'D152') add('', '15.2', 'To reception facility' + (f.fac ? ' (' + f.fac + ')' : '') + ', port of ' + (f.port || '?') + '.' + (f.rcpt ? ' Receipt No. ' + f.rcpt + '.' : ''));
+                    if (op === 'D153') { const to = T(f.tank2 || '1'); add('', '15.3', 'Transferred to ' + to.n + '. Total quantity retained ' + erQ(robAfter(f.tank2 || '1', q || 0)) + ' m³.'); }
+                    break;
+                }
+                case 'E': {
+                    if (f.mode === 'over') add('E', '16', (erHM(f.t1) || '?') + ' system put into automatic mode for discharge overboard through 15 ppm equipment.');
+                    else if (f.mode === 'hold') add('E', '17', (erHM(f.t1) || '?') + ' system put into automatic mode for transfer of bilge water to ' + T(f.tank2 || '1').n + '.');
+                    else add('E', '18', (erHM(f.t1) || '?') + ' system put into manual operation.');
+                    break;
+                }
+                case 'F': {
+                    add('F', '19', (erHM(f.t1) || '?') + ' time of system failure.');
+                    add('', '20', (f.t2 ? erHM(f.t2) + ' system made operational.' : 'Not yet operational.'));
+                    add('', '21', f.reason || 'Reason: ?');
+                    break;
+                }
+                case 'H': {
+                    const tankList = (f.btanks || '').trim();
+                    add('H', '26.1', 'Port of ' + (f.port || '?') + (f.place ? ', ' + f.place : '') + '.');
+                    add('', '26.2', 'Start ' + (erHM(f.t1) || '?') + ', stop ' + (erHM(f.t2) || '?') + (f.d2 && f.d2 !== date ? ' (' + erDate(f.d2) + ')' : '') + '.');
+                    if (f.lube) add('', '26.4', erQ(q, 3) + ' t of ' + (f.grade || '?') + ' added to ' + (tankList || '?') + '.');
+                    else add('', '26.3', erQ(q, 3) + ' t of ' + (f.grade || '?') + (f.sul ? ', sulphur ' + f.sul + '% m/m' : '') + ' added to ' + (tankList || '?') + '.' + (f.totals ? ' Now in tanks: ' + f.totals + '.' : ''));
+                    break;
+                }
+                default: add('I', '', f.text || '');
+            }
+            return L;
+        }
+        function orbApply(op, f, tanks) {
+            const q = pn(f.q) || 0; const t = tanks.map((x) => ({ ...x }));
+            const ch = (i, d) => { const k = t[+i]; if (!k) return; const r = pn(k.rob); if (isFinite(r)) k.rob = String(Math.round(Math.max(0, r + d) * 100) / 100); };
+            if (op === 'C114') ch(f.tank || '0', q);
+            if (op === 'C121' || op === 'C123' || op === 'C124') ch(f.tank || '0', -q);
+            if (op === 'C122') { ch(f.tank || '0', -q); ch(f.tank2 || '1', q); }
+            if (op === 'D153') ch(f.tank2 || '1', q);
+            if ((op === 'D151' || op === 'D152') && f.fromTank) ch(f.tank || '1', -q);
+            return t;
+        }
+        function OrbTab() {
+            const [s, setS, set] = useErStore(ORB_KEY, ORB_DEF);
+            const [msg, flash] = useErMsg();
+            const [view, setView] = useState('new');
+            const f = s.f || {};
+            const setF = (k) => (v) => setS((o) => ({ ...o, f: { ...(o.f || {}), [k]: v } }));
+            const tankOpts = s.tanks.map((t, i) => [String(i), t.n || 'Tank ' + (i + 1)]);
+            const lines = orbLines(s.op, f, s.tanks, s.date);
+            const asText = (ls, d) => ls.map((l, i) => [i === 0 ? erDate(d) : '', l.code, l.item, l.rec].join('\t')).join('\n') + (s.sign ? '\n\t\t\t' + s.sign : '');
+            const save = () => {
+                setS((o) => ({ ...o, tanks: orbApply(o.op, o.f || {}, o.tanks), log: [{ id: Date.now(), date: o.date, op: o.op, lines }, ...(o.log || [])].slice(0, 300), f: {} }));
+                flash('Saved to the log, tank totals updated');
+            };
+            const setTank = (i, k, v) => setS((o) => ({ ...o, tanks: o.tanks.map((t, j) => (j === i ? { ...t, [k]: v } : t)) }));
+            const need = {
+                q: !['C11', 'E', 'F', 'I'].includes(s.op),
+                tank: ['C114', 'C121', 'C122', 'C123', 'C124', 'C11'].includes(s.op),
+                tank2: ['C122', 'D153'].includes(s.op) || (s.op === 'E' && f.mode === 'hold'),
+                times: ['C123', 'C124', 'D151', 'D152', 'D153', 'F', 'H'].includes(s.op) || s.op === 'E',
+                port: ['C121', 'D152', 'H'].includes(s.op)
+            };
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Oil Record Book Part I</h2>
+                    <ErTabs tabs={[['new', 'New entry'], ['log', 'Log (' + (s.log || []).length + ')'], ['tanks', 'Tanks']]} value={view} onChange={setView} />
+                    {view === 'new' && <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="card-title">Operation</div>
+                            <ErSel label="What was done" value={s.op} onChange={(v) => setS((o) => ({ ...o, op: v }))} opts={ORB_OPS} />
+                            <div className="cx-row">
+                                <CxField label="Date" type="date" value={s.date} onChange={set('date')} />
+                                {need.q && <CxField label={s.op === 'H' ? 'Quantity (t)' : 'Quantity (m³)'} value={f.q || ''} onChange={setF('q')} placeholder="e.g. 2.5" />}
+                            </div>
+                            {s.op === 'C11' && <div className="cx-hint" style={{ marginBottom: 8 }}>Uses the retained quantity in each sludge tank from the Tanks list. Update the Tanks list first if soundings changed.</div>}
+                            {need.tank && s.op !== 'C11' && <ErSel label={s.op === 'C122' ? 'From tank' : 'Tank'} value={f.tank || '0'} onChange={setF('tank')} opts={tankOpts} />}
+                            {s.op === 'C11' && <div className="input-label">Sludge tanks in this entry</div>}
+                            {s.op === 'C11' && s.tanks.map((t, i) => t.kind === 's' ? (
+                                <label key={i} className="cx-check" style={{ minHeight: 32 }}><input type="checkbox" checked={(f.multi || ['0']).includes(String(i))} onChange={(e) => setF('multi')(e.target.checked ? [...(f.multi || ['0']), String(i)] : (f.multi || ['0']).filter((x) => x !== String(i)))} /> {t.n} ({erQ(t.rob)} of {erQ(t.cap)} m³)</label>
+                            ) : null)}
+                            {need.tank2 && <ErSel label="To tank" value={f.tank2 || '1'} onChange={setF('tank2')} opts={tankOpts} />}
+                            {s.op === 'C114' && <CxField label="Collected from" value={f.src || ''} onChange={setF('src')} placeholder="e.g. FO purifier drain, save-all" type="text" />}
+                            {['D151', 'D152', 'D153'].includes(s.op) && <>
+                                <CxField label="Bilge water from" value={f.src || ''} onChange={setF('src')} placeholder="e.g. ER bilge wells, Bilge holding tank" type="text" />
+                                {s.op !== 'D153' && <label className="cx-check"><input type="checkbox" checked={!!f.fromTank} onChange={(e) => setF('fromTank')(e.target.checked)} /> Taken from a listed tank (reduce its total)</label>}
+                                {s.op !== 'D153' && f.fromTank && <ErSel label="Tank" value={f.tank || '1'} onChange={setF('tank')} opts={tankOpts} />}
+                            </>}
+                            {s.op === 'E' && <ErSel label="Mode" value={f.mode || 'over'} onChange={setF('mode')} opts={[['over', '16: automatic, overboard through 15 ppm'], ['hold', '17: automatic, to holding tank'], ['man', '18: back to manual']]} />}
+                            {need.times && <div className="cx-row">
+                                <CxField label={s.op === 'F' ? 'Time of failure' : s.op === 'E' ? 'Time' : 'Start'} type="time" value={f.t1 || ''} onChange={setF('t1')} />
+                                {s.op !== 'E' && <CxField label={s.op === 'F' ? 'Operational again' : 'Stop'} type="time" value={f.t2 || ''} onChange={setF('t2')} />}
+                                {s.op === 'H' && <CxField label="Stop date" type="date" value={f.d2 || ''} onChange={setF('d2')} />}
+                            </div>}
+                            {s.op === 'D151' && <div className="cx-row">
+                                <CxField label="Position at start" value={f.p1 || ''} onChange={setF('p1')} placeholder="35°12.4'N 139°45.1'E" type="text" />
+                                <CxField label="Position at stop" value={f.p2 || ''} onChange={setF('p2')} placeholder="35°08.0'N 139°50.3'E" type="text" />
+                            </div>}
+                            {need.port && <div className="cx-row">
+                                <CxField label="Port" value={f.port || ''} onChange={setF('port')} type="text" />
+                                {s.op !== 'H' ? <CxField label="Facility or barge" value={f.fac || ''} onChange={setF('fac')} type="text" /> : <CxField label="Berth or anchorage" value={f.place || ''} onChange={setF('place')} type="text" />}
+                            </div>}
+                            {['C121', 'D152'].includes(s.op) && <CxField label="Receipt number" value={f.rcpt || ''} onChange={setF('rcpt')} type="text" />}
+                            {s.op === 'F' && <CxField label="Reason for failure" value={f.reason || ''} onChange={setF('reason')} type="text" />}
+                            {s.op === 'H' && <>
+                                <label className="cx-check"><input type="checkbox" checked={!!f.lube} onChange={(e) => setF('lube')(e.target.checked)} /> Bulk lubricating oil (26.4)</label>
+                                <div className="cx-row">
+                                    <CxField label="Grade" value={f.grade || ''} onChange={setF('grade')} placeholder={f.lube ? 'e.g. Cylinder oil BN 40' : 'e.g. VLSFO RMG 380'} type="text" />
+                                    {!f.lube && <CxField label="Sulphur (% m/m)" value={f.sul || ''} onChange={setF('sul')} placeholder="0.50" />}
+                                </div>
+                                <CxField label="Added to tanks" value={f.btanks || ''} onChange={setF('btanks')} placeholder="e.g. No.1 FO Tk P 210.4 t, No.1 FO Tk S 195.6 t" type="text" />
+                                {!f.lube && <CxField label="Total content of these tanks after (optional)" value={f.totals || ''} onChange={setF('totals')} placeholder="e.g. No.1 P 402.1 t, No.1 S 388.0 t" type="text" />}
+                            </>}
+                            {s.op === 'I' && <div><label className="input-label">Remark</label><textarea className="input-field" rows={3} value={f.text || ''} onChange={(e) => setF('text')(e.target.value)} placeholder="e.g. Weekly inventory of bilge water holding tank: 3.2 m³ retained." /></div>}
+                            <CxField label="Signature line (name, rank)" value={s.sign} onChange={set('sign')} placeholder="e.g. A. Kumar, 2/E" type="text" />
+                        </div>
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">Entry</div>
+                                <div className="bw-scroll"><table className="orb-t"><thead><tr><th>Date</th><th>Code</th><th>Item</th><th>Record of operations</th></tr></thead>
+                                    <tbody>{lines.map((l, i) => <tr key={i}><td className="nw">{i === 0 ? erDate(s.date) : ''}</td><td>{l.code}</td><td>{l.item}</td><td>{l.rec}</td></tr>)}
+                                        {s.sign && <tr><td /><td /><td /><td className="orb-sig">{s.sign}</td></tr>}</tbody></table></div>
+                                <div className="cx-btns" style={{ marginTop: 12 }}>
+                                    <button type="button" className="btn btn-primary" style={{ marginTop: 0 }} onClick={save}>Save to log</button>
+                                    <button type="button" className="btn btn-ghost" onClick={() => erCopy(asText(lines, s.date), flash)}>Copy</button>
+                                </div>
+                                {msg && <div className="cx-hint" style={{ marginTop: 8, color: 'var(--ok)' }}>{msg}</div>}
+                            </div>
+                            <div className="cx-hint">Format follows MEPC.1/Circ.736/Rev.2: one code letter per operation, item numbers on each line, quantities of sludge and bilge water in m³, bunkers in tonnes, signed by the officer in charge and each page by the Master. Check against your company and flag guidance before writing in the book.</div>
+                        </div>
+                    </div>}
+                    {view === 'log' && <div className="card cx-card">
+                        <div className="card-title">Saved entries</div>
+                        {!(s.log || []).length && <div className="cx-hint">Nothing saved yet.</div>}
+                        {(s.log || []).map((e) => (
+                            <div key={e.id} className="orb-log">
+                                <table className="orb-t"><tbody>{e.lines.map((l, i) => <tr key={i}><td className="nw">{i === 0 ? erDate(e.date) : ''}</td><td>{l.code}</td><td>{l.item}</td><td>{l.rec}</td></tr>)}</tbody></table>
+                                <div className="cx-btns"><button type="button" className="btn-ghost" onClick={() => erCopy(asText(e.lines, e.date), flash)}>Copy</button><button type="button" className="btn-ghost" onClick={() => setS((o) => ({ ...o, log: o.log.filter((x) => x.id !== e.id) }))}>Delete</button></div>
+                            </div>
+                        ))}
+                        {(s.log || []).length > 0 && <div className="cx-btns"><button type="button" className="btn-ghost" onClick={() => erCopy(s.log.slice().reverse().map((e) => asText(e.lines, e.date)).join('\n'), flash)}>Copy all</button></div>}
+                        {msg && <div className="cx-hint" style={{ color: 'var(--ok)' }}>{msg}</div>}
+                    </div>}
+                    {view === 'tanks' && <div className="card cx-card">
+                        <div className="card-title">Sludge and bilge tanks (as in the IOPP Supplement, 3.1 and 3.3)</div>
+                        <div className="er-tk er-tk-h"><span>Tank</span><span>Type</span><span>Capacity m³</span><span>Retained m³</span><span /></div>
+                        {s.tanks.map((t, i) => (
+                            <div key={i} className="er-tk">
+                                <input className="input-field" value={t.n} onChange={(e) => setTank(i, 'n', e.target.value)} />
+                                <select className="input-field" value={t.kind} onChange={(e) => setTank(i, 'kind', e.target.value)}><option value="s">Sludge</option><option value="b">Bilge</option></select>
+                                <input className="input-field" inputMode="decimal" value={t.cap} onChange={(e) => setTank(i, 'cap', e.target.value)} />
+                                <input className="input-field" inputMode="decimal" value={t.rob} onChange={(e) => setTank(i, 'rob', e.target.value)} />
+                                <button type="button" className="icon-btn" aria-label="Remove tank" onClick={() => setS((o) => ({ ...o, tanks: o.tanks.filter((_, j) => j !== i) }))}>×</button>
+                            </div>
+                        ))}
+                        <button type="button" className="btn-ghost" onClick={() => setS((o) => ({ ...o, tanks: [...o.tanks, { n: 'Tank ' + (o.tanks.length + 1), cap: '', rob: '', kind: 's' }] }))}>+ Add tank</button>
+                        <div className="cx-hint" style={{ marginTop: 8 }}>Saving an entry updates the retained quantities automatically. Correct them here after soundings.</div>
+                    </div>}
+                </div>
+            );
+        }
+
+        // ---------- 2. Fuel changeover (ECA) ----------
+        const FCO_KEY = 'tfm_er_fco_v1';
+        const FCO_DEF = () => ({ meth: 'valve', dir: 'in', sOld: '0.50', sNew: '0.08', lim: '0.10', vol: '', pipe: '1.5', cons: '', rhoN: '0.85', rhoO: '0.95', margin: '1', tz: cxDevTz(), eta: '', dist: '', spd: '', tOld: '135', tNew: '40', ramp: '2', pos: '', robs: '', lsName: 'MGO' });
+        function FcoTab() {
+            const [s, , set] = useErStore(FCO_KEY, FCO_DEF);
+            const [msg, flash] = useErMsg();
+            const inEca = s.dir === 'in';
+            const sOld = pn(s.sOld), sNew = pn(s.sNew), lim = pn(s.lim);
+            const V = (s.meth === 'tank' ? (pn(s.vol) || 0) : 0) + (pn(s.pipe) || 0);
+            const rhoIn = inEca ? pn(s.rhoN) : pn(s.rhoO);
+            const qh = pn(s.cons) > 0 && rhoIn > 0 ? pn(s.cons) / 24 / rhoIn : NaN; // m3 per hour of the incoming fuel
+            const tau = V > 0 && qh > 0 ? V / qh : NaN; // h
+            let hrs = NaN, err = '';
+            if (inEca) {
+                if (!(sNew < lim)) err = 'The new fuel must have less sulphur than the limit.';
+                else if (!(sOld > lim)) err = 'The fuel in use is already below the limit.';
+                else hrs = tau * Math.log((sOld - sNew) / (lim - sNew));
+            } else hrs = tau * Math.log(100); // 99% changed over when leaving
+            const margin = pn(s.margin) || 0;
+            const off = cxTzMin(s.tz);
+            let entryMs = cxWallToUtc(s.eta, off);
+            if (!isFinite(entryMs) && pn(s.dist) > 0 && pn(s.spd) > 0) entryMs = Date.now() + pn(s.dist) / pn(s.spd) * 3600000;
+            const startMs = isFinite(entryMs) && isFinite(hrs) ? entryMs - (hrs + margin) * 3600000 : NaN;
+            const rampMin = pn(s.ramp) > 0 ? Math.abs((pn(s.tOld) || 0) - (pn(s.tNew) || 0)) / pn(s.ramp) : NaN;
+            const curve = [];
+            if (isFinite(tau) && isFinite(sOld) && isFinite(sNew)) {
+                const end = Math.max(1, Math.ceil((isFinite(hrs) ? hrs : tau * 3) + 1));
+                const step = end > 12 ? 2 : end > 6 ? 1 : 0.5;
+                for (let h = 0; h <= end + 1e-9; h += step) curve.push([h, sNew + (sOld - sNew) * Math.exp(-h / tau)]);
+            }
+            const hhmm = (h) => isFinite(h) ? Math.floor(h) + ' h ' + String(Math.round((h % 1) * 60)).padStart(2, '0') + ' min' : '-';
+            const logText = inEca
+                ? 'Fuel oil changeover from ' + sOld + '% S fuel to ' + (s.lsName || 'compliant fuel') + ' (' + sNew + '% S) commenced ' + cxFmt(startMs, off) + ' ' + s.tz.replace('GMT', 'UTC') + '. Completed (sulphur below ' + lim + '% in the fuel system) ' + (isFinite(startMs) ? cxFmt(startMs + hrs * 3600000, off) : '?') + ', position ' + (s.pos || '?') + '. Compliant fuel ROB: ' + (s.robs || '?') + '. ECA entry ' + cxFmt(entryMs, off) + '.'
+                : 'Fuel oil changeover from ' + (s.lsName || 'compliant fuel') + ' to ' + sOld + '% S fuel commenced after leaving the ECA at ' + cxFmt(entryMs, off) + ' ' + s.tz.replace('GMT', 'UTC') + ', position ' + (s.pos || '?') + '. Compliant fuel ROB at commencement: ' + (s.robs || '?') + '.';
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Fuel Changeover (ECA)</h2>
+                    <ErTabs tabs={[['in', 'Entering ECA'], ['out', 'Leaving ECA']]} value={s.dir} onChange={set('dir')} />
+                    <div className="cx-two">
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">Fuels</div>
+                                <div className="cx-row">
+                                    <CxField label="Sulphur of fuel in use now (%)" value={s.sOld} onChange={set('sOld')} hint={inEca ? 'e.g. VLSFO 0.50, HSFO 2.5 with scrubber off' : 'The fuel you change back to'} />
+                                    <CxField label="Sulphur of compliant fuel (%)" value={s.sNew} onChange={set('sNew')} />
+                                    {inEca && <CxField label="ECA limit (%)" value={s.lim} onChange={set('lim')} hint="0.10 in all ECAs" />}
+                                </div>
+                                <div className="cx-row">
+                                    <CxField label="Compliant fuel name" value={s.lsName} onChange={set('lsName')} type="text" placeholder="MGO, ULSFO" />
+                                    <CxField label="Density, compliant fuel (t/m³)" value={s.rhoN} onChange={set('rhoN')} />
+                                    <CxField label="Density, other fuel (t/m³)" value={s.rhoO} onChange={set('rhoO')} />
+                                </div>
+                            </div>
+                            <div className="card cx-card">
+                                <div className="card-title">System and consumption</div>
+                                <ErSel label="How the fuel is changed" value={s.meth || 'valve'} onChange={set('meth')} opts={[['valve', 'Changeover valve after separate service tanks'], ['tank', 'Through the same service tank']]} hint={(s.meth || 'valve') === 'valve' ? 'Only the pipes, mixing column and filters are flushed' : 'The whole service tank content mixes with the new fuel'} />
+                                <div className="cx-row">
+                                    {s.meth === 'tank' && <CxField label="Service tank content at changeover (m³)" value={s.vol} onChange={set('vol')} />}
+                                    <CxField label="Pipe, mixing column and filters (m³)" value={s.pipe} onChange={set('pipe')} hint="From the maker's changeover table or piping drawing" />
+                                    <CxField label="Consumption ME + DG (t/day)" value={s.cons} onChange={set('cons')} />
+                                    <CxField label="Safety margin (h)" value={s.margin} onChange={set('margin')} />
+                                </div>
+                            </div>
+                            <div className="card cx-card">
+                                <div className="card-title">{inEca ? 'ECA entry' : 'ECA exit'}</div>
+                                <div className="cx-row">
+                                    <CxField label={inEca ? 'Time at ECA boundary' : 'Time leaving ECA'} type="datetime-local" value={s.eta} onChange={set('eta')} />
+                                    <CxTz label="Zone" value={s.tz} onChange={set('tz')} />
+                                </div>
+                                <div className="cx-hint" style={{ margin: '-4px 0 8px' }}>Or leave the time blank and use distance and speed from now:</div>
+                                <div className="cx-row">
+                                    <CxField label="Distance to boundary (NM)" value={s.dist} onChange={set('dist')} />
+                                    <CxField label="Speed (kn)" value={s.spd} onChange={set('spd')} />
+                                </div>
+                            </div>
+                            <div className="card cx-card">
+                                <div className="card-title">Temperature change</div>
+                                <div className="cx-row">
+                                    <CxField label="Temperature, heavy fuel (°C)" value={s.tOld} onChange={set('tOld')} />
+                                    <CxField label="Temperature, compliant fuel (°C)" value={s.tNew} onChange={set('tNew')} />
+                                    <CxField label="Max rate (°C/min)" value={s.ramp} onChange={set('ramp')} hint="Use the engine maker's limit, often 2 °C/min" />
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">Result</div>
+                                {err ? <div className="cx-status bad">{err}</div> : null}
+                                <div className="cx-grid" style={{ marginTop: 0 }}>
+                                    <CxOut l={inEca ? 'Time to reach the limit' : 'Time to full changeover (99%)'} v={hhmm(hrs)} hi />
+                                    <CxOut l="Flow through system" v={cxF(qh, 2)} u="m³/h" />
+                                    <CxOut l="Mixing volume" v={V > 0 ? cxF(V, 1) : '-'} u="m³" />
+                                    <CxOut l="Temperature ramp at least" v={isFinite(rampMin) ? Math.round(rampMin) + '' : '-'} u="min" />
+                                    {inEca && <CxOut l="Start changeover no later than" v={cxFmt(startMs, off)} hi sub={isFinite(startMs) ? 'includes ' + margin + ' h margin' : 'enter ECA time or distance and speed'} />}
+                                    <CxOut l={inEca ? 'At ECA boundary' : 'Leaving ECA'} v={cxFmt(entryMs, off)} />
+                                </div>
+                                {curve.length > 0 && <>
+                                    <div className="cx-sub">Sulphur in the system after start</div>
+                                    <div className="fco-curve">{curve.map(([h, v]) => <div key={h} className={'fco-bar' + (inEca && v <= lim ? ' ok' : '')} title={hhmm(h) + ': ' + v.toFixed(3) + '%'}><span style={{ height: Math.max(3, (v / Math.max(sOld, sNew)) * 100) + '%' }} /><small>{h % 1 ? '' : h + 'h'}</small></div>)}</div>
+                                    <div className="cx-hint">Green bars are below the limit. Based on full mixing in the service tank and pipes, as in maker changeover guides; real systems mix less evenly, so keep the margin.</div>
+                                </>}
+                            </div>
+                            <div className="card cx-card">
+                                <div className="card-title">Log entry (MARPOL Annex VI, Reg. 14.6)</div>
+                                <div className="cx-row">
+                                    <CxField label={inEca ? 'Position at completion' : 'Position at commencement'} value={s.pos} onChange={set('pos')} type="text" />
+                                    <CxField label="Compliant fuel ROB per tank" value={s.robs} onChange={set('robs')} type="text" placeholder="e.g. MGO Tk P 85.2 m³, MGO Serv 12.1 m³" />
+                                </div>
+                                <div className="er-note">{logText}</div>
+                                <div className="cx-btns"><button type="button" className="btn-ghost" onClick={() => erCopy(logText, flash)}>Copy</button>{msg && <span className="cx-hint" style={{ color: 'var(--ok)' }}>{msg}</span>}</div>
+                                <div className="cx-hint">Record the volume of compliant fuel in each tank, with date, time and position, when the changeover is completed before entry and when it is commenced after exit.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ---------- 3. Bunker planner ----------
+        const BK_KEY = 'tfm_er_bunker_v1';
+        const BK_DEF = () => ({
+            view: 'plan', grade: 'VLSFO RMG 380', rho: '0.9900', temp: '45', mt: '', fill: '90', rate: '', tol: '0.5', bdn: '',
+            tanks: [{ n: 'No.1 FO Tk P', cap: '', rob: '', on: true }, { n: 'No.1 FO Tk S', cap: '', rob: '', on: true }],
+            rec: [], info: { port: '', supplier: '', barge: '', bdnNo: '', start: '', end: '', sul: '', visc: '', seal: '', seals: '' }
+        });
+        function BunkerTab() {
+            const [s, setS, set] = useErStore(BK_KEY, BK_DEF);
+            const [msg, flash] = useErMsg();
+            const rho = erRho(s.rho), T = pn(s.temp), vcf = vcf54b(rho, isFinite(T) ? T : 15), wcf = rho > 0 ? erWcf(rho) : NaN;
+            const mt = pn(s.mt), fill = Math.min(100, Math.max(1, pn(s.fill) || 90)) / 100, rate = pn(s.rate);
+            const v15 = mt > 0 && wcf > 0 ? mt / wcf : NaN; const vObs = isFinite(v15) && vcf > 0 ? v15 / vcf : NaN;
+            let left = isFinite(vObs) ? vObs : 0, clock = 0;
+            const plan = s.tanks.map((t) => {
+                const cap = pn(t.cap), rob = pn(t.rob) || 0;
+                const space = t.on && cap > 0 ? Math.max(0, cap * fill - rob) : 0;
+                const take = Math.min(space, left); left -= take;
+                const hrs = rate > 0 && take > 0 ? take / rate : NaN; if (isFinite(hrs)) clock += hrs;
+                return { cap, rob, space, take, fin: cap > 0 ? (rob + take) / cap * 100 : NaN, hrs, at: isFinite(hrs) ? clock : NaN, mtIn: take * vcf * wcf };
+            });
+            const space = plan.reduce((a, p) => a + p.space, 0);
+            const short = isFinite(vObs) && left > 0.01;
+            const setTank = (i, k, v) => setS((o) => ({ ...o, tanks: o.tanks.map((t, j) => (j === i ? { ...t, [k]: v } : t)) }));
+            const rec = s.tanks.map((t, i) => s.rec[i] || { b: '', bt: '', a: '', at: '' });
+            const setRec = (i, k, v) => setS((o) => { const r = o.tanks.map((t, j) => ({ ...(o.rec[j] || { b: '', bt: '', a: '', at: '' }) })); r[i][k] = v; return { ...o, rec: r }; });
+            const recRows = rec.map((r) => {
+                const b = pn(r.b), a = pn(r.a), bt = pn(r.bt), at = pn(r.at);
+                const b15 = b >= 0 ? b * vcf54b(rho, isFinite(bt) ? bt : T) : NaN, a15 = a >= 0 ? a * vcf54b(rho, isFinite(at) ? at : T) : NaN;
+                const got = isFinite(a15) ? (a15 - (isFinite(b15) ? b15 : 0)) : NaN;
+                return { b15, a15, v15: got, mt: isFinite(got) ? got * wcf : NaN };
+            });
+            const recMt = recRows.reduce((x, r) => x + (isFinite(r.mt) ? r.mt : 0), 0);
+            const bdn = pn(s.bdn); const diff = bdn > 0 && recMt > 0 ? recMt - bdn : NaN; const pct = isFinite(diff) ? diff / bdn * 100 : NaN;
+            const tol = pn(s.tol) || 0.5;
+            const inf = s.info || {}; const setI = (k) => (v) => setS((o) => ({ ...o, info: { ...(o.info || {}), [k]: v } }));
+            const summary = ['Bunker report', 'Port: ' + (inf.port || '-') + '   Supplier: ' + (inf.supplier || '-') + '   Barge: ' + (inf.barge || '-'),
+                'Grade: ' + s.grade + '   Density @15: ' + (rho ? (rho / 1000).toFixed(4) : '-') + '   Sulphur: ' + (inf.sul || '-') + '%   Viscosity: ' + (inf.visc || '-') + ' cSt',
+                'BDN No: ' + (inf.bdnNo || '-') + '   BDN qty: ' + (bdn > 0 ? bdn.toFixed(3) : '-') + ' t   Ship received: ' + (recMt > 0 ? recMt.toFixed(3) : '-') + ' t   Difference: ' + (isFinite(diff) ? diff.toFixed(3) + ' t (' + pct.toFixed(2) + '%)' : '-'),
+                'Pumping: ' + (inf.start || '-').replace('T', ' ') + ' to ' + (inf.end || '-').replace('T', ' '),
+                'MARPOL sample seal: ' + (inf.seal || '-') + '   Other seals: ' + (inf.seals || '-'),
+                ...s.tanks.map((t, i) => '  ' + t.n + ': ' + (isFinite(recRows[i].mt) ? recRows[i].mt.toFixed(3) + ' t received' : '-'))].join('\n');
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Bunker Planner</h2>
+                    <ErTabs tabs={[['plan', 'Plan'], ['rec', 'Received'], ['info', 'Record']]} value={s.view} onChange={set('view')} />
+                    <div className="card cx-card">
+                        <div className="card-title">Fuel</div>
+                        <div className="cx-row">
+                            <CxField label="Grade" value={s.grade} onChange={set('grade')} type="text" />
+                            <CxField label="Density at 15 °C (BDN)" value={s.rho} onChange={set('rho')} hint="t/m³ or kg/m³" />
+                            <CxField label="Expected temperature (°C)" value={s.temp} onChange={set('temp')} />
+                            <CxField label="Nominated quantity (t)" value={s.mt} onChange={set('mt')} />
+                        </div>
+                        <div className="cx-grid">
+                            <CxOut l="VCF (ASTM 54B)" v={cxF(vcf, 5)} />
+                            <CxOut l="WCF (density − 0.0011)" v={cxF(wcf, 4)} />
+                            <CxOut l="Volume at 15 °C" v={cxF(v15, 1)} u="m³" />
+                            <CxOut l="Volume at temperature" v={cxF(vObs, 1)} u="m³" hi />
+                        </div>
+                    </div>
+                    {s.view === 'plan' && <div className="card cx-card">
+                        <div className="card-title">Tank distribution</div>
+                        <div className="cx-row">
+                            <CxField label="Max fill (%)" value={s.fill} onChange={set('fill')} hint="Company limit, often 90%" />
+                            <CxField label="Pumping rate (m³/h)" value={s.rate} onChange={set('rate')} />
+                        </div>
+                        <div className="bw-scroll"><table className="bw-steps er-plan"><thead><tr><th>Use</th><th>Tank</th><th className="n">100% (m³)</th><th className="n">ROB (m³)</th><th className="n">Space to {Math.round(fill * 100)}%</th><th className="n">Load (m³)</th><th className="n">Load (t)</th><th className="n">Final %</th><th className="n">Topped at</th><th /></tr></thead>
+                            <tbody>{s.tanks.map((t, i) => { const p = plan[i]; return (
+                                <tr key={i}>
+                                    <td><input type="checkbox" checked={!!t.on} onChange={(e) => setTank(i, 'on', e.target.checked)} /></td>
+                                    <td><input className="input-field" value={t.n} onChange={(e) => setTank(i, 'n', e.target.value)} /></td>
+                                    <td><input className="input-field bw-lc" inputMode="decimal" value={t.cap} onChange={(e) => setTank(i, 'cap', e.target.value)} /></td>
+                                    <td><input className="input-field bw-lc" inputMode="decimal" value={t.rob} onChange={(e) => setTank(i, 'rob', e.target.value)} /></td>
+                                    <td className="n">{p.cap > 0 ? cxF(p.space, 1) : '-'}</td>
+                                    <td className="n"><b>{p.take > 0 ? cxF(p.take, 1) : '-'}</b></td>
+                                    <td className="n">{p.take > 0 ? cxF(p.mtIn, 1) : '-'}</td>
+                                    <td className="n">{isFinite(p.fin) && p.take > 0 ? cxF(p.fin, 1) + '%' : '-'}</td>
+                                    <td className="n">{isFinite(p.at) ? hhm(p.at) : '-'}</td>
+                                    <td><button type="button" className="icon-btn" aria-label="Remove tank" onClick={() => setS((o) => ({ ...o, tanks: o.tanks.filter((_, j) => j !== i), rec: (o.rec || []).filter((_, j) => j !== i) }))}>×</button></td>
+                                </tr>); })}</tbody></table></div>
+                        <div className="cx-btns"><button type="button" className="btn-ghost" onClick={() => setS((o) => ({ ...o, tanks: [...o.tanks, { n: 'Tank ' + (o.tanks.length + 1), cap: '', rob: '', on: true }] }))}>+ Add tank</button></div>
+                        <div className="cx-grid">
+                            <CxOut l="Space available" v={cxF(space, 1)} u="m³" />
+                            <CxOut l="Pumping time" v={clock > 0 ? hhm(clock) : '-'} />
+                            <CxOut l="Status" v={!isFinite(vObs) ? '-' : short ? 'Short of space' : 'Fits'} sub={short ? cxF(left, 1) + ' m³ will not fit at ' + Math.round(fill * 100) + '%' : ''} hi={!short} />
+                        </div>
+                        <div className="cx-hint">Tanks fill in the order listed; untick a tank to skip it. Reduce the rate when topping off each tank and before the last one, and keep the agreed signals with the barge.</div>
+                    </div>}
+                    {s.view === 'rec' && <div className="card cx-card">
+                        <div className="card-title">Quantity received from soundings</div>
+                        <div className="bw-scroll"><table className="bw-steps er-plan"><thead><tr><th>Tank</th><th className="n">Before (m³ obs)</th><th className="n">Temp °C</th><th className="n">After (m³ obs)</th><th className="n">Temp °C</th><th className="n">Received (m³ at 15)</th><th className="n">Received (t)</th></tr></thead>
+                            <tbody>{s.tanks.map((t, i) => (
+                                <tr key={i}><td className="nw">{t.n}</td>
+                                    <td><input className="input-field bw-lc" inputMode="decimal" value={rec[i].b} onChange={(e) => setRec(i, 'b', e.target.value)} /></td>
+                                    <td><input className="input-field bw-lc" inputMode="decimal" value={rec[i].bt} placeholder={s.temp} onChange={(e) => setRec(i, 'bt', e.target.value)} /></td>
+                                    <td><input className="input-field bw-lc" inputMode="decimal" value={rec[i].a} onChange={(e) => setRec(i, 'a', e.target.value)} /></td>
+                                    <td><input className="input-field bw-lc" inputMode="decimal" value={rec[i].at} placeholder={s.temp} onChange={(e) => setRec(i, 'at', e.target.value)} /></td>
+                                    <td className="n">{cxF(recRows[i].v15, 2)}</td><td className="n"><b>{cxF(recRows[i].mt, 3)}</b></td></tr>))}</tbody></table></div>
+                        <div className="cx-row" style={{ marginTop: 10 }}>
+                            <CxField label="BDN quantity (t)" value={s.bdn} onChange={set('bdn')} />
+                            <CxField label="Tolerance (%)" value={s.tol} onChange={set('tol')} />
+                        </div>
+                        <div className="cx-grid">
+                            <CxOut l="Ship received" v={recMt > 0 ? recMt.toFixed(3) : '-'} u="t" hi />
+                            <CxOut l="Difference to BDN" v={isFinite(diff) ? diff.toFixed(3) : '-'} u="t" sub={isFinite(pct) ? pct.toFixed(2) + '%' : ''} />
+                        </div>
+                        {isFinite(pct) && <div className={'cx-status ' + (pct < -tol ? 'bad' : 'ok')} style={{ marginTop: 10 }}>{pct < -tol ? 'Short delivery beyond ' + tol + '%. Recheck soundings, trim and temperatures, then issue a Letter of Protest before signing the BDN.' : 'Within tolerance.'}</div>}
+                        <div className="cx-hint" style={{ marginTop: 8 }}>Volumes are observed volumes from the tank tables after trim and list correction. Uses the BDN density for every tank.</div>
+                    </div>}
+                    {s.view === 'info' && <div className="card cx-card">
+                        <div className="card-title">Bunker record</div>
+                        <div className="cx-row">
+                            <CxField label="Port" value={inf.port} onChange={setI('port')} type="text" />
+                            <CxField label="Supplier" value={inf.supplier} onChange={setI('supplier')} type="text" />
+                            <CxField label="Barge" value={inf.barge} onChange={setI('barge')} type="text" />
+                            <CxField label="BDN number" value={inf.bdnNo} onChange={setI('bdnNo')} type="text" />
+                        </div>
+                        <div className="cx-row">
+                            <CxField label="Pumping start" type="datetime-local" value={inf.start} onChange={setI('start')} />
+                            <CxField label="Pumping end" type="datetime-local" value={inf.end} onChange={setI('end')} />
+                            <CxField label="Sulphur (% m/m)" value={inf.sul} onChange={setI('sul')} />
+                            <CxField label="Viscosity (cSt at 50 °C)" value={inf.visc} onChange={setI('visc')} />
+                        </div>
+                        <div className="cx-row">
+                            <CxField label="MARPOL sample seal number" value={inf.seal} onChange={setI('seal')} type="text" />
+                            <CxField label="Other sample seals" value={inf.seals} onChange={setI('seals')} type="text" placeholder="ship, supplier, lab" />
+                        </div>
+                        <div className="er-note" style={{ whiteSpace: 'pre-wrap' }}>{summary}</div>
+                        <div className="cx-btns"><button type="button" className="btn-ghost" onClick={() => erCopy(summary, flash)}>Copy report</button>{msg && <span className="cx-hint" style={{ color: 'var(--ok)' }}>{msg}</span>}</div>
+                        <div className="cx-hint">Record the bunkering in the Oil Record Book under H 26 (Engine Room, ORB Entry Maker). Keep the BDN on board for 3 years and the MARPOL sample for at least 12 months.</div>
+                    </div>}
+                </div>
+            );
+        }
+        function hhm(h) { return isFinite(h) ? Math.floor(h) + 'h ' + String(Math.round((h % 1) * 60)).padStart(2, '0') + 'm' : '-'; }
+
+        // ---------- 4. ME performance ----------
+        const PF_KEY = 'tfm_er_perf_v1';
+        const PF_DEF = () => ({
+            eng: { name: '', mcr: '', rpmMcr: '', cyl: '6', bore: '', stroke: '', pitch: '', eff: '95', liMcr: '' },
+            method: 'li', rpm: '', li: '', kw: '', mipAvg: '', hrs: '24', fo: '', lcv: '42.7', log: '', gps: '',
+            lim: { pmax: '3', pcomp: '3', texh: '40', mip: '0.5' },
+            cyl: Array.from({ length: 6 }, () => ({ pmax: '', pcomp: '', texh: '', idx: '', mip: '' })), hist: [], showEng: true
+        });
+        function PerfTab() {
+            const [s, setS, set] = useErStore(PF_KEY, PF_DEF);
+            const [msg, flash] = useErMsg();
+            const e = s.eng; const setE = (k) => (v) => setS((o) => ({ ...o, eng: { ...o.eng, [k]: v } }));
+            const setL = (k) => (v) => setS((o) => ({ ...o, lim: { ...o.lim, [k]: v } }));
+            const nCyl = Math.max(1, Math.min(14, parseInt(e.cyl) || 6));
+            const cyl = Array.from({ length: nCyl }, (_, i) => s.cyl[i] || { pmax: '', pcomp: '', texh: '', idx: '', mip: '' });
+            const setC = (i, k, v) => setS((o) => { const c = Array.from({ length: nCyl }, (_, j) => ({ ...(o.cyl[j] || { pmax: '', pcomp: '', texh: '', idx: '', mip: '' }) })); c[i][k] = v; return { ...o, cyl: c }; });
+            const mcr = pn(e.mcr), nM = pn(e.rpmMcr), rpm = pn(s.rpm), D = pn(e.bore) / 1000, St = pn(e.stroke) / 1000, eff = (pn(e.eff) || 95) / 100;
+            const avg = (k) => { const v = cyl.map((c) => pn(c[k])).filter((x) => isFinite(x)); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : NaN; };
+            const mipCyl = avg('mip');
+            const mip = isFinite(pn(s.mipAvg)) ? pn(s.mipAvg) : mipCyl;
+            const swept = D > 0 && St > 0 ? Math.PI / 4 * D * D * St : NaN; // m3 per cylinder
+            let P = NaN, how = '';
+            if (s.method === 'kw') { P = pn(s.kw); how = 'shaft power meter'; }
+            else if (s.method === 'li') { const li = pn(s.li), liM = pn(e.liMcr); P = mcr > 0 && nM > 0 && rpm > 0 && li > 0 && liM > 0 ? mcr * (li / liM) * (rpm / nM) : NaN; how = 'load indicator × rpm'; }
+            else { const Pi = isFinite(mip) && swept > 0 && rpm > 0 ? mip * 100 * swept * (rpm / 60) * nCyl : NaN; P = Pi * eff; how = 'MIP, indicated × mechanical efficiency'; }
+            const load = P > 0 && mcr > 0 ? P / mcr * 100 : NaN;
+            const bmep = P > 0 && swept > 0 && rpm > 0 ? P / (100 * swept * (rpm / 60) * nCyl) : NaN;
+            const hrs = pn(s.hrs), fo = pn(s.fo), lcv = pn(s.lcv) || 42.7;
+            const sfoc = P > 0 && hrs > 0 && fo > 0 ? fo * 1e6 / (P * hrs) : NaN;
+            const sfocIso = isFinite(sfoc) ? sfoc * lcv / 42.7 : NaN;
+            const perDay = hrs > 0 && fo > 0 ? fo / hrs * 24 : NaN;
+            const engDist = pn(e.pitch) > 0 && rpm > 0 && hrs > 0 ? pn(e.pitch) * rpm * 60 * hrs / 1852 : NaN;
+            const slipLog = isFinite(engDist) && pn(s.log) > 0 ? (engDist - pn(s.log)) / engDist * 100 : NaN;
+            const slipGps = isFinite(engDist) && pn(s.gps) > 0 ? (engDist - pn(s.gps)) / engDist * 100 : NaN;
+            const engSpd = isFinite(engDist) && hrs > 0 ? engDist / hrs : NaN;
+            const lim = { pmax: pn(s.lim.pmax), pcomp: pn(s.lim.pcomp), texh: pn(s.lim.texh), mip: pn(s.lim.mip), idx: NaN };
+            const cols = [['pmax', 'Pmax (bar)'], ['pcomp', 'Pcomp (bar)'], ['texh', 'Exh temp (°C)'], ['idx', 'Fuel index'], ['mip', 'MIP (bar)']];
+            const avgs = Object.fromEntries(cols.map(([k]) => [k, avg(k)]));
+            const flags = [];
+            cyl.forEach((c, i) => cols.forEach(([k, n]) => { const d = pn(c[k]) - avgs[k]; if (isFinite(d) && isFinite(lim[k]) && Math.abs(d) > lim[k]) flags.push('Unit ' + (i + 1) + ' ' + n.replace(/ \(.*/, '') + ' ' + (d > 0 ? '+' : '') + d.toFixed(1) + ' from average'); }));
+            const saveHist = () => { setS((o) => ({ ...o, hist: [{ id: Date.now(), d: cxToday(), rpm, P, load, sfoc: sfocIso, slip: isFinite(slipLog) ? slipLog : slipGps, pmax: avgs.pmax, texh: avgs.texh }, ...(o.hist || [])].slice(0, 60) })); flash('Saved'); };
+            const report = ['ME performance ' + cxToday() + (e.name ? ' · ' + e.name : ''),
+                'RPM ' + cxF(rpm, 1) + ', power ' + cxInt(P) + ' kW (' + cxF(load, 1) + '% MCR) by ' + how,
+                'FO ' + cxF(fo, 2) + ' t in ' + cxF(hrs, 1) + ' h = ' + cxF(perDay, 2) + ' t/day, SFOC ' + cxF(sfoc, 1) + ' g/kWh, at LCV 42.7: ' + cxF(sfocIso, 1) + ' g/kWh',
+                'Engine distance ' + cxF(engDist, 1) + ' NM, slip ' + (isFinite(slipLog) ? cxF(slipLog, 1) + '% (log)' : '') + (isFinite(slipGps) ? ' ' + cxF(slipGps, 1) + '% (GPS)' : ''),
+                'Average Pmax ' + cxF(avgs.pmax, 1) + ', Pcomp ' + cxF(avgs.pcomp, 1) + ' bar, exhaust ' + cxF(avgs.texh, 0) + ' °C',
+                flags.length ? 'Deviations: ' + flags.join('; ') : 'No cylinder beyond the deviation limits'].join('\n');
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">ME Performance</h2>
+                    <div className="card cx-card">
+                        <div className="card-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>Engine particulars<button type="button" className="btn-ghost" onClick={() => set('showEng')(!s.showEng)}>{s.showEng ? 'Hide' : 'Edit'}</button></div>
+                        {s.showEng ? <><div className="cx-row">
+                            <CxField label="Engine" value={e.name} onChange={setE('name')} type="text" placeholder="e.g. MAN B&W 6S50MC-C" />
+                            <CxField label="MCR (kW)" value={e.mcr} onChange={setE('mcr')} />
+                            <CxField label="RPM at MCR" value={e.rpmMcr} onChange={setE('rpmMcr')} />
+                            <CxField label="Cylinders" value={e.cyl} onChange={setE('cyl')} />
+                        </div><div className="cx-row">
+                            <CxField label="Bore (mm)" value={e.bore} onChange={setE('bore')} />
+                            <CxField label="Stroke (mm)" value={e.stroke} onChange={setE('stroke')} />
+                            <CxField label="Propeller pitch (m)" value={e.pitch} onChange={setE('pitch')} />
+                            <CxField label="Mechanical efficiency (%)" value={e.eff} onChange={setE('eff')} />
+                            <CxField label="Load indicator at MCR" value={e.liMcr} onChange={setE('liMcr')} />
+                        </div></> : <div className="cx-hint">{e.name || 'Main engine'} · MCR {e.mcr || '?'} kW at {e.rpmMcr || '?'} rpm · {nCyl} cyl · pitch {e.pitch || '?'} m</div>}
+                    </div>
+                    <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="card-title">Reading</div>
+                            <div className="cx-row">
+                                <CxField label="RPM" value={s.rpm} onChange={set('rpm')} />
+                                <ErSel label="Power from" value={s.method} onChange={set('method')} opts={[['li', 'Load indicator'], ['mip', 'MIP (indicator cards)'], ['kw', 'Shaft power meter']]} />
+                                {s.method === 'li' && <CxField label="Load indicator" value={s.li} onChange={set('li')} />}
+                                {s.method === 'kw' && <CxField label="Shaft power (kW)" value={s.kw} onChange={set('kw')} />}
+                                {s.method === 'mip' && <CxField label="Average MIP (bar)" value={s.mipAvg} onChange={set('mipAvg')} placeholder={isFinite(mipCyl) ? cxF(mipCyl, 2) + ' from cylinders' : ''} />}
+                            </div>
+                            <div className="cx-row">
+                                <CxField label="Period (h)" value={s.hrs} onChange={set('hrs')} />
+                                <CxField label="ME fuel used (t)" value={s.fo} onChange={set('fo')} hint="Flowmeter or soundings" />
+                                <CxField label="LCV (MJ/kg)" value={s.lcv} onChange={set('lcv')} hint="From the fuel report, 42.7 = ISO" />
+                            </div>
+                            <div className="cx-row">
+                                <CxField label="Distance by log (NM)" value={s.log} onChange={set('log')} />
+                                <CxField label="Distance by GPS (NM)" value={s.gps} onChange={set('gps')} />
+                            </div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Result</div>
+                            <div className="cx-grid" style={{ marginTop: 0 }}>
+                                <CxOut l="Power" v={cxInt(P)} u="kW" hi sub={how} />
+                                <CxOut l="Load" v={cxF(load, 1)} u="% MCR" />
+                                <CxOut l="BMEP" v={cxF(bmep, 2)} u="bar" />
+                                <CxOut l="Fuel per day" v={cxF(perDay, 2)} u="t" />
+                                <CxOut l="SFOC" v={cxF(sfoc, 1)} u="g/kWh" />
+                                <CxOut l="SFOC at LCV 42.7" v={cxF(sfocIso, 1)} u="g/kWh" hi />
+                                <CxOut l="Engine distance" v={cxF(engDist, 1)} u="NM" sub={isFinite(engSpd) ? 'engine speed ' + cxF(engSpd, 2) + ' kn' : ''} />
+                                <CxOut l="Slip (log)" v={cxF(slipLog, 1)} u="%" />
+                                <CxOut l="Slip (GPS)" v={cxF(slipGps, 1)} u="%" />
+                            </div>
+                            <div className="cx-hint" style={{ marginTop: 8 }}>SFOC is corrected for fuel LCV only. For shop test comparison also correct for scavenge air and cooling water temperatures as in the maker's manual.</div>
+                        </div>
+                    </div>
+                    <div className="card cx-card">
+                        <div className="card-title">Cylinders</div>
+                        <div className="bw-scroll"><table className="bw-steps er-cyl"><thead><tr><th>Unit</th>{cols.map(([k, n]) => <th key={k} className="n">{n}</th>)}<th className="n">Pmax − Pcomp</th></tr></thead>
+                            <tbody>{cyl.map((c, i) => (
+                                <tr key={i}><td><b>{i + 1}</b></td>
+                                    {cols.map(([k]) => { const d = pn(c[k]) - avgs[k]; const bad = isFinite(d) && isFinite(lim[k]) && Math.abs(d) > lim[k]; return <td key={k} className="n"><input className={'input-field bw-lc' + (bad ? ' er-bad' : '')} inputMode="decimal" value={c[k]} onChange={(ev) => setC(i, k, ev.target.value)} />{isFinite(d) && <small className={bad ? 'er-dev bad' : 'er-dev'}>{(d > 0 ? '+' : '') + d.toFixed(k === 'texh' ? 0 : 1)}</small>}</td>; })}
+                                    <td className="n">{cxF(pn(c.pmax) - pn(c.pcomp), 1)}</td></tr>))}
+                                <tr className="er-avg"><td>Avg</td>{cols.map(([k]) => <td key={k} className="n"><b>{cxF(avgs[k], k === 'texh' ? 0 : 1)}</b></td>)}<td className="n">{cxF(avgs.pmax - avgs.pcomp, 1)}</td></tr></tbody></table></div>
+                        <div className="cx-row" style={{ marginTop: 10 }}>
+                            <CxField label="Pmax limit ± (bar)" value={s.lim.pmax} onChange={setL('pmax')} />
+                            <CxField label="Pcomp limit ± (bar)" value={s.lim.pcomp} onChange={setL('pcomp')} />
+                            <CxField label="Exhaust limit ± (°C)" value={s.lim.texh} onChange={setL('texh')} />
+                            <CxField label="MIP limit ± (bar)" value={s.lim.mip} onChange={setL('mip')} />
+                        </div>
+                        <div className={'cx-status ' + (flags.length ? 'bad' : 'ok')}>{flags.length ? flags.join('. ') + '.' : 'No cylinder outside the deviation limits.'}</div>
+                        <div className="cx-hint" style={{ marginTop: 6 }}>Set the limits from the engine maker's performance guide.</div>
+                    </div>
+                    <div className="card cx-card">
+                        <div className="card-title">Report and history</div>
+                        <div className="er-note" style={{ whiteSpace: 'pre-wrap' }}>{report}</div>
+                        <div className="cx-btns"><button type="button" className="btn btn-primary" style={{ marginTop: 0 }} onClick={saveHist}>Save reading</button><button type="button" className="btn-ghost" onClick={() => erCopy(report, flash)}>Copy report</button>{msg && <span className="cx-hint" style={{ color: 'var(--ok)' }}>{msg}</span>}</div>
+                        {(s.hist || []).length > 0 && <div className="bw-scroll" style={{ marginTop: 10 }}><table className="bw-steps"><thead><tr><th>Date</th><th className="n">RPM</th><th className="n">kW</th><th className="n">% MCR</th><th className="n">SFOC ISO</th><th className="n">Slip %</th><th className="n">Pmax</th><th className="n">Exh °C</th><th /></tr></thead>
+                            <tbody>{s.hist.map((h) => <tr key={h.id}><td className="nw">{erDate(h.d)}</td><td className="n">{cxF(h.rpm, 1)}</td><td className="n">{cxInt(h.P)}</td><td className="n">{cxF(h.load, 1)}</td><td className="n">{cxF(h.sfoc, 1)}</td><td className="n">{cxF(h.slip, 1)}</td><td className="n">{cxF(h.pmax, 1)}</td><td className="n">{cxF(h.texh, 0)}</td><td><button type="button" className="icon-btn" aria-label="Delete" onClick={() => setS((o) => ({ ...o, hist: o.hist.filter((x) => x.id !== h.id) }))}>×</button></td></tr>)}</tbody></table></div>}
+                    </div>
+                </div>
+            );
+        }
+
+        // ---------- 5. Engineer's calculator ----------
+        const EC_KEY = 'tfm_er_calc_v1';
+        // Saturation pressure, bar absolute (bubble point for blends), -40 to 60 °C in 10 °C steps
+        const REFR = {
+            'R134a': [0.512, 0.844, 1.327, 2.006, 2.928, 4.146, 5.717, 7.702, 10.166, 13.18, 16.82],
+            'R22': [1.05, 1.64, 2.45, 3.55, 4.98, 6.81, 9.10, 11.92, 15.34, 19.42, 24.26],
+            'R404A': [1.33, 2.04, 3.02, 4.33, 6.05, 8.24, 10.96, 14.28, 18.28, 23.04, 28.6],
+            'R507A': [1.40, 2.13, 3.14, 4.49, 6.24, 8.48, 11.27, 14.67, 18.78, 23.68, 29.4],
+            'R410A': [1.76, 2.70, 4.00, 5.73, 7.99, 10.86, 14.44, 18.85, 24.19, 30.65, 38.3]
+        };
+        const REFR_T = [-40, -30, -20, -10, 0, 10, 20, 30, 40, 50, 60];
+        function refrP(name, t, custom) { // bar abs at temperature
+            const pts = name === 'Custom' ? custom : REFR_T.map((x, i) => [x, REFR[name][i]]);
+            if (!pts || pts.length < 2 || !isFinite(t)) return NaN;
+            for (let i = 0; i < pts.length - 1; i++) { const [t1, p1] = pts[i], [t2, p2] = pts[i + 1]; if (t <= t2 || i === pts.length - 2) { const f = (t - t1) / (t2 - t1); return Math.exp(Math.log(p1) + f * (Math.log(p2) - Math.log(p1))); } }
+            return NaN;
+        }
+        function refrT(name, p, custom) { // saturation temperature at bar abs
+            const pts = name === 'Custom' ? custom : REFR_T.map((x, i) => [x, REFR[name][i]]);
+            if (!pts || pts.length < 2 || !(p > 0)) return NaN;
+            const lp = Math.log(p);
+            for (let i = 0; i < pts.length - 1; i++) { const [t1, p1] = pts[i], [t2, p2] = pts[i + 1]; if (p <= p2 || i === pts.length - 2) { const f = (lp - Math.log(p1)) / (Math.log(p2) - Math.log(p1)); return t1 + f * (t2 - t1); } }
+            return NaN;
+        }
+        // Walther (ASTM D341): log log (v + 0.7) = A − B log T
+        const walZ = (v) => Math.log10(Math.log10(v + 0.7));
+        function viscFit(v1, t1, v2, t2) {
+            const T1 = t1 + 273.15; let B = 3.52; // typical residual fuel slope when only one point is known
+            if (v2 > 0 && isFinite(t2) && t2 !== t1) B = (walZ(v1) - walZ(v2)) / (Math.log10(t2 + 273.15) - Math.log10(T1));
+            const A = walZ(v1) + B * Math.log10(T1);
+            return { A, B, at: (t) => Math.pow(10, Math.pow(10, A - B * Math.log10(t + 273.15))) - 0.7, temp: (v) => Math.pow(10, (A - walZ(v)) / B) - 273.15 };
+        }
+        const UNITS = {
+            Pressure: [['bar', 1], ['kPa', 0.01], ['MPa', 10], ['psi', 0.0689476], ['kg/cm²', 0.980665], ['mmHg', 0.00133322], ['m water', 0.0980665], ['atm', 1.01325]],
+            Power: [['kW', 1], ['bhp (hp)', 0.745700], ['PS (metric hp)', 0.735499], ['kcal/h', 0.00116300], ['Btu/h', 0.000293071], ['TR (refrigeration ton)', 3.51685]],
+            Flow: [['m³/h', 1], ['l/min', 0.06], ['l/s', 3.6], ['US gpm', 0.227125], ['UK gpm', 0.272765], ['bbl/day', 0.00662447]],
+            Torque: [['N·m', 1], ['kN·m', 1000], ['kgf·m', 9.80665], ['lbf·ft', 1.35582], ['lbf·in', 0.112985]],
+            Volume: [['m³', 1], ['litre', 0.001], ['US gal', 0.00378541], ['UK gal', 0.00454609], ['barrel', 0.158987], ['ft³', 0.0283168]],
+            Mass: [['t', 1], ['kg', 0.001], ['long ton', 1.01605], ['short ton', 0.907185], ['lb', 0.000453592]]
+        };
+        const EC_DEF = () => ({
+            tool: 'heat',
+            heat: { v1: '380', t1: '50', v2: '', t2: '', target: '13', at: '' },
+            disc: { rho: '0.9910', t: '98', type: '991', discs: [] },
+            refr: { gas: 'R404A', mode: 'tp', t: '', p: '', gauge: true, suc: '', sucT: '', dis: '', liqT: '', custom: '' },
+            elec: { mode: 'kw', v: '440', i: '', pf: '0.8', kw: '', eff: '', gens: [{ kw: '', cap: '' }, { kw: '', cap: '' }] },
+            unit: { cat: 'Pressure', from: 'bar', v: '1' }
+        });
+        function EcalcTab() {
+            const [s, setS, set] = useErStore(EC_KEY, EC_DEF);
+            const part = (p) => ({ s: s[p], set: (k) => (v) => setS((o) => ({ ...o, [p]: { ...o[p], [k]: v } })), setAll: (obj) => setS((o) => ({ ...o, [p]: { ...o[p], ...obj } })) });
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Engineer's Calculator</h2>
+                    <ErTabs tabs={[['heat', 'Fuel heating'], ['disc', 'Purifier'], ['refr', 'Refrigerant P-T'], ['elec', 'Electrical'], ['unit', 'Units']]} value={s.tool} onChange={set('tool')} />
+                    {s.tool === 'heat' && <EcHeat {...part('heat')} />}
+                    {s.tool === 'disc' && <EcDisc {...part('disc')} />}
+                    {s.tool === 'refr' && <EcRefr {...part('refr')} />}
+                    {s.tool === 'elec' && <EcElec {...part('elec')} />}
+                    {s.tool === 'unit' && <EcUnit {...part('unit')} />}
+                </div>
+            );
+        }
+        function EcHeat({ s, set }) {
+            const v1 = pn(s.v1), t1 = pn(s.t1), v2 = pn(s.v2), t2 = pn(s.t2);
+            const fit = v1 > 0 && isFinite(t1) ? viscFit(v1, t1, v2, t2) : null;
+            const targets = [10, 12, 13, 15, 20];
+            const tg = pn(s.target);
+            const tAt = fit && tg > 0 ? fit.temp(tg) : NaN;
+            const vAt = fit && isFinite(pn(s.at)) ? fit.at(pn(s.at)) : NaN;
+            return (
+                <div className="cx-two">
+                    <div className="card cx-card">
+                        <div className="card-title">Fuel viscosity</div>
+                        <div className="cx-row">
+                            <CxField label="Viscosity (cSt)" value={s.v1} onChange={set('v1')} hint="From the BDN or fuel analysis" />
+                            <CxField label="At temperature (°C)" value={s.t1} onChange={set('t1')} hint="50 for residual, 40 for distillate" />
+                        </div>
+                        <div className="cx-sub">Second point (optional, from the lab report)</div>
+                        <div className="cx-row">
+                            <CxField label="Viscosity (cSt)" value={s.v2} onChange={set('v2')} />
+                            <CxField label="At temperature (°C)" value={s.t2} onChange={set('t2')} hint="e.g. 100 °C" />
+                        </div>
+                        <div className="cx-row">
+                            <CxField label="Target injection viscosity (cSt)" value={s.target} onChange={set('target')} hint="Engine maker's range, often 10 to 15" />
+                            <CxField label="Viscosity at temperature (°C)" value={s.at} onChange={set('at')} placeholder="e.g. 120" />
+                        </div>
+                    </div>
+                    <div className="card cx-card">
+                        <div className="card-title">Heating needed</div>
+                        <div className="cx-grid" style={{ marginTop: 0 }}>
+                            <CxOut l={'Temperature for ' + (tg || '?') + ' cSt'} v={cxF(tAt, 0)} u="°C" hi />
+                            <CxOut l={'Viscosity at ' + (s.at || '?') + ' °C'} v={cxF(vAt, 1)} u="cSt" />
+                            {targets.map((v) => <CxOut key={v} l={v + ' cSt at'} v={fit ? cxF(fit.temp(v), 0) : '-'} u="°C" />)}
+                        </div>
+                        <div className="cx-hint" style={{ marginTop: 8 }}>Walther equation (ASTM D341). With one point it uses the typical slope for residual fuels; add a second point for an exact line. Stay within the maker's maximum fuel temperature; distillates need cooling, not heating, below about 2 cSt.</div>
+                        {fit && tAt > 150 && <div className="cx-status bad" style={{ marginTop: 8 }}>Above 150 °C. Check the heater limit and the engine maker's maximum.</div>}
+                    </div>
+                </div>
+            );
+        }
+        function EcDisc({ s, set, setAll }) {
+            const rho = erRho(s.rho), t = pn(s.t);
+            const rhoT = rho > 0 && isFinite(t) ? rho * vcf54b(rho, t) : NaN;
+            const lim = pn(s.type);
+            const discs = (s.discs || []).filter((d) => d.id && isFinite(pn(d.max))).sort((a, b) => pn(a.max) - pn(b.max));
+            const pick = isFinite(rhoT) ? discs.find((d) => rhoT <= pn(d.max)) : null;
+            const setD = (i, k, v) => setAll({ discs: (s.discs || []).map((d, j) => (j === i ? { ...d, [k]: v } : d)) });
+            return (
+                <div className="cx-two">
+                    <div className="card cx-card">
+                        <div className="card-title">Fuel and separator</div>
+                        <div className="cx-row">
+                            <CxField label="Density at 15 °C" value={s.rho} onChange={set('rho')} hint="t/m³ or kg/m³" />
+                            <CxField label="Separation temperature (°C)" value={s.t} onChange={set('t')} hint="Usually 98 °C for residual fuel" />
+                            <ErSel label="Separator type" value={s.type} onChange={set('type')} opts={[['991', 'Gravity disc (max 991 kg/m³)'], ['1010', 'ALCAP or similar (max 1010 kg/m³)']]} />
+                        </div>
+                        <div className="cx-sub">Gravity disc chart from the separator manual (optional)</div>
+                        <div className="cx-hint" style={{ marginBottom: 6 }}>Enter each disc and the highest density at separation temperature it suits, from the maker's nomogram.</div>
+                        {(s.discs || []).map((d, i) => (
+                            <div key={i} className="er-disc"><input className="input-field" placeholder="Disc, e.g. Ø 89" value={d.id} onChange={(e) => setD(i, 'id', e.target.value)} /><input className="input-field" inputMode="decimal" placeholder="Max kg/m³ at temp" value={d.max} onChange={(e) => setD(i, 'max', e.target.value)} /><button type="button" className="icon-btn" aria-label="Remove" onClick={() => setAll({ discs: s.discs.filter((_, j) => j !== i) })}>×</button></div>
+                        ))}
+                        <button type="button" className="btn-ghost" onClick={() => setAll({ discs: [...(s.discs || []), { id: '', max: '' }] })}>+ Add disc</button>
+                    </div>
+                    <div className="card cx-card">
+                        <div className="card-title">Result</div>
+                        <div className="cx-grid" style={{ marginTop: 0 }}>
+                            <CxOut l="Density at separation temperature" v={cxF(rhoT, 1)} u="kg/m³" hi />
+                            <CxOut l="VCF" v={cxF(rho > 0 ? vcf54b(rho, t) : NaN, 5)} />
+                            <CxOut l="Gravity disc" v={pick ? pick.id : discs.length ? 'None fits' : '-'} sub={discs.length ? '' : 'add the disc chart'} />
+                        </div>
+                        {rho > 0 && <div className={'cx-status ' + (rho > lim ? 'bad' : 'ok')} style={{ marginTop: 10 }}>{rho > lim ? 'Density at 15 °C ' + rho.toFixed(1) + ' kg/m³ is above ' + lim + ' kg/m³. This separator type cannot clean it reliably.' : 'Density within the separator limit of ' + lim + ' kg/m³ at 15 °C.'}</div>}
+                    </div>
+                </div>
+            );
+        }
+        function EcRefr({ s, set }) {
+            const custom = (s.custom || '').split(/[\n;]+/).map((l) => l.split(/[,\s]+/).map(Number)).filter((a) => a.length >= 2 && isFinite(a[0]) && a[1] > 0).sort((a, b) => a[0] - b[0]);
+            const atm = 1.01325, g = s.gauge ? atm : 0;
+            const tIn = pn(s.t), pIn = pn(s.p);
+            const pOut = refrP(s.gas, tIn, custom), tOut = refrT(s.gas, pIn + g, custom);
+            const sucSat = refrT(s.gas, pn(s.suc) + g, custom), disSat = refrT(s.gas, pn(s.dis) + g, custom);
+            const sh = isFinite(sucSat) && isFinite(pn(s.sucT)) ? pn(s.sucT) - sucSat : NaN;
+            const sc = isFinite(disSat) && isFinite(pn(s.liqT)) ? disSat - pn(s.liqT) : NaN;
+            const unit = s.gauge ? 'bar g' : 'bar abs';
+            const table = REFR_T.map((t) => [t, refrP(s.gas, t, custom)]).filter(([, p]) => isFinite(p));
+            return (
+                <div className="cx-two">
+                    <div>
+                        <div className="card cx-card">
+                            <div className="card-title">Refrigerant</div>
+                            <div className="cx-row">
+                                <ErSel label="Gas" value={s.gas} onChange={set('gas')} opts={[...Object.keys(REFR), ['Custom', 'Custom (from plant chart)']]} />
+                                <ErSel label="Pressure as" value={s.gauge ? 'g' : 'a'} onChange={(v) => set('gauge')(v === 'g')} opts={[['g', 'Gauge (bar g)'], ['a', 'Absolute (bar abs)']]} />
+                            </div>
+                            {s.gas === 'Custom' && <div><label className="input-label">Points from the plant's P-T chart: temperature °C, bar abs, one per line</label><textarea className="input-field" rows={4} value={s.custom} onChange={(e) => set('custom')(e.target.value)} placeholder={'-30, 1.8\n0, 5.2\n40, 16.5'} /></div>}
+                            <div className="cx-row">
+                                <CxField label="Temperature (°C)" value={s.t} onChange={set('t')} />
+                                <CxField label={'Pressure (' + unit + ')'} value={s.p} onChange={set('p')} />
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l={'Pressure at ' + (s.t || '?') + ' °C'} v={isFinite(pOut) ? cxF(pOut - g, 2) : '-'} u={unit} hi />
+                                <CxOut l={'Saturation at ' + (s.p || '?') + ' ' + unit} v={cxF(tOut, 1)} u="°C" hi />
+                            </div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Superheat and subcooling</div>
+                            <div className="cx-row">
+                                <CxField label={'Suction pressure (' + unit + ')'} value={s.suc} onChange={set('suc')} />
+                                <CxField label="Suction line temp (°C)" value={s.sucT} onChange={set('sucT')} />
+                                <CxField label={'Discharge pressure (' + unit + ')'} value={s.dis} onChange={set('dis')} />
+                                <CxField label="Liquid line temp (°C)" value={s.liqT} onChange={set('liqT')} />
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l="Evaporating temp" v={cxF(sucSat, 1)} u="°C" />
+                                <CxOut l="Superheat" v={cxF(sh, 1)} u="K" hi />
+                                <CxOut l="Condensing temp" v={cxF(disSat, 1)} u="°C" />
+                                <CxOut l="Subcooling" v={cxF(sc, 1)} u="K" hi />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="card cx-card">
+                        <div className="card-title">{s.gas} P-T chart</div>
+                        <table className="bw-steps er-pt"><thead><tr><th className="n">°C</th><th className="n">bar abs</th><th className="n">bar g</th></tr></thead>
+                            <tbody>{table.map(([t, p]) => <tr key={t}><td className="n">{t}</td><td className="n">{p.toFixed(2)}</td><td className="n">{(p - atm).toFixed(2)}</td></tr>)}</tbody></table>
+                        <div className="cx-hint" style={{ marginTop: 8 }}>Approximate saturation values; for blends the bubble point. Check against the chart on the plant or the gas supplier's table. Range −40 to 60 °C.</div>
+                    </div>
+                </div>
+            );
+        }
+        function EcElec({ s, set, setAll }) {
+            const V = pn(s.v), I = pn(s.i), pf = pn(s.pf), kwIn = pn(s.kw), eff = pn(s.eff) > 0 ? pn(s.eff) / 100 : 1;
+            const r3 = Math.sqrt(3);
+            let kw = NaN, kva = NaN, amps = NaN;
+            if (s.mode === 'kw') { kva = V > 0 && I > 0 ? r3 * V * I / 1000 : NaN; kw = isFinite(kva) && pf > 0 ? kva * pf : NaN; amps = I; }
+            else { amps = kwIn > 0 && V > 0 && pf > 0 ? kwIn * 1000 / (r3 * V * pf * eff) : NaN; kva = isFinite(amps) ? r3 * V * amps / 1000 : NaN; kw = kwIn; }
+            const kvar = isFinite(kva) && isFinite(kw) ? Math.sqrt(Math.max(0, kva * kva - (s.mode === 'kw' ? kw : kw / eff) ** 2)) : NaN;
+            const gens = s.gens || [];
+            const tot = gens.reduce((a, gg) => a + (pn(gg.kw) || 0), 0), cap = gens.reduce((a, gg) => a + (pn(gg.cap) || 0), 0);
+            const share = cap > 0 ? tot / cap * 100 : NaN;
+            const setG = (i, k, v) => setAll({ gens: gens.map((gg, j) => (j === i ? { ...gg, [k]: v } : gg)) });
+            return (
+                <div className="cx-two">
+                    <div className="card cx-card">
+                        <div className="card-title">Three-phase power</div>
+                        <ErTabs tabs={[['kw', 'Volts and amps to kW'], ['amp', 'kW to amps']]} value={s.mode} onChange={set('mode')} />
+                        <div className="cx-row">
+                            <CxField label="Line voltage (V)" value={s.v} onChange={set('v')} />
+                            {s.mode === 'kw' ? <CxField label="Current (A)" value={s.i} onChange={set('i')} /> : <CxField label="Motor output (kW)" value={s.kw} onChange={set('kw')} />}
+                            <CxField label="Power factor" value={s.pf} onChange={set('pf')} />
+                            {s.mode === 'amp' && <CxField label="Motor efficiency (%)" value={s.eff} onChange={set('eff')} placeholder="100 if blank" />}
+                        </div>
+                        <div className="cx-grid">
+                            <CxOut l="Active power" v={cxF(kw, 1)} u="kW" hi={s.mode === 'kw'} />
+                            <CxOut l="Apparent power" v={cxF(kva, 1)} u="kVA" />
+                            <CxOut l="Reactive power" v={cxF(kvar, 1)} u="kVAR" />
+                            <CxOut l="Current" v={cxF(amps, 1)} u="A" hi={s.mode === 'amp'} />
+                        </div>
+                        <div className="cx-hint" style={{ marginTop: 8 }}>P = √3 × V × I × cos φ.</div>
+                    </div>
+                    <div className="card cx-card">
+                        <div className="card-title">Generator load sharing</div>
+                        {gens.map((gg, i) => {
+                            const pc = pn(gg.cap) > 0 && pn(gg.kw) >= 0 ? pn(gg.kw) / pn(gg.cap) * 100 : NaN;
+                            return (
+                                <div key={i} className="er-gen"><b>DG {i + 1}</b><input className="input-field" inputMode="decimal" placeholder="Load kW" value={gg.kw} onChange={(e) => setG(i, 'kw', e.target.value)} /><input className="input-field" inputMode="decimal" placeholder="Rated kW" value={gg.cap} onChange={(e) => setG(i, 'cap', e.target.value)} /><span className={'er-pc' + (isFinite(pc) && isFinite(share) && Math.abs(pc - share) > 10 ? ' bad' : '')}>{cxF(pc, 0)}%</span><button type="button" className="icon-btn" aria-label="Remove" onClick={() => setAll({ gens: gens.filter((_, j) => j !== i) })}>×</button></div>
+                            );
+                        })}
+                        <button type="button" className="btn-ghost" onClick={() => setAll({ gens: [...gens, { kw: '', cap: '' }] })}>+ Add generator</button>
+                        <div className="cx-grid">
+                            <CxOut l="Total load" v={cxF(tot, 0)} u="kW" />
+                            <CxOut l="Online capacity" v={cxF(cap, 0)} u="kW" />
+                            <CxOut l="Even share" v={cxF(share, 1)} u="%" hi />
+                        </div>
+                        <div className="cx-hint" style={{ marginTop: 8 }}>A generator more than 10 points from the even share is marked. Check the governor droop and the load sharing settings.</div>
+                    </div>
+                </div>
+            );
+        }
+        function EcUnit({ s, set, setAll }) {
+            const list = UNITS[s.cat] || UNITS.Pressure;
+            const from = list.find((u) => u[0] === s.from) || list[0];
+            const v = pn(s.v);
+            return (
+                <div className="card cx-card cx-wrap">
+                    <div className="cx-row">
+                        <ErSel label="Quantity" value={s.cat} onChange={(c) => setAll({ cat: c, from: UNITS[c][0][0] })} opts={Object.keys(UNITS)} />
+                        <CxField label="Value" value={s.v} onChange={set('v')} />
+                        <ErSel label="From" value={from[0]} onChange={set('from')} opts={list.map((u) => u[0])} />
+                    </div>
+                    <div className="cx-grid">
+                        {list.map((u) => <CxOut key={u[0]} l={u[0]} v={isFinite(v) ? fmtSig(v * from[1] / u[1]) : '-'} hi={u[0] === from[0]} />)}
+                    </div>
+                    <div className="cx-hint" style={{ marginTop: 8 }}>Temperature: °F = °C × 1.8 + 32. {isFinite(v) ? v + ' °C = ' + fmtSig(v * 1.8 + 32) + ' °F, ' + v + ' °F = ' + fmtSig((v - 32) / 1.8) + ' °C.' : ''}</div>
+                </div>
+            );
+        }
+
+        const APP_VERSION = '3.2.0';
         const WHATS_NEW = [
+            ['3.2.0', ['New Engine Room group: ORB Entry Maker, Fuel Changeover (ECA), Bunker Planner, ME Performance and Engineer\'s Calculator', 'Alt+1 to 5 switch between the five groups']],
             ['3.1.0', ['i button like Meridian PDF Mate: keyboard shortcuts, quick tour, about, app guide and update', 'NRE Days is its own tool under Personal', 'Media and Proofread moved to Personal']],
             ['3.0.0', ['New interface shared with Meridian PDF Mate: glass top bar, tool groups and a tool row in colour', 'Phone dock with group switcher', 'Bridge night mode with five brightness levels', 'Search all tools with Ctrl K']]
         ];
         const TOUR = [
-            { sel: '.cats, .catsw', t: 'Tool groups', d: 'Voyage, Cargo & Stability, Ship\'s Office and Personal. Each group remembers the last tool you used.' },
+            { sel: '.cats, .catsw', t: 'Tool groups', d: 'Voyage, Cargo & Stability, Engine Room, Ship\'s Office and Personal. Each group remembers the last tool you used.' },
             { sel: '.ribbon .tools, .dk-tools', t: 'Tools', d: 'The tools in the chosen group, each in its own colour. Arrow keys move between them.' },
             { sel: '.tsearch, .tb-search-m', t: 'Search', d: 'Find any tool by name or by what it does, for example "dew point" or "salary". Ctrl K opens it.' },
             { sel: '[aria-label="Bridge night mode"]', t: 'Bridge night mode', d: 'Red on black so you keep your night vision. Tap the moon again for five brightness levels.' },
@@ -6822,13 +7784,19 @@ const Proof = (function () {
             { key: 'media', label: 'Media', c: '#db2777', cd: '#f472b6' },
             { key: 'ot', label: 'Crew OT', c: '#1d4ed8', cd: '#60a5fa' },
             { key: 'bwe', label: 'Ballast Exchange', c: '#0e5c86', cd: '#7dd3fc' },
-            { key: 'nre', label: 'NRE Days', c: '#059669', cd: '#34d399' }
+            { key: 'nre', label: 'NRE Days', c: '#059669', cd: '#34d399' },
+            { key: 'orb', label: 'ORB Entries', c: '#7c2d12', cd: '#fdba74' },
+            { key: 'fco', label: 'Fuel Changeover', c: '#0d9488', cd: '#5eead4' },
+            { key: 'bunk', label: 'Bunker Planner', c: '#b91c1c', cd: '#fca5a5' },
+            { key: 'perf', label: 'ME Performance', c: '#4338ca', cd: '#a5b4fc' },
+            { key: 'ecalc', label: "Engineer's Calculator", c: '#6d28d9', cd: '#c4b5fd' }
         ];
         const TAB_GROUPS = [
-            { name: 'Voyage', keys: ['rob', 'eta', 'speed', 'time', 'load'] },
-            { name: 'Cargo & Stability', short: 'Cargo', keys: ['vent', 'dwt', 'hydro', 'bwe', 'calc'] },
-            { name: "Ship's Office", short: 'Office', keys: ['ot', 'garbage', 'conv'] },
-            { name: 'Personal', keys: ['budget', 'nre', 'media', 'proof'] }
+            { name: 'Voyage', icon: 'g0', keys: ['rob', 'eta', 'speed', 'time', 'load'] },
+            { name: 'Cargo & Stability', short: 'Cargo', icon: 'g1', keys: ['vent', 'dwt', 'hydro', 'bwe', 'calc'] },
+            { name: 'Engine Room', short: 'Engine', icon: 'gE', keys: ['orb', 'fco', 'bunk', 'perf', 'ecalc'] },
+            { name: "Ship's Office", short: 'Office', icon: 'g2', keys: ['ot', 'garbage', 'conv'] },
+            { name: 'Personal', icon: 'g3', keys: ['budget', 'nre', 'media', 'proof'] }
         ];
         const TAB_DESC = {
             rob: 'Fuel and fresh water remaining per leg',
@@ -6844,6 +7812,11 @@ const Proof = (function () {
             garbage: 'GMP drums per deck, Annex V',
             calc: 'DWA, days, SF, trim, roll, anchor, mooring',
             nre: 'Days in India and NRI status per financial year',
+            orb: 'Oil Record Book Part I entries, sludge and bilge totals',
+            fco: 'ECA changeover start time, timeline and log entry',
+            bunk: 'Tank plan, received quantity against the BDN',
+            perf: 'Power, SFOC, slip and cylinder deviations',
+            ecalc: 'Fuel heating, purifier, refrigerant, electrical, units',
             bwe: 'Exchange plan, D-1 check, drafts, SF/BM, Excel',
             budget: 'Salary, spending and in hand forecast',
             media: 'Compress and convert photos, PDF, video, audio',
@@ -6854,6 +7827,11 @@ const Proof = (function () {
             conv: 'units convert', hydro: 'hydrostatics tpc mctc lcf km', dwt: 'deadweight cargo intake draft', proof: 'spelling grammar email',
             time: 'time zone clock', load: 'load line zone summer winter tropical', garbage: 'garbage marpol annex v',
             calc: 'salinity dwa fwa days contract stowage factor density trim draft rolling period gm turning heel anchor holding cable scope catenary windlass mooring hours lines form 5 all fast all clear',
+            orb: 'oil record book orb part i marpol annex i sludge bilge incinerator evaporation 15 ppm ows reception facility bunkering code c d e f h i 11.1 12.1 12.2 12.3 12.4 circ 736',
+            fco: 'fuel changeover eca seca sulphur 0.10 mgo ulsfo hfo vlsfo switch over annex vi regulation 14 timing flush',
+            bunk: 'bunker bunkering bdn vcf astm 54b density temperature tank distribution 90% topping sample marpol seal letter of protest',
+            perf: 'main engine performance power kw sfoc slip mip pmax pcomp exhaust temperature indicator cards load indicator fuel index propeller pitch',
+            ecalc: 'engineer calculator purifier gravity disc density viscosity heating injection walther refrigerant r404a r134a r22 r507 r410a superheat subcooling pressure temperature electrical three phase kw amps power factor generator load sharing units psi bar torque flow',
             nre: 'nre nri tax resident india days financial year fy 182 residential status salary',
             budget: 'budget money salary wages expense spending savings allotment emi in hand forecast',
             ot: 'overtime ot crew hours fixed 103 extra wages payroll port coasting carry over estimate cut-off monthly',
@@ -6885,6 +7863,12 @@ const Proof = (function () {
             mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3.5 6.5 8.5 6.5 8.5-6.5" /></>,
             lock: <><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></>,
             offline: <><path d="M2 8.5a15 15 0 0 1 20 0" /><path d="M5.5 12a10 10 0 0 1 13 0" /><path d="M9 15.5a5 5 0 0 1 6 0" /><path d="M12 19h.01" /><path d="M3 3l18 18" /></>,
+            gE: <><circle cx="12" cy="12" r="3" /><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" /></>,
+            orb: <><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z" /><path d="M5 17a3 3 0 0 1 3-3h11" /><path d="M9 8h6" /></>,
+            fco: <><path d="M7 4v13" /><path d="m4 14 3 3 3-3" /><path d="M17 20V7" /><path d="m14 10 3-3 3 3" /></>,
+            bunk: <><path d="M4 21h10V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2z" /><path d="M4 10h10" /><path d="M14 8l3 3v6a1.5 1.5 0 0 0 3 0V9l-3-3" /></>,
+            perf: <><path d="M3 3v18h18" /><path d="m7 15 4-4 3 3 5-6" /></>,
+            ecalc: <><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z" /></>,
             g0: <><circle cx="12" cy="12" r="9" /><path d="m15.5 8.5-2 5-5 2 2-5z" /></>,
             g1: <><path d="M21 8l-9-5-9 5 9 5 9-5z" /><path d="M3 12.5l9 5 9-5" /><path d="M3 17l9 5 9-5" /></>,
             g2: <><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" /><path d="M3 12.5h18" /></>,
@@ -6991,7 +7975,7 @@ const Proof = (function () {
                 const onKey = (e) => {
                     const mod = e.metaKey || e.ctrlKey;
                     if (mod && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); setSearchOpen(true); setTimeout(() => searchRef.current && searchRef.current.focus(), 0); return; }
-                    if (e.altKey && !mod && /^Digit[1-4]$/.test(e.code)) { e.preventDefault(); const gi = +e.code.slice(5) - 1; if (TAB_GROUPS[gi]) openTab(keyIdx(lastInGroup(gi))); return; }
+                    if (e.altKey && !mod && /^Digit[1-5]$/.test(e.code)) { e.preventDefault(); const gi = +e.code.slice(5) - 1; if (TAB_GROUPS[gi]) openTab(keyIdx(lastInGroup(gi))); return; }
                     if (e.key === 'Escape') { setMenu(null); setSheet(null); }
                 };
                 const onBip = (e) => { e.preventDefault(); setInstallEvt(e); };
@@ -7324,7 +8308,7 @@ const Proof = (function () {
                             <div className="cats" role="tablist" aria-label="Tool groups">
                                 {TAB_GROUPS.map((g, gi) => (
                                     <button key={g.name} type="button" role="tab" className="cat" aria-selected={gi === curGroup} onClick={() => openGroup(gi)} title={g.name + ' (Alt+' + (gi + 1) + ')'}>
-                                        <Icon name={'g' + gi} /><span>{g.name}</span>
+                                        <Icon name={g.icon} /><span>{g.name}</span>
                                     </button>
                                 ))}
                             </div>
@@ -7351,7 +8335,7 @@ const Proof = (function () {
                     </div>
                     <nav className="dock no-print" aria-label="Tools">
                         <button type="button" className="catsw" data-menu-btn="1" onClick={(e) => { if (menu && menu.kind === 'groups') { setMenu(null); return; } const r = e.currentTarget.getBoundingClientRect(); setMenu({ kind: 'groups', x: r.left, y: r.top - 8, up: true }); }} aria-haspopup="menu" aria-label={'Group: ' + TAB_GROUPS[curGroup].name}>
-                            <Icon name={'g' + curGroup} /><span>{TAB_GROUPS[curGroup].short || TAB_GROUPS[curGroup].name}</span><svg className="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6" /></svg>
+                            <Icon name={TAB_GROUPS[curGroup].icon} /><span>{TAB_GROUPS[curGroup].short || TAB_GROUPS[curGroup].name}</span><svg className="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6" /></svg>
                         </button>
                         <span className="catsep" aria-hidden="true" />
                         <div className="dk-tools" key={curGroup}>
@@ -7382,7 +8366,7 @@ const Proof = (function () {
                         ))}
                         {menu.kind === 'groups' && <>
                             <div className="tm-mh">Tool groups</div>
-                            {TAB_GROUPS.map((g, gi) => <button key={g.name} type="button" role="menuitemradio" aria-checked={gi === curGroup} onClick={() => { setMenu(null); openGroup(gi); }}><Icon name={'g' + gi} />{g.name}<small>{g.keys.length}</small></button>)}
+                            {TAB_GROUPS.map((g, gi) => <button key={g.name} type="button" role="menuitemradio" aria-checked={gi === curGroup} onClick={() => { setMenu(null); openGroup(gi); }}><Icon name={g.icon} />{g.name}<small>{g.keys.length}</small></button>)}
                             <div className="tm-msep" />
                             <button type="button" role="menuitem" onClick={() => { setMenu(null); setSheet('search'); }}><Icon name="search" />All tools and search</button>
                         </>}
@@ -7395,7 +8379,7 @@ const Proof = (function () {
                         </div>}
                         {sheet === 'about' && <div className="tm-sheet" role="dialog" aria-label="About">
                             <div className="tm-sheet-h"><div className="about-hero"><img src="icons/icon-192.png" alt="" width="52" height="52" /><div><h3>Meridian Tools for Mate</h3><small>Version {APP_VERSION} · Tango Juliet Dev</small></div></div><button type="button" className="tbtn solo" onClick={() => setSheet(null)} aria-label="Close"><Icon name="close" /></button></div>
-                            <p className="about-lead">Calculators and planners for the watchkeeper and the chief mate, plus personal tools. {TABS.length} tools in four groups.</p>
+                            <p className="about-lead">Calculators and planners for the watchkeeper and the chief mate, plus personal tools. {TABS.length} tools in five groups.</p>
                             <div className="about-facts"><span><Icon name="offline" />Works offline</span><span><Icon name="install" />No installation needed</span><span><Icon name="lock" />Data stays on this device</span></div>
                             <div className="about-mail"><div><b>Suggestions or problems</b><span>tangojulietdev@gmail.com</span></div><a className="btn btn-ghost" href={'mailto:tangojulietdev@gmail.com?subject=Meridian%20Tools%20for%20Mate%20' + APP_VERSION}><Icon name="mail" />Email</a></div>
                             <p className="about-small">Media uses Mediabunny (MPL-2.0), pdf.js (Apache-2.0), pdf-lib (MIT), heic-to (LGPL-3.0) and gifenc (MIT). Built with React (MIT).</p>
@@ -7406,7 +8390,7 @@ const Proof = (function () {
                             <div className="kgrid">
                                 <span><kbd>{isMac ? '⌘' : 'Ctrl'}</kbd><kbd>K</kbd></span><span>Search tools</span>
                                 <span><kbd>Enter</kbd></span><span>Open the first search result</span>
-                                <span><kbd>Alt</kbd><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></span><span>Voyage, Cargo & Stability, Ship's Office, Personal</span>
+                                <span><kbd>Alt</kbd><kbd>1</kbd> to <kbd>5</kbd></span><span>Voyage, Cargo & Stability, Engine Room, Ship's Office, Personal</span>
                                 <span><kbd>←</kbd><kbd>→</kbd></span><span>Previous or next tool, when the tool row has focus</span>
                                 <span><kbd>{isMac ? '⌘' : 'Ctrl'}</kbd><kbd>P</kbd></span><span>Print or save as PDF</span>
                                 <span><kbd>Esc</kbd></span><span>Close menus, sheets and search</span>
@@ -7417,7 +8401,7 @@ const Proof = (function () {
                             <div className="tm-sheet-h"><div className="about-hero"><span className="about-ic"><Icon name="guide" /></span><div><h3>App guide</h3><small>Meridian Tools for Mate · version {APP_VERSION}</small></div></div><button type="button" className="tbtn solo" onClick={() => setSheet(null)} aria-label="Close"><Icon name="close" /></button></div>
                             <div className="gd-list">
                                 {[
-                                    ['info', 'What this app is', <><p>A set of calculators and planners for life on board: ROB, ETA and speed, ventilation, deadweight, hydrostatics, ballast exchange, load line, crew overtime, garbage stowage and more. Personal tools cover your budget, NRE days, media conversion and proofreading.</p><p>It was built by a serving seafarer for ships with slow or no internet.</p></>, true],
+                                    ['info', 'What this app is', <><p>A set of calculators and planners for life on board: ROB, ETA and speed, ventilation, deadweight, hydrostatics, ballast exchange, load line, Oil Record Book entries, fuel changeover, bunkering, main engine performance, crew overtime, garbage stowage and more. Personal tools cover your budget, NRE days, media conversion and proofreading.</p><p>It was built by a serving seafarer for ships with slow or no internet.</p></>, true],
                                     ['refresh', 'How it works', <><p>The app is a set of files your browser downloads once. After that every tool runs on your own device.</p><ul><li>Nothing is sent to a server.</li><li>After the first visit it works fully offline, including at sea.</li><li>What you enter is saved on this device and is there next time.</li></ul></>],
                                     ['lock', 'Why it is safe', <ul><li><b>Your data never leaves the device.</b> No upload, no cloud copy, no account.</li><li><b>No tracking.</b> No analytics or adverts.</li><li><b>Browser sandbox.</b> It cannot reach your other files unless you choose one.</li><li><b>Works without internet.</b> Switch off Wi-Fi and it keeps working.</li></ul>],
                                     ['install', 'Install it as an app', <><p>Installing adds an icon and its own window, needs no administrator rights and can be removed like any app.</p><ul><li><b>Windows or Mac, Chrome or Edge:</b> click the install icon in the address bar, or the browser menu, Install.</li><li><b>Android, Chrome:</b> menu, Install app or Add to Home screen.</li><li><b>iPhone or iPad, Safari:</b> Share, Add to Home Screen.</li></ul></>],
@@ -7916,6 +8900,11 @@ const Proof = (function () {
                             {activeTab === 14 && <OtTab />}
                             {activeTab === 15 && <BweTab />}
                             {activeTab === 16 && <NreTab />}
+                            {activeTab === 17 && <OrbTab />}
+                            {activeTab === 18 && <FcoTab />}
+                            {activeTab === 19 && <BunkerTab />}
+                            {activeTab === 20 && <PerfTab />}
+                            {activeTab === 21 && <EcalcTab />}
                         </div>
                     </div>
                     </main>

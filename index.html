@@ -1517,11 +1517,50 @@
         .tour-acts .btn { margin-top: 0; height: 34px; padding: 0 16px; }
         @media (max-width: 760px) { .gd-b { padding-left: 14px; } .tour-card { left: 12px !important; right: 12px; width: auto; } }
         @media (prefers-reduced-motion: reduce) { .tour-spot, .tour-card { transition: none; } .about-ic.spin svg { animation: none; } }
+    
+        /* Engine Room */
+        .orb-t { width: 100%; border-collapse: collapse; font-size: 13px; box-shadow: none; background: transparent; }
+        .orb-t th { text-align: left; font-size: 11px; padding: 6px 8px; }
+        .orb-t td { padding: 6px 8px; border-bottom: .5px solid var(--sep); vertical-align: top; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; }
+        .orb-t td.nw { white-space: nowrap; }
+        .orb-t td:nth-child(2), .orb-t td:nth-child(3) { white-space: nowrap; font-weight: 700; color: var(--accent); }
+        .orb-t tbody tr:nth-child(even), .orb-t tbody tr:hover { background: transparent; }
+        .orb-sig { font-style: italic; color: var(--muted); }
+        .orb-log { padding: 10px 0; border-bottom: .5px solid var(--sep); }
+        .orb-log .cx-btns { margin-top: 6px; }
+        .er-tk { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 34px; gap: 6px; align-items: center; margin-bottom: 6px; }
+        .er-tk .input-field { margin: 0; }
+        .er-tk-h { font-size: 11px; font-weight: 600; color: var(--muted); }
+        .er-note { padding: 12px 14px; border-radius: 10px; background: var(--well); font-size: 13px; line-height: 1.55; margin: 6px 0 10px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+        .fco-curve { display: flex; align-items: flex-end; gap: 3px; height: 120px; margin: 8px 0 6px; padding: 6px; border-radius: 10px; background: var(--well); }
+        .fco-bar { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; min-width: 6px; }
+        .fco-bar span { width: 100%; border-radius: 3px 3px 0 0; background: var(--bad); opacity: .8; }
+        .fco-bar.ok span { background: var(--ok); }
+        .fco-bar small { font-size: 9.5px; color: var(--muted); height: 12px; }
+        .er-plan td .input-field, .er-cyl td .input-field { margin: 0; }
+        .bw-steps.er-plan { min-width: 860px; }
+        .bw-steps.er-cyl { min-width: 680px; }
+        .bw-steps.er-pt { min-width: 0; }
+        .er-plan td input[type="checkbox"] { width: 18px; height: 18px; min-width: 0; min-height: 0; padding: 0; margin: 0; box-shadow: none !important; background: none; }
+        .er-plan td:nth-child(2) .input-field { min-width: 130px; }
+        .er-cyl td { position: relative; }
+        .er-dev { display: block; font-size: 10.5px; color: var(--muted); text-align: right; margin-top: 1px; }
+        .er-dev.bad { color: var(--bad); font-weight: 700; }
+        .input-field.er-bad { box-shadow: 0 0 0 1.5px var(--bad) !important; }
+        .er-avg td { border-top: 1px solid var(--sep-strong); }
+        .er-disc, .er-gen { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 34px; gap: 6px; align-items: center; margin-bottom: 6px; }
+        .er-gen { grid-template-columns: 44px minmax(0, 1fr) minmax(0, 1fr) 52px 34px; }
+        .er-disc .input-field, .er-gen .input-field { margin: 0; }
+        .er-pc { font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+        .er-pc.bad { color: var(--bad); }
+        @media (max-width: 640px) { .er-tk { grid-template-columns: minmax(0, 1fr) 80px 34px; } .er-tk > :nth-child(3), .er-tk > :nth-child(4) { grid-row: 2; } .er-tk-h { display: none; } }
+        @media (max-width: 1480px) and (min-width: 761px) { .cats .cat svg { display: none; } .cat { padding: 0 11px; } }
+        @media (max-width: 1240px) and (min-width: 761px) { .cats .cat svg { display: inline; } }
     </style>
 </head>
 <body>
     <div id="root"></div>
-    <script src="app.js?v=25" defer></script>
+    <script src="app.js?v=26" defer></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(e){console.log("SW failed",e)})})}</script>
 </body>
 </html>
