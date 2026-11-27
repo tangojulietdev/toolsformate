@@ -3908,8 +3908,8 @@ const Proof = (function () {
                 </div>
             );
         }
-        const cxF = (v, d) => (isFinite(v) ? v.toFixed(d) : '-');
-        const cxInt = (v) => (isFinite(v) ? Math.round(v).toLocaleString('en-GB') : '-');
+        const cxF = (v, d) => (typeof v === 'number' && isFinite(v) ? v.toFixed(d) : '-');
+        const cxInt = (v) => (typeof v === 'number' && isFinite(v) ? Math.round(v).toLocaleString('en-GB') : '-');
 
         // ---------- Salinity & DWA ----------
         function CxSalinity({ s, set }) {
@@ -9415,7 +9415,8 @@ const Proof = (function () {
             const diur = isFinite(hr) ? 1.3 * Math.cos((hr - 10) / 12 * 2 * Math.PI) : NaN; // semi-diurnal tide, highs 10 and 22 LT
             const pCorr = isFinite(msl) && isFinite(diur) ? msl - diur : NaN;
             // humidity
-            const dpt = calculateDewPoint(s.db, s.wb), rh = calculateRH(s.db, s.wb), sst = pn(s.sst);
+            const numOr = (v) => (typeof v === 'number' && isFinite(v) ? v : NaN);
+            const dpt = numOr(calculateDewPoint(s.db, s.wb)), rh = numOr(calculateRH(s.db, s.wb)), sst = pn(s.sst);
             const fogM = isFinite(dpt) && isFinite(sst) ? dpt - sst : NaN;
             const iw = pn(s.iw) * 0.5144, ia = pn(s.ia), isst = pn(s.is), Tf = -1.7;
             const ppr = isFinite(iw) && isFinite(ia) && isFinite(isst) ? iw * (Tf - ia) / (1 + 0.3 * (isst - Tf)) : NaN;
@@ -9943,8 +9944,9 @@ const Proof = (function () {
             );
         }
 
-        const APP_VERSION = '3.7.0';
+        const APP_VERSION = '3.7.1';
         const WHATS_NEW = [
+            ['3.7.1', ['Fixed: Meteorology, Humidity, fog, icing no longer crashes when the boxes are empty']],
             ['3.7.0', ['Meteorology: animated sea and swell comparison, swell classification with the WMO swell code and storm distance from swell, and an interactive ocean currents map with monsoon currents, types of current, Ekman transport and upwelling, set and drift, and course to steer']],
             ['3.6.0', ['New Meteorology tool in Bridge: true wind with vector triangle and wind barb, Beaufort scale with sea picture, barometer to MSL, tendency and tropical pressure tide, dew point, sea fog and icing, frontal depression and anticyclone diagrams for both hemispheres, wave growth, encounter period and dangerous rolling check, cloud guide']],
             ['3.5.0', ['Storm Avoidance: diagram of the storm for both hemispheres with semicircles, quadrants, path and wind, your own situation on the diagram, and a Practice test with scenarios and avoiding actions']],

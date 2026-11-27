@@ -1,5 +1,5 @@
-const VERSION = 'tools-for-mate-v33';
-const CORE = ['./', 'index.html', 'app.js?v=31', 'manifest.webmanifest', 'dict-en.txt', 'dict-common.txt', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png', 'media.js?v=1', 'media.js'];
+const VERSION = 'tools-for-mate-v34';
+const CORE = ['./', 'index.html', 'app.js?v=32', 'manifest.webmanifest', 'dict-en.txt', 'dict-common.txt', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png', 'media.js?v=1', 'media.js'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));
