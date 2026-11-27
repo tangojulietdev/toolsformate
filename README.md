@@ -8,7 +8,7 @@ Installable PWA that works offline. All data stays on the device.
 
 `ballast-exchange.html` is the Ballast Exchange module (with the Hydrostatics table) as one standalone offline HTML file.
 
-UI: macOS style window with sidebar and unified toolbar on desktop, iOS list to detail navigation on phones. Control metrics adapted from [Puppertino](https://github.com/codedgar/Puppertino) (MIT).
+UI: same interface as Meridian PDF Mate. Frosted glass top bar with the four tool groups (Voyage, Cargo & Stability, Ship's Office, Personal) in the middle and the chosen group's tools, each in its own colour, in the row underneath. On phones the tools sit in a floating glass dock with the group switcher in its first button. Search (Ctrl K), light and dark switch, bridge night mode (red on black, five brightness levels), About and keyboard shortcuts behind the i button. Alt+1 to 4 switch group.
 
 
 Media engines in `vendor/` load only when the Media tab is used: Mediabunny and its MP3 encoder (MPL-2.0, LAME LGPL), pdf.js (Apache-2.0), pdf-lib (MIT), heic-to (LGPL-3.0), gifenc (MIT). Video and audio use the browser's WebCodecs hardware encoders.

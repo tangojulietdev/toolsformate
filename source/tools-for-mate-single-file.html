@@ -17,7 +17,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/milanova" rel="stylesheet">
-    <script>(function(){try{var t=localStorage.getItem('tfm_theme');if(!t){t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+    <script>(function(){var r=document.documentElement;try{var t=localStorage.getItem('tfm_theme');if(t!=='light'&&t!=='dark'){t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}r.setAttribute('data-theme',t);var n=localStorage.getItem('tfm_night');if(n&&n!=='off'){r.setAttribute('data-theme','dark');r.dataset.night='on';r.style.setProperty('--night-b',n);}var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',n&&n!=='off'?'#000000':t==='dark'?'#1c1c1e':'#f5f5f7');}catch(e){r.setAttribute('data-theme','light');}})();</script>
     <style>
         /* ===== Design tokens: light + dark designed together ===== */
         :root {
@@ -1173,6 +1173,295 @@
         .ot-who { min-height: var(--ctl-h, 40px); display: flex; align-items: center; font-weight: 600; color: var(--text); }
         @media (max-width: 640px) { .ot-table td.nm { min-width: 112px; } .ot-table td.nm .input-field { width: 108px; } .ot-table .input-field { width: 62px; } .ot-month-t b { font-size: 16px; } }
         @media print { .ot-table { min-width: 0; font-size: 10px; } .ot-table:not(.ot-carry) td:last-child, .ot-table:not(.ot-carry) th:last-child { display: none; } .ot-table .input-field { border: 0; box-shadow: none; width: auto; padding: 0; background: transparent; } }
+    
+        /* ===== Meridian interface, shared with Meridian PDF Mate =====
+           Frosted glass top chrome: toolbar with the tool groups in the middle, the chosen
+           group's tools in the row underneath. On phones the tool row becomes a floating
+           glass dock at the bottom with the group switcher in its first button. */
+        :root {
+            --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Inter", "Segoe UI Variable Text", "Segoe UI", Roboto, sans-serif;
+            --win: #f5f5f7; --canvas: #ececf0;
+            --bg: #ececf0; --surface: #ffffff; --surface-2: #ffffff; --well: #f5f5f7;
+            --border: rgba(0, 0, 0, .08); --sep: rgba(0, 0, 0, .10); --sep-strong: rgba(0, 0, 0, .16);
+            --fill: rgba(0, 0, 0, .05); --fill-2: rgba(0, 0, 0, .08); --fill-3: rgba(0, 0, 0, .13); --fill-hover: rgba(0, 0, 0, .07);
+            --ring: rgba(0, 0, 0, .15);
+            --text: #1d1d1f; --text-2: #48484d; --muted: #6e6e73;
+            --label: #1d1d1f; --label-2: #48484d; --label-3: #6e6e73;
+            --control: #ffffff;
+            --accent: #007aff; --accent-hover: #0062cc; --accent-soft: rgba(0, 122, 255, .12); --on-accent: #ffffff;
+            --focus: 0 0 0 3px rgba(0, 122, 255, .35), inset 0 0 0 1px rgba(0, 122, 255, .7);
+            --ok: #248a3d; --ok-soft: #e3f4e7; --bad: #d70015; --bad-soft: #fde8ea; --warn: #9a5200; --warn-soft: #fdf2e1;
+            --pill: rgba(255, 255, 255, .78); --pill-shadow: 0 0 0 .5px rgba(0, 0, 0, .09), 0 1px 2px rgba(0, 0, 0, .07);
+            --mat: rgba(246, 246, 249, .66); --mat-strong: rgba(250, 250, 252, .84); --mat-thin: rgba(255, 255, 255, .55);
+            --rim-top: rgba(255, 255, 255, .95); --rim-side: rgba(255, 255, 255, .45); --hair: rgba(0, 0, 0, .10);
+            --sheen: linear-gradient(180deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 55%);
+            --blur: blur(22px) saturate(180%);
+            --glass-shadow: 0 0 0 .5px rgba(0, 0, 0, .10), 0 12px 34px -6px rgba(15, 23, 42, .22), 0 3px 10px -2px rgba(15, 23, 42, .10);
+            --card-shadow: 0 0 0 .5px rgba(0, 0, 0, .07), 0 1px 2px rgba(0, 0, 0, .04), 0 6px 18px -10px rgba(15, 23, 42, .18);
+            --zebra: rgba(0, 0, 0, .022);
+            --chrome-h: 102px; --dock-h: 0px;
+            color-scheme: light;
+        }
+        :root[data-theme="dark"] {
+            --win: #1c1c1e; --canvas: #111113;
+            --bg: #111113; --surface: #1f1f22; --surface-2: #2a2a2d; --well: #29292c;
+            --border: rgba(255, 255, 255, .08); --sep: rgba(255, 255, 255, .10); --sep-strong: rgba(255, 255, 255, .16);
+            --fill: rgba(255, 255, 255, .07); --fill-2: rgba(255, 255, 255, .11); --fill-3: rgba(255, 255, 255, .17); --fill-hover: rgba(255, 255, 255, .10);
+            --ring: rgba(255, 255, 255, .13);
+            --text: #f5f5f7; --text-2: #d1d1d6; --muted: #a1a1a6;
+            --label: #f5f5f7; --label-2: #d1d1d6; --label-3: #a1a1a6;
+            --control: #3a3a3e;
+            --accent: #0a84ff; --accent-hover: #409cff; --accent-soft: rgba(10, 132, 255, .22); --on-accent: #ffffff;
+            --focus: 0 0 0 3px rgba(10, 132, 255, .45), inset 0 0 0 1px rgba(10, 132, 255, .8);
+            --ok: #30d158; --ok-soft: rgba(48, 209, 88, .15); --bad: #ff453a; --bad-soft: rgba(255, 69, 58, .16); --warn: #ffb340; --warn-soft: rgba(255, 179, 64, .15);
+            --pill: rgba(255, 255, 255, .075); --pill-shadow: inset 0 .5px 0 rgba(255, 255, 255, .12), 0 0 0 .5px rgba(0, 0, 0, .5), 0 1px 2px rgba(0, 0, 0, .35);
+            --mat: rgba(30, 30, 32, .74); --mat-strong: rgba(36, 36, 38, .88); --mat-thin: rgba(255, 255, 255, .06);
+            --rim-top: rgba(255, 255, 255, .11); --rim-side: rgba(255, 255, 255, .06); --hair: rgba(0, 0, 0, .55);
+            --sheen: none;
+            --blur: blur(20px) saturate(160%);
+            --glass-shadow: 0 0 0 .5px rgba(255, 255, 255, .10), 0 16px 40px -8px rgba(0, 0, 0, .65), 0 4px 12px -2px rgba(0, 0, 0, .4);
+            --card-shadow: 0 0 0 .5px rgba(255, 255, 255, .07), 0 10px 26px -14px rgba(0, 0, 0, .7);
+            --zebra: rgba(255, 255, 255, .025);
+            color-scheme: dark;
+        }
+        @media (max-width: 1000px) {
+            :root { --surface-2: #f2f2f7; --well: #f2f2f7; }
+            :root[data-theme="dark"] { --surface-2: #2c2c2f; --well: #2c2c2f; }
+        }
+        html, body { height: 100%; background: var(--canvas); }
+        body { overflow: hidden; font-family: var(--font); color: var(--text); -webkit-tap-highlight-color: transparent; }
+        #root { height: 100%; }
+        .tm-app { position: relative; height: 100%; }
+        .tm-app svg { flex: none; }
+
+        /* Content scrolls under the glass chrome */
+        .content { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scroll-padding-top: calc(var(--chrome-h) + 12px);
+            background: radial-gradient(1100px 520px at 12% -8%, color-mix(in srgb, var(--cur, #0a84ff) 11%, transparent), transparent 62%),
+                        radial-gradient(900px 480px at 100% 4%, rgba(175, 82, 222, .06), transparent 60%),
+                        radial-gradient(800px 600px at 50% 120%, rgba(48, 209, 88, .05), transparent 60%), var(--canvas);
+            background-attachment: local; scrollbar-width: thin; scrollbar-color: var(--fill-3) transparent; }
+        .content::-webkit-scrollbar { width: 11px; height: 11px; }
+        .content::-webkit-scrollbar-thumb { background: var(--fill-3); border-radius: 99px; border: 3px solid transparent; background-clip: content-box; }
+        .content > .container { max-width: 1200px; margin: 0 auto; padding: calc(var(--chrome-h) + env(safe-area-inset-top, 0px) + 10px) max(28px, env(safe-area-inset-right)) calc(64px + var(--dock-h)) max(28px, env(safe-area-inset-left)); }
+
+        /* Top chrome: one glass material */
+        .topchrome { position: absolute; top: 0; left: 0; right: 0; z-index: 50; padding-top: env(safe-area-inset-top, 0px);
+            background-color: var(--mat); background-image: var(--sheen); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+            box-shadow: inset 0 -.5px 0 var(--hair), 0 8px 24px -16px rgba(0, 0, 0, .35); }
+        .tm-bar { height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; column-gap: 14px;
+            padding: 0 max(14px, env(safe-area-inset-right)) 0 max(14px, env(safe-area-inset-left)); margin: 0; border-bottom: .5px solid color-mix(in srgb, var(--hair) 60%, transparent); flex-wrap: nowrap; }
+        .tm-left { display: flex; align-items: center; gap: 10px; min-width: 0; position: relative; }
+        .tm-right { display: flex; align-items: center; gap: 8px; justify-self: end; min-width: 0; flex-wrap: nowrap; }
+        .tm-brand { width: 34px; height: 34px; border-radius: 9px; flex: none; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .12), 0 1px 3px rgba(0, 0, 0, .18); }
+        .docname { display: flex; flex-direction: column; justify-content: center; min-width: 0; line-height: 1.15; flex: 0 1 auto; }
+        .docname b { font-size: 14px; font-weight: 650; letter-spacing: -.01em; color: var(--label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .docname small { font-size: 11px; color: var(--label-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .tbtn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 32px; height: 30px; padding: 0 8px; border: 0; border-radius: 999px; background: transparent; color: var(--label-2);
+            font: 600 13px var(--font); cursor: pointer; transition: background-color .15s var(--ease), color .15s, transform .1s; }
+        .tbtn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+        .tbtn:hover { background: var(--fill-hover); color: var(--label); }
+        .tbtn:active { transform: scale(.95); }
+        .tbtn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+        .tbtn.solo { height: 32px; min-width: 32px; padding: 0; background: var(--pill); box-shadow: var(--pill-shadow); }
+        .tbtn.primary { height: 34px; padding: 0 16px 0 13px; color: #fff;
+            background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 82%, #fff), var(--accent) 55%, color-mix(in srgb, var(--accent) 88%, #000));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .38), inset 0 -1px 0 rgba(0, 0, 0, .12), 0 1px 3px color-mix(in srgb, var(--accent) 40%, transparent), 0 0 0 .5px rgba(0, 0, 0, .12); }
+        .tbtn.primary:hover { color: #fff; filter: brightness(1.05); }
+        .pill { display: inline-flex; align-items: center; height: 34px; padding: 2px; border-radius: 999px; flex: none;
+            background: var(--mat-thin); box-shadow: inset 0 1px 0 var(--rim-top), inset 0 0 0 .5px var(--rim-side), 0 1px 2px rgba(0, 0, 0, .08); }
+        :root[data-theme="dark"] .pill { background: var(--pill); box-shadow: var(--pill-shadow); }
+        .pill .tbtn { height: 30px; min-width: 32px; padding: 0 7px; }
+        .tb-search-m { display: none; }
+
+        /* Search: a round button that grows into a field with results */
+        .tsearch { position: relative; display: flex; align-items: center; height: 34px; width: 34px; margin-left: auto; flex: none; border-radius: 999px;
+            background: var(--mat-thin); box-shadow: inset 0 1px 0 var(--rim-top), inset 0 0 0 .5px var(--rim-side), 0 1px 2px rgba(0, 0, 0, .08); }
+        :root[data-theme="dark"] .tsearch { background: var(--pill); box-shadow: var(--pill-shadow); }
+        .ts-ic { width: 34px; height: 34px; flex: none; display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; color: var(--label-2); border-radius: 999px; cursor: pointer; }
+        .ts-ic svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; }
+        .tsearch input { display: none; flex: 1; min-width: 0; height: 32px; border: 0; background: transparent; color: var(--label); font: 500 13.5px var(--font); padding: 0 4px; outline: none; }
+        .tsearch input::-webkit-search-cancel-button { opacity: .5; }
+        .tsearch .ts-kbd { display: none; font: 600 10.5px var(--font); color: var(--label-3); background: var(--fill); border-radius: 5px; padding: 2px 6px; margin-right: 8px; }
+        .tsearch.open { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: min(380px, 100%); min-width: 260px; z-index: 60; margin: 0; border-radius: 10px;
+            background: var(--mat-strong) !important; -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); box-shadow: var(--glass-shadow), 0 0 0 3px var(--accent-soft), inset 0 0 0 1px var(--accent) !important; animation: tsgrow .22s cubic-bezier(.2, .9, .3, 1); }
+        .tsearch.open input, .tsearch.open .ts-kbd { display: block; }
+        @keyframes tsgrow { from { width: 34px; min-width: 34px; opacity: .6; } }
+
+        /* Floating surfaces: menus, search results, sheets, toast */
+        .tm-pop { border-radius: 14px; padding: 6px; background-color: var(--mat-strong); background-image: var(--sheen); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+            box-shadow: inset 0 1px 0 var(--rim-top), inset 0 0 0 .5px var(--rim-side), var(--glass-shadow); animation: pop .16s var(--ease); }
+        @keyframes pop { from { opacity: 0; transform: translateY(-4px) scale(.98); } }
+        .tm-search-pop { position: absolute; left: 0; right: 0; top: calc(100% + 8px); max-height: min(70vh, 560px); overflow-y: auto; }
+        .tm-rgroup + .tm-rgroup { margin-top: 4px; }
+        .tm-rh { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--label-3); padding: 8px 10px 4px; }
+        .tm-ritem { display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 8px; border: 0; border-radius: 9px; background: transparent; color: var(--label); text-align: left; cursor: pointer; }
+        .tm-ritem:hover, .tm-ritem:focus-visible { background: var(--accent); color: #fff; }
+        .tm-ritem:hover small, .tm-ritem:focus-visible small { color: rgba(255, 255, 255, .8); }
+        .tm-ritem[aria-selected="true"]:not(:hover) { background: var(--fill-2); }
+        .tm-rl { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+        .tm-rl b { font-size: 13.5px; font-weight: 600; }
+        .tm-rl small { font-size: 12px; color: var(--label-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tm-rempty { padding: 14px 10px; color: var(--label-3); font-size: 13px; }
+        .tm-menu { position: fixed; z-index: 120; min-width: 230px; }
+        .tm-menu.up { animation-name: popup; }
+        @keyframes popup { from { opacity: 0; transform: translateY(4px) scale(.98); } }
+        .tm-menu > button { display: flex; align-items: center; gap: 10px; width: 100%; height: 34px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: var(--label); font: 500 13.5px var(--font); text-align: left; cursor: pointer; }
+        .tm-menu > button svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: var(--label-2); }
+        .tm-menu > button small { margin-left: auto; color: var(--label-3); font-size: 12px; }
+        .tm-menu > button:hover { background: var(--accent); color: #fff; }
+        .tm-menu > button:hover svg, .tm-menu > button:hover small { color: #fff; }
+        .tm-menu > button[aria-checked="true"] { font-weight: 650; }
+        .tm-menu > button[aria-checked="true"] svg { color: var(--accent); }
+        .tm-menu > button[aria-checked="true"]:hover svg { color: #fff; }
+        .tm-mh { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--label-3); padding: 6px 10px 4px; }
+        .tm-msep { height: .5px; background: var(--sep-strong); margin: 5px 6px; }
+        .tm-scrim { position: fixed; inset: 0; z-index: 110; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(10, 12, 18, .22); -webkit-backdrop-filter: blur(6px) saturate(130%); backdrop-filter: blur(6px) saturate(130%); animation: fade .18s ease; }
+        :root[data-theme="dark"] .tm-scrim { background: rgba(0, 0, 0, .45); -webkit-backdrop-filter: none; backdrop-filter: none; }
+        @keyframes fade { from { opacity: 0; } }
+        .tm-sheet { width: 100%; max-width: 480px; max-height: calc(100% - 32px); overflow: auto; border-radius: 18px; padding: 20px;
+            background-color: var(--mat-strong); background-image: var(--sheen); -webkit-backdrop-filter: blur(40px) saturate(180%); backdrop-filter: blur(40px) saturate(180%);
+            box-shadow: inset 0 1px 0 var(--rim-top), inset 0 0 0 .5px var(--rim-side), var(--glass-shadow); animation: sheetin .22s var(--ease); color: var(--label); }
+        @keyframes sheetin { from { opacity: 0; transform: translateY(10px) scale(.98); } }
+        .tm-sheet-h { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+        .tm-sheet-h h3 { font-size: 17px; font-weight: 700; letter-spacing: -.015em; }
+        .about-hero { display: flex; align-items: center; gap: 14px; }
+        .about-hero img { border-radius: 14px; box-shadow: 0 4px 14px rgba(0, 0, 0, .2); }
+        .about-hero small { color: var(--label-3); font-size: 12.5px; }
+        .about-p { font-size: 13.5px; color: var(--label-2); line-height: 1.5; margin-bottom: 10px; }
+        .about-h { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--label-3); margin: 16px 0 8px; }
+        .kgrid { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; align-items: center; font-size: 13px; color: var(--label-2); margin-bottom: 6px; }
+        .kgrid kbd { display: inline-block; min-width: 22px; text-align: center; font: 600 11.5px var(--font); padding: 2px 6px; margin-right: 3px; border-radius: 6px; background: var(--fill-2); color: var(--label); box-shadow: inset 0 -1px 0 var(--sep-strong); }
+        .tm-sfield { position: relative; margin-bottom: 8px; }
+        .tm-sfield svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: none; stroke: var(--label-3); stroke-width: 2; stroke-linecap: round; }
+        .tm-sfield input { width: 100%; height: 40px; border: 0; border-radius: 11px; padding: 0 12px 0 34px; background: var(--fill-2); color: var(--label); font: 500 16px var(--font); outline: none; }
+        .tm-sfield input:focus { box-shadow: var(--focus); }
+        .tm-sheet-search { max-width: 520px; }
+        .tm-toast { position: fixed; left: 50%; bottom: calc(28px + var(--dock-h) + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 130; padding: 10px 16px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--label);
+            background: var(--mat-strong); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); box-shadow: inset 0 1px 0 var(--rim-top), var(--glass-shadow); animation: fade .2s ease; white-space: nowrap; }
+
+        /* Groups: segmented control in the toolbar */
+        .cats { position: relative; display: flex; align-items: center; gap: 2px; height: 36px; padding: 3px; border-radius: 11px; flex: none;
+            background: var(--mat-thin); box-shadow: inset 0 1px 0 var(--rim-top), inset 0 0 0 .5px var(--rim-side), 0 1px 2px rgba(0, 0, 0, .08); }
+        :root[data-theme="dark"] .cats { background: var(--pill); box-shadow: var(--pill-shadow); }
+        .cat { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 13px; border: 0; border-radius: 8px; background: transparent; color: var(--label-2);
+            font: 600 12.5px var(--font); letter-spacing: -.005em; white-space: nowrap; cursor: pointer; transition: background-color .15s var(--ease), color .2s, transform .15s; }
+        .cat svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; opacity: .85; transition: transform .3s cubic-bezier(.3, 1.5, .5, 1); }
+        .cat:hover { background: var(--fill-hover); color: var(--label); }
+        .cat:active { transform: scale(.96); }
+        .cat[aria-selected="true"] { background: color-mix(in srgb, var(--control) 88%, transparent); color: var(--label); box-shadow: inset 0 1px 0 var(--rim-top), 0 1px 3px rgba(0, 0, 0, .16), 0 0 0 .5px var(--hair); }
+        :root[data-theme="dark"] .cat[aria-selected="true"] { background: #3a3a3e; }
+        .cat[aria-selected="true"] svg { color: var(--accent); opacity: 1; transform: scale(1.1); }
+
+        /* Tool row: the chosen group's tools, each in its own colour */
+        .ribbon { height: 46px; display: flex; justify-content: center; align-items: center; padding: 0 14px; border-bottom: .5px solid color-mix(in srgb, var(--hair) 50%, transparent); }
+        .ribbon .tools { position: relative; display: flex; align-items: center; gap: 4px; max-width: 100%; overflow-x: auto; scrollbar-width: none; padding: 2px; animation: rowin .26s var(--ease); }
+        .ribbon .tools::-webkit-scrollbar { display: none; }
+        @keyframes rowin { from { opacity: 0; transform: translateY(-3px); } }
+        .tool { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px 0 6px; border: 0; border-radius: 9px; background: transparent; color: var(--label-2); flex: none;
+            font: 500 12.5px var(--font); white-space: nowrap; cursor: pointer; transition: background-color .15s var(--ease), color .15s, transform .15s var(--ease); }
+        .tool:hover { background: var(--fill-hover); color: var(--label); }
+        .tool:active { transform: scale(.95); }
+        .tool[aria-pressed="true"] { color: #fff; font-weight: 600;
+            background: linear-gradient(180deg, color-mix(in srgb, var(--tc) 80%, #fff), var(--tc) 55%, color-mix(in srgb, var(--tc) 88%, #000));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -1px 0 rgba(0, 0, 0, .12), 0 1px 3px color-mix(in srgb, var(--tc) 45%, transparent), 0 0 0 .5px rgba(0, 0, 0, .12); }
+        .tm-tile { width: 22px; height: 22px; border-radius: 6px; flex: none; display: inline-flex; align-items: center; justify-content: center;
+            background: var(--tc); background-image: linear-gradient(180deg, rgba(255, 255, 255, .24), rgba(255, 255, 255, 0) 70%); box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .12); }
+        .tm-tile svg { width: 14px; height: 14px; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+        .tool[aria-pressed="true"] .tm-tile { background: rgba(255, 255, 255, .22); box-shadow: none; }
+        .tm-results .tm-tile { width: 28px; height: 28px; border-radius: 7px; }
+        .tm-results .tm-tile svg { width: 16px; height: 16px; }
+
+        /* Dock (phones) */
+        .dock { display: none; }
+
+        /* Content surfaces in the same material language */
+        .card, .summary-card, .calc-result, .info-section { background: var(--surface); box-shadow: var(--card-shadow); border-radius: 14px; }
+        .res-panel, .eta-tile, .dwt-tile, .cx-out, .quick-ref-card { background: var(--well); }
+        .res-panel.dep, .dwt-tile.big, .cx-out.hi { background: var(--accent-soft); }
+        .btn-primary { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 82%, #fff), var(--accent) 55%, color-mix(in srgb, var(--accent) 88%, #000));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .38), inset 0 -1px 0 rgba(0, 0, 0, .12), 0 1px 3px color-mix(in srgb, var(--accent) 40%, transparent), 0 0 0 .5px rgba(0, 0, 0, .12); }
+        .btn-primary:hover { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 76%, #fff), var(--accent) 55%, color-mix(in srgb, var(--accent) 92%, #000)); }
+        .btn, .btn-ghost { border-radius: 999px; }
+        .btn-ghost { background: var(--fill-2); }
+        :root[data-theme="dark"] .seg button[aria-pressed="true"], :root[data-theme="dark"] .mode-btn.active { background: #636366; color: #fff; }
+        .section-title { color: var(--label); }
+        table { background: var(--surface); }
+        th { background: var(--well); }
+        .tab-content { animation: tc-in .24s var(--ease); }
+
+        /* Narrower desktops */
+        @media (max-width: 1240px) and (min-width: 761px) { .cat { padding: 0 10px; } .cat span { display: none; } .cat svg { width: 17px; height: 17px; } }
+        @media (max-width: 1040px) and (min-width: 761px) { .docname small { display: none; } .tm-bar { column-gap: 10px; } .ribbon { justify-content: flex-start; } }
+        @media (max-width: 900px) and (min-width: 761px) { .tb-primary span { display: none; } .tb-primary { padding: 0 10px; } .tool .tl { display: none; } .tool { padding: 0 6px; } .tool[aria-pressed="true"] .tl { display: inline; } .tool[aria-pressed="true"] { padding-right: 12px; } }
+
+        /* Phones: compact toolbar on top, tools in a floating glass dock */
+        @media (max-width: 760px) {
+            :root { --chrome-h: 56px; --dock-h: 86px; }
+            .tm-bar { height: 56px; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; border-bottom: 0; }
+            .cats, .ribbon, .tsearch { display: none; }
+            .tb-search-m { display: inline-flex; }
+            .tb-primary { width: 34px; padding: 0; }
+            .tb-primary span { display: none; }
+            .tm-brand { width: 30px; height: 30px; border-radius: 8px; }
+            .docname b { font-size: 15px; }
+            .docname small { font-size: 11.5px; }
+            .pill .tbtn { min-width: 34px; padding: 0 6px; }
+            .content > .container { padding-top: calc(var(--chrome-h) + env(safe-area-inset-top, 0px) + 8px); padding-left: max(14px, env(safe-area-inset-left)); padding-right: max(14px, env(safe-area-inset-right)); padding-bottom: calc(var(--dock-h) + 30px + env(safe-area-inset-bottom, 0px)); }
+            .dock { position: fixed; z-index: 60; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 0;
+                max-width: calc(100% - 20px); height: 56px; padding: 5px; border-radius: 999px;
+                background-color: var(--mat-strong); background-image: var(--sheen); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+                box-shadow: inset 0 1px 0 var(--rim-top), inset 0 0 0 .5px var(--rim-side), var(--glass-shadow); }
+            .catsw { display: inline-flex; align-items: center; gap: 5px; height: 46px; padding: 0 9px 0 12px; border: 0; border-radius: 999px; background: transparent; color: var(--accent); font: 650 12.5px var(--font); flex: none; cursor: pointer; }
+            .catsw svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+            .catsw .chev { width: 11px; height: 11px; stroke-width: 2.6; opacity: .7; }
+            .catsw:active { background: var(--fill-2); }
+            .catsep { width: 1px; height: 26px; background: var(--sep-strong); margin: 0 4px; flex: none; }
+            .dk-tools { position: relative; display: flex; align-items: center; gap: 2px; overflow-x: auto; scrollbar-width: none; min-width: 0; animation: rowin .26s var(--ease); }
+            .dk-tools::-webkit-scrollbar { display: none; }
+            .dk-tool { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 46px; min-width: 46px; padding: 0 6px; border: 0; border-radius: 999px; background: transparent; color: var(--label); flex: none; cursor: pointer; font: 650 13px var(--font); transition: background-color .15s, transform .12s; }
+            .dk-tool:active { transform: scale(.93); }
+            .dk-tool .tm-tile { width: 32px; height: 32px; border-radius: 9px; }
+            .dk-tool .tm-tile svg { width: 18px; height: 18px; }
+            .dk-tool .dl { display: none; }
+            .dk-tool[aria-pressed="true"] { padding-right: 14px; color: #fff;
+                background: linear-gradient(180deg, color-mix(in srgb, var(--tc) 80%, #fff), var(--tc) 55%, color-mix(in srgb, var(--tc) 88%, #000));
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 1px 3px color-mix(in srgb, var(--tc) 45%, transparent); }
+            .dk-tool[aria-pressed="true"] .dl { display: inline; white-space: nowrap; }
+            .dk-tool[aria-pressed="true"] .tm-tile { background: rgba(255, 255, 255, .22); box-shadow: none; width: 30px; height: 30px; }
+            .tm-scrim { align-items: flex-end; padding: 0; }
+            .tm-sheet { max-width: none; border-radius: 20px 20px 0 0; max-height: 88vh; padding: 18px 16px calc(20px + env(safe-area-inset-bottom, 0px)); animation-name: sheetup; }
+            @keyframes sheetup { from { transform: translateY(40px); opacity: 0; } }
+            .tm-ritem { padding: 8px; }
+            .tm-rl b { font-size: 15.5px; }
+            .tm-rl small { font-size: 13px; }
+            .tm-menu > button { height: 42px; font-size: 15px; }
+        }
+        @media (max-width: 380px) { .docname small { display: none; } }
+
+        /* Bridge night mode: red on black, five brightness levels */
+        :root[data-night] { background: #000; color-scheme: dark; }
+        :root[data-night] body { filter: grayscale(1) brightness(var(--night-b, .6)); }
+        :root[data-night]::after { content: ""; position: fixed; inset: 0; background: #ff1a00; mix-blend-mode: multiply; pointer-events: none; z-index: 2147483647; }
+        :root[data-night] img { filter: grayscale(1); }
+
+        /* Reduced transparency */
+        @media (prefers-reduced-transparency: reduce) {
+            * { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+            .topchrome, .dock, .tm-pop, .tm-sheet, .tm-toast, .tsearch.open { background: var(--win) !important; background-image: none !important; }
+        }
+        @media (prefers-reduced-motion: reduce) { .ribbon .tools, .dk-tools, .tm-pop, .tm-sheet, .tm-scrim, .tsearch.open { animation: none !important; } }
+
+        @media print {
+            html, body, #root { height: auto !important; overflow: visible !important; background: #fff !important; }
+            :root[data-night]::after { display: none; }
+            :root[data-night] body { filter: none; }
+            .tm-app { height: auto; }
+            .topchrome, .dock, .tm-menu, .tm-scrim, .tm-toast { display: none !important; }
+            .content { position: static; overflow: visible; background: #fff; }
+            .content > .container { padding: 0 !important; max-width: none; }
+            .card, .summary-card, .calc-result, .info-section { box-shadow: 0 0 0 .5px #bbb !important; }
+        }
     </style>
 </head>
 <body>
@@ -6446,8 +6735,8 @@ const Proof = (function () {
         ];
         const TAB_GROUPS = [
             { name: 'Voyage', keys: ['rob', 'eta', 'speed', 'time', 'load'] },
-            { name: 'Cargo & Stability', keys: ['vent', 'dwt', 'hydro', 'bwe', 'calc'] },
-            { name: "Ship's Office", keys: ['ot', 'garbage', 'conv', 'proof', 'media'] },
+            { name: 'Cargo & Stability', short: 'Cargo', keys: ['vent', 'dwt', 'hydro', 'bwe', 'calc'] },
+            { name: "Ship's Office", short: 'Office', keys: ['ot', 'garbage', 'conv', 'proof', 'media'] },
             { name: 'Personal', keys: ['budget'] }
         ];
         const TAB_DESC = {
@@ -6495,6 +6784,16 @@ const Proof = (function () {
             ot: <><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2.5 1.5" /><path d="M10 2h4" /><path d="M12 2v3" /></>,
             bwe: <><path d="M3 15h18l-2.5 5h-13z" /><path d="M12 15V4" /><path d="M8.5 7.5 12 4l3.5 3.5" /><path d="M2 21.5c2 0 2-1 4.5-1" /></>,
             calc: <><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M8 7h8" /><path d="M8 11h.01M12 11h.01M16 11h.01M8 14.5h.01M12 14.5h.01M16 14.5h.01M8 18h4M16 18h.01" /></>,
+            g0: <><circle cx="12" cy="12" r="9" /><path d="m15.5 8.5-2 5-5 2 2-5z" /></>,
+            g1: <><path d="M21 8l-9-5-9 5 9 5 9-5z" /><path d="M3 12.5l9 5 9-5" /><path d="M3 17l9 5 9-5" /></>,
+            g2: <><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" /><path d="M3 12.5h18" /></>,
+            g3: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
+            contrast: <><circle cx="12" cy="12" r="9" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" /></>,
+            info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v5" /><path d="M12 7.6v.01" /></>,
+            install: <><path d="M12 4v11" /><path d="m7.5 10.5 4.5 4.5 4.5-4.5" /><path d="M5 20h14" /></>,
+            share: <><path d="M7 9V3h10v6" /><rect x="3" y="9" width="18" height="8" rx="2" /><path d="M7 14h10v7H7z" /></>,
+            check: <><path d="m5 12.5 4.5 4.5L19 7.5" /></>,
+            close: <><path d="M6 6l12 12M18 6 6 18" /></>,
             search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
             print: <><path d="M7 9V3h10v6" /><rect x="3" y="9" width="18" height="8" rx="2" /><path d="M7 14h10v7H7z" /></>,
             sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></>,
@@ -6515,68 +6814,114 @@ const Proof = (function () {
             const [robView, setRobView] = useState('cards');
             const [nowMs, setNowMs] = useState(Date.now());
             useEffect(() => { const t = setInterval(() => setNowMs(Date.now()), 20000); return () => clearInterval(t); }, []);
-            const [theme, setTheme] = useState(() => document.documentElement.getAttribute('data-theme') || 'dark');
+            const [theme, setTheme] = useState(() => { try { const t = localStorage.getItem('tfm_theme'); if (t === 'light' || t === 'dark') return t; } catch (e) {} return (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; });
+            const [night, setNight] = useState(() => { try { const v = localStorage.getItem('tfm_night'); return v && v !== 'off' ? parseFloat(v) : 'off'; } catch (e) { return 'off'; } });
             const toggleTheme = () => {
                 const next = theme === 'dark' ? 'light' : 'dark';
                 setTheme(next);
-                document.documentElement.setAttribute('data-theme', next);
                 try { localStorage.setItem('tfm_theme', next); } catch (e) {}
-                const m = document.querySelector('meta[name="theme-color"]');
-                if (m) m.setAttribute('content', next === 'dark' ? '#1e1e1e' : '#ffffff');
+                if (night !== 'off') setNightLevel('off');
             };
-            // ===== Window navigation: sidebar on desktop, iOS list > detail on phones =====
+            const setNightLevel = (v) => {
+                setNight(v);
+                try { localStorage.setItem('tfm_night', String(v)); if (v !== 'off') localStorage.setItem('tfm_night_last', String(v)); } catch (e) {}
+            };
+            useEffect(() => {
+                const root = document.documentElement;
+                const on = night !== 'off';
+                if (on) { root.dataset.night = 'on'; root.style.setProperty('--night-b', String(night)); root.setAttribute('data-theme', 'dark'); }
+                else { delete root.dataset.night; root.style.removeProperty('--night-b'); root.setAttribute('data-theme', theme); }
+                const m = document.querySelector('meta[name="theme-color"]');
+                if (m) m.setAttribute('content', on ? '#000000' : theme === 'dark' ? '#1c1c1e' : '#f5f5f7');
+            }, [theme, night]);
+            // ===== Window navigation: glass toolbar with groups on top, the group's tools underneath, dock on phones =====
             const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
-            const narrow = () => window.matchMedia && window.matchMedia('(max-width: 1000px)').matches;
+            const narrow = () => window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
             const keyIdx = (k) => TABS.findIndex((t) => t.key === k);
             const hashKey = () => (location.hash || '').replace('#', '');
+            const groupOf = (k) => Math.max(0, TAB_GROUPS.findIndex((g) => g.keys.includes(k)));
             const [activeTab, setActiveTab] = useState(() => {
                 const h = keyIdx(hashKey()); if (h >= 0) return h;
                 try { const s = keyIdx(localStorage.getItem('tfm_tab') || ''); if (s >= 0) return s; } catch (e) {}
                 return 0;
             });
-            const [mView, setMView] = useState(() => (keyIdx(hashKey()) >= 0 ? 'tool' : 'list'));
             const [q, setQ] = useState('');
+            const [searchOpen, setSearchOpen] = useState(false);
             const [scrolled, setScrolled] = useState(false);
+            const [menu, setMenu] = useState(null); // { kind: 'night' | 'groups', x, y }
+            const [sheet, setSheet] = useState(null); // 'about'
+            const [installEvt, setInstallEvt] = useState(null);
+            const [toast, setToast] = useState('');
             const searchRef = useRef(null);
             const mainRef = useRef(null);
+            const ribbonRef = useRef(null);
             const cur = TABS[activeTab] || TABS[0];
+            const curGroup = groupOf(cur.key);
             const ql = q.trim().toLowerCase();
             const visibleIdx = TABS.map((t, i) => i).filter((i) => !ql || (TABS[i].label + ' ' + TAB_DESC[TABS[i].key] + ' ' + (TAB_TAGS[TABS[i].key] || '')).toLowerCase().includes(ql));
-            const toTop = () => { if (mainRef.current) mainRef.current.scrollTop = 0; window.scrollTo(0, 0); setScrolled(false); };
+            const toTop = () => { if (mainRef.current) mainRef.current.scrollTop = 0; setScrolled(false); };
+            const lastInGroup = (gi) => { try { const k = localStorage.getItem('tfm_g' + gi); if (TAB_GROUPS[gi].keys.includes(k)) return k; } catch (e) {} return TAB_GROUPS[gi].keys[0]; };
             const openTab = (idx) => {
                 const k = TABS[idx].key;
                 setActiveTab(idx);
-                try { localStorage.setItem('tfm_tab', k); } catch (e) {}
-                if (narrow() && mView === 'list') { try { history.pushState({ t: k }, '', '#' + k); } catch (e) {} }
-                else { try { history.replaceState(history.state, '', '#' + k); } catch (e) {} }
-                setMView('tool');
+                try { localStorage.setItem('tfm_tab', k); localStorage.setItem('tfm_g' + groupOf(k), k); } catch (e) {}
+                try { history.replaceState(null, '', '#' + k); } catch (e) {}
+                setMenu(null);
                 toTop();
             };
-            const backToList = () => {
-                if (history.state && history.state.t) { history.back(); return; }
-                try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
-                setMView('list'); window.scrollTo(0, 0);
+            const openGroup = (gi) => { if (gi === curGroup) return; openTab(keyIdx(lastInGroup(gi))); };
+            const closeSearch = () => { setQ(''); setSearchOpen(false); };
+            const pickSearch = (idx) => { openTab(idx); closeSearch(); if (searchRef.current) searchRef.current.blur(); };
+            const flash = (msg) => { setToast(msg); clearTimeout(flash.t); flash.t = setTimeout(() => setToast(''), 2600); };
+            const onNight = (e) => {
+                if (night === 'off') {
+                    let last = 0.6; try { last = parseFloat(localStorage.getItem('tfm_night_last')) || 0.6; } catch (er) {}
+                    setNightLevel(last); flash('Night mode on. Tap the moon again for brightness'); return;
+                }
+                const r = e.currentTarget.getBoundingClientRect();
+                setMenu({ kind: 'night', x: Math.min(r.left, window.innerWidth - 240), y: r.bottom + 8 });
             };
             useEffect(() => {
-                const onPop = () => {
-                    const i = keyIdx(hashKey());
-                    if (i >= 0) { setActiveTab(i); setMView('tool'); } else setMView('list');
-                    window.scrollTo(0, 0);
+                const onPop = () => { const i = keyIdx(hashKey()); if (i >= 0) { setActiveTab(i); toTop(); } };
+                const onKey = (e) => {
+                    const mod = e.metaKey || e.ctrlKey;
+                    if (mod && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); setSearchOpen(true); setTimeout(() => searchRef.current && searchRef.current.focus(), 0); return; }
+                    if (e.altKey && !mod && /^Digit[1-4]$/.test(e.code)) { e.preventDefault(); const gi = +e.code.slice(5) - 1; if (TAB_GROUPS[gi]) openTab(keyIdx(lastInGroup(gi))); return; }
+                    if (e.key === 'Escape') { setMenu(null); setSheet(null); }
                 };
-                const onKey = (e) => { if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); if (narrow()) setMView('list'); setTimeout(() => searchRef.current && searchRef.current.focus(), 0); } };
+                const onBip = (e) => { e.preventDefault(); setInstallEvt(e); };
+                const onInstalled = () => setInstallEvt(null);
                 window.addEventListener('popstate', onPop);
                 window.addEventListener('keydown', onKey);
-                if (!narrow() && keyIdx(hashKey()) < 0) { try { history.replaceState(null, '', '#' + TABS[activeTab].key); } catch (e) {} }
-                return () => { window.removeEventListener('popstate', onPop); window.removeEventListener('keydown', onKey); };
+                window.addEventListener('beforeinstallprompt', onBip);
+                window.addEventListener('appinstalled', onInstalled);
+                if (keyIdx(hashKey()) < 0) { try { history.replaceState(null, '', '#' + TABS[activeTab].key); } catch (e) {} }
+                return () => { window.removeEventListener('popstate', onPop); window.removeEventListener('keydown', onKey); window.removeEventListener('beforeinstallprompt', onBip); window.removeEventListener('appinstalled', onInstalled); };
             }, []);
-            useEffect(() => { document.title = (mView === 'tool' || !narrow() ? cur.label + ' · ' : '') + 'Meridian Tools for Mate'; }, [activeTab, mView]);
-            const sideKey = (e) => {
-                if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-                const order = TAB_GROUPS.flatMap((g) => g.keys.map(keyIdx)).filter((i) => i >= 0 && visibleIdx.includes(i));
+            useEffect(() => { document.title = cur.label + ' · Meridian Tools for Mate'; }, [activeTab]);
+            useEffect(() => { // keep the chosen tool in view in the tool row and the dock
+                const t = setTimeout(() => ['tab-', 'dk-'].forEach((pre) => {
+                    const el = document.getElementById(pre + cur.key); const box = el && el.parentElement;
+                    if (!el || !box || !el.offsetParent) return;
+                    const want = el.offsetLeft - (box.clientWidth - el.offsetWidth) / 2;
+                    try { box.scrollTo({ left: Math.max(0, want), behavior: 'smooth' }); } catch (e) { box.scrollLeft = Math.max(0, want); }
+                }), 60);
+                return () => clearTimeout(t);
+            }, [activeTab]);
+            useEffect(() => {
+                if (!menu) return;
+                const close = (e) => { if (!e.target.closest || !e.target.closest('.tm-menu, [data-menu-btn]')) setMenu(null); };
+                document.addEventListener('pointerdown', close);
+                return () => document.removeEventListener('pointerdown', close);
+            }, [menu]);
+            const ribbonKey = (e) => {
+                if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+                const order = TAB_GROUPS[curGroup].keys.map(keyIdx).filter((i) => i >= 0);
                 const p = order.indexOf(activeTab);
-                const n = order[Math.min(order.length - 1, Math.max(0, (p < 0 ? -1 : p) + (e.key === 'ArrowDown' ? 1 : -1)))];
-                if (n !== undefined) { e.preventDefault(); openTab(n); setTimeout(() => { const el = document.getElementById('tab-' + TABS[n].key); if (el) el.focus(); }, 0); }
+                const n = order[Math.min(order.length - 1, Math.max(0, p + (e.key === 'ArrowRight' ? 1 : -1)))];
+                if (n !== undefined && n !== activeTab) { e.preventDefault(); openTab(n); setTimeout(() => { const el = document.getElementById('tab-' + TABS[n].key); if (el) el.focus(); }, 0); }
             };
+            const doInstall = async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch (e) {} setInstallEvt(null); };
 
             // Speed profiles
             const [superEco, setSuperEco] = useState({ name: 'SUPER ECO', speed: 10, fuel: 18 });
@@ -6772,67 +7117,127 @@ const Proof = (function () {
                 );
             }
 
+            const NIGHT_LEVELS = [[1, 'Brightest'], [0.8, 'Bright'], [0.6, 'Medium'], [0.42, 'Dim'], [0.28, 'Darkest']];
+            const searchList = (
+                <div className="tm-results" role="listbox" aria-label="Tools">
+                    {TAB_GROUPS.map((g) => {
+                        const items = g.keys.map(keyIdx).filter((i) => i >= 0 && visibleIdx.includes(i));
+                        if (!items.length) return null;
+                        return (
+                            <div key={g.name} className="tm-rgroup">
+                                <div className="tm-rh">{g.name}</div>
+                                {items.map((idx) => { const t = TABS[idx]; return (
+                                    <button key={t.key} type="button" role="option" aria-selected={idx === activeTab} className="tm-ritem" onMouseDown={(e) => e.preventDefault()} onClick={() => pickSearch(idx)}>
+                                        <span className="tm-tile" style={{ '--tc': t.c }}><Icon name={t.key} /></span>
+                                        <span className="tm-rl"><b>{t.label}</b><small>{TAB_DESC[t.key]}</small></span>
+                                    </button>
+                                ); })}
+                            </div>
+                        );
+                    })}
+                    {visibleIdx.length === 0 && <div className="tm-rempty">No tool matches "{q}".</div>}
+                </div>
+            );
             return (
                 <>
-                    <div className={'win ' + (mView === 'list' ? 'm-list' : 'm-tool')}>
-                    <aside className="side" aria-label="Tools">
-                        <div className="side-top">
-                            <img className="brand-ic" src="icons/icon-192.png" alt="" width="30" height="30" />
-                            <div className="brand-txt">
-                                <h1>Meridian Tools</h1>
-                                <span>for Mate</span>
+                    <div className={'tm-app' + (scrolled ? ' scrolled' : '')} style={{ '--cur': cur.c }}>
+                    <div className="topchrome no-print">
+                        <header className="tm-bar">
+                            <div className="tm-left">
+                                <img className="tm-brand" src="icons/icon-192.png" alt="" width="34" height="34" />
+                                <div className="docname">
+                                    <b>{cur.label}</b>
+                                    <small>{TAB_DESC[cur.key]}</small>
+                                </div>
+                                <div className={'tsearch' + (searchOpen ? ' open' : '')} role="search">
+                                    <button type="button" className="ts-ic" aria-label="Search tools" title={'Search tools (' + (isMac ? '⌘K' : 'Ctrl K') + ')'} onClick={() => { setSearchOpen(true); setTimeout(() => searchRef.current && searchRef.current.focus(), 0); }}><Icon name="search" /></button>
+                                    <input ref={searchRef} type="search" value={q} placeholder="Search tools" aria-label="Search tools" autoComplete="off" spellCheck="false"
+                                        onFocus={() => setSearchOpen(true)} onBlur={() => setTimeout(() => { if (document.activeElement !== searchRef.current) { setSearchOpen(false); setQ(''); } }, 120)}
+                                        onChange={(e) => setQ(e.target.value)}
+                                        onKeyDown={(e) => { if (e.key === 'Enter' && visibleIdx.length) pickSearch(visibleIdx[0]); if (e.key === 'Escape') { closeSearch(); e.currentTarget.blur(); } }} />
+                                    <kbd className="ts-kbd">{isMac ? '⌘K' : 'Ctrl K'}</kbd>
+                                    {searchOpen && <div className="tm-pop tm-search-pop">{searchList}</div>}
+                                </div>
                             </div>
-                            <button className="tbar-btn side-theme" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
-                                <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
-                            </button>
+                            <div className="cats" role="tablist" aria-label="Tool groups">
+                                {TAB_GROUPS.map((g, gi) => (
+                                    <button key={g.name} type="button" role="tab" className="cat" aria-selected={gi === curGroup} onClick={() => openGroup(gi)} title={g.name + ' (Alt+' + (gi + 1) + ')'}>
+                                        <Icon name={'g' + gi} /><span>{g.name}</span>
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="tm-right">
+                                <div className="pill" role="group" aria-label="App">
+                                    <button type="button" className="tbtn tb-search-m" onClick={() => setSheet('search')} aria-label="Search tools" title="Search tools"><Icon name="search" /></button>
+                                    <button type="button" className="tbtn" onClick={toggleTheme} aria-label={theme === 'dark' && night === 'off' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' && night === 'off' ? 'Light mode' : 'Dark mode'}><Icon name="contrast" /></button>
+                                    <button type="button" className="tbtn" data-menu-btn="1" onClick={onNight} aria-pressed={night !== 'off'} aria-label="Bridge night mode" title="Bridge night mode: red light, keeps your night vision"><Icon name="moon" /></button>
+                                    {installEvt && <button type="button" className="tbtn" onClick={doInstall} aria-label="Install app" title="Install Meridian Tools for Mate"><Icon name="install" /></button>}
+                                    <button type="button" className="tbtn" onClick={() => setSheet('about')} aria-label="About and help" title="About Meridian Tools for Mate"><Icon name="info" /></button>
+                                </div>
+                                <button type="button" className="tbtn primary tb-primary" onClick={() => window.print()}><Icon name="share" /><span>Print</span></button>
+                            </div>
+                        </header>
+                        <div className="ribbon">
+                            <div className="tools" ref={ribbonRef} role="tablist" aria-label={TAB_GROUPS[curGroup].name + ' tools'} onKeyDown={ribbonKey} key={curGroup}>
+                                {TAB_GROUPS[curGroup].keys.map(keyIdx).filter((i) => i >= 0).map((idx) => { const t = TABS[idx]; return (
+                                    <button key={t.key} id={'tab-' + t.key} type="button" role="tab" aria-selected={activeTab === idx} aria-pressed={activeTab === idx} tabIndex={activeTab === idx ? 0 : -1} className="tool" style={{ '--tc': t.c }} onClick={() => openTab(idx)} title={TAB_DESC[t.key]}>
+                                        <span className="tm-tile"><Icon name={t.key} /></span><span className="tl">{t.label}</span>
+                                    </button>
+                                ); })}
+                            </div>
                         </div>
-                        <div className="side-search">
-                            <Icon name="search" />
-                            <input ref={searchRef} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search" aria-label="Search tools" onKeyDown={(e) => { if (e.key === 'Enter' && visibleIdx.length) { openTab(visibleIdx[0]); setQ(''); } if (e.key === 'Escape') setQ(''); }} />
-                            {!q && <kbd className="side-kbd">{isMac ? '⌘K' : 'Ctrl K'}</kbd>}
-                        </div>
-                        <nav className="side-scroll" role="tablist" aria-orientation="vertical" aria-label="Tools" onKeyDown={sideKey}>
-                            {TAB_GROUPS.map((g) => {
-                                const items = g.keys.map((k) => TABS.findIndex((t) => t.key === k)).filter((i) => i >= 0 && visibleIdx.includes(i));
-                                if (!items.length) return null;
-                                return (
-                                    <div className="side-group" key={g.name}>
-                                        <div className="side-h">{g.name}</div>
-                                        <div className="side-list">
-                                            {items.map((idx) => {
-                                                const t = TABS[idx];
-                                                return (
-                                                    <button key={t.key} id={'tab-' + t.key} role="tab" aria-selected={activeTab === idx} tabIndex={activeTab === idx ? 0 : -1} className="side-item" onClick={() => openTab(idx)}>
-                                                        <span className="side-ic" style={{ '--tc': t.c }}><Icon name={t.key} /></span>
-                                                        <span className="side-lbl">{t.label}<small>{TAB_DESC[t.key]}</small></span>
-                                                        <svg className="side-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                            {visibleIdx.length === 0 && <div className="side-empty">No tool matches "{q}".</div>}
-                        </nav>
-                        <div className="side-foot">Tango Juliet Dev &middot; works offline</div>
-                    </aside>
-                    <main className="main" ref={mainRef} onScroll={(e) => { const s = e.currentTarget.scrollTop > 4; if (s !== scrolled) setScrolled(s); }}>
-                    <header className={'tbar' + (scrolled ? ' scrolled' : '')}>
-                        <button className="tbar-back" onClick={backToList} aria-label="All tools">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg>
-                            <span>Tools</span>
+                    </div>
+                    <nav className="dock no-print" aria-label="Tools">
+                        <button type="button" className="catsw" data-menu-btn="1" onClick={(e) => { if (menu && menu.kind === 'groups') { setMenu(null); return; } const r = e.currentTarget.getBoundingClientRect(); setMenu({ kind: 'groups', x: r.left, y: r.top - 8, up: true }); }} aria-haspopup="menu" aria-label={'Group: ' + TAB_GROUPS[curGroup].name}>
+                            <Icon name={'g' + curGroup} /><span>{TAB_GROUPS[curGroup].short || TAB_GROUPS[curGroup].name}</span><svg className="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6" /></svg>
                         </button>
-                        <span className="tbar-ic" style={{ '--tc': cur.c }}><Icon name={cur.key} /></span>
-                        <div className="tbar-title">
-                            <h2>{cur.label}</h2>
-                            <span>{TAB_DESC[cur.key]}</span>
+                        <span className="catsep" aria-hidden="true" />
+                        <div className="dk-tools" key={curGroup}>
+                            {TAB_GROUPS[curGroup].keys.map(keyIdx).filter((i) => i >= 0).map((idx) => { const t = TABS[idx]; return (
+                                <button key={t.key} id={'dk-' + t.key} type="button" className="dk-tool" aria-pressed={activeTab === idx} style={{ '--tc': t.c }} onClick={() => openTab(idx)} aria-label={t.label}>
+                                    <span className="tm-tile"><Icon name={t.key} /></span><span className="dl">{t.label}</span>
+                                </button>
+                            ); })}
                         </div>
-                        <div className="tbar-actions">
-                            <button className="tbar-btn" onClick={() => window.print()} aria-label="Print or save as PDF" title="Print or save as PDF"><Icon name="print" /></button>
-                            <button className="tbar-btn" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}><Icon name={theme === 'dark' ? 'sun' : 'moon'} /></button>
-                        </div>
-                    </header>
+                    </nav>
+                    {menu && <div className={'tm-menu tm-pop' + (menu.up ? ' up' : '')} role="menu" style={menu.up ? { left: Math.max(8, menu.x), bottom: window.innerHeight - menu.y } : { left: Math.max(8, menu.x), top: menu.y }}>
+                        {menu.kind === 'night' && <>
+                            <div className="tm-mh">Night brightness</div>
+                            {NIGHT_LEVELS.map(([k, l]) => <button key={k} type="button" role="menuitemradio" aria-checked={Math.abs(k - night) < 0.01} onClick={() => { setNightLevel(k); setMenu(null); }}><Icon name={Math.abs(k - night) < 0.01 ? 'check' : 'moon'} />{l}</button>)}
+                            <div className="tm-msep" />
+                            <button type="button" role="menuitem" onClick={() => { setNightLevel('off'); setMenu(null); }}><Icon name="close" />Turn night mode off</button>
+                        </>}
+                        {menu.kind === 'groups' && <>
+                            <div className="tm-mh">Tool groups</div>
+                            {TAB_GROUPS.map((g, gi) => <button key={g.name} type="button" role="menuitemradio" aria-checked={gi === curGroup} onClick={() => { setMenu(null); openGroup(gi); }}><Icon name={'g' + gi} />{g.name}<small>{g.keys.length}</small></button>)}
+                            <div className="tm-msep" />
+                            <button type="button" role="menuitem" onClick={() => { setMenu(null); setSheet('search'); }}><Icon name="search" />All tools and search</button>
+                        </>}
+                    </div>}
+                    {sheet && <div className="tm-scrim no-print" onClick={(e) => { if (e.target === e.currentTarget) { setSheet(null); setQ(''); } }}>
+                        {sheet === 'search' && <div className="tm-sheet tm-sheet-search" role="dialog" aria-label="All tools">
+                            <div className="tm-sheet-h"><h3>All tools</h3><button type="button" className="tbtn solo" onClick={() => { setSheet(null); setQ(''); }} aria-label="Close"><Icon name="close" /></button></div>
+                            <div className="tm-sfield"><Icon name="search" /><input type="search" autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search tools" aria-label="Search tools" onKeyDown={(e) => { if (e.key === 'Enter' && visibleIdx.length) { openTab(visibleIdx[0]); setSheet(null); setQ(''); } }} /></div>
+                            <div onClick={(e) => { if (e.target.closest('.tm-ritem')) { setSheet(null); setQ(''); } }}>{searchList}</div>
+                        </div>}
+                        {sheet === 'about' && <div className="tm-sheet" role="dialog" aria-label="About">
+                            <div className="tm-sheet-h"><div className="about-hero"><img src="icons/icon-192.png" alt="" width="52" height="52" /><div><h3>Meridian Tools for Mate</h3><small>Tango Juliet Dev</small></div></div><button type="button" className="tbtn solo" onClick={() => setSheet(null)} aria-label="Close"><Icon name="close" /></button></div>
+                            <p className="about-p">Maritime calculators for the watchkeeper and the chief mate. {TABS.length} tools in four groups. Works fully offline, and everything you enter stays on this device.</p>
+                            <div className="about-h">Keyboard shortcuts</div>
+                            <div className="kgrid">
+                                <span><kbd>{isMac ? '⌘' : 'Ctrl'}</kbd><kbd>K</kbd></span><span>Search tools</span>
+                                <span><kbd>Alt</kbd><kbd>1</kbd> to <kbd>4</kbd></span><span>Switch group</span>
+                                <span><kbd>←</kbd><kbd>→</kbd></span><span>Previous or next tool in the tool row</span>
+                                <span><kbd>{isMac ? '⌘' : 'Ctrl'}</kbd><kbd>P</kbd></span><span>Print or save as PDF</span>
+                                <span><kbd>Esc</kbd></span><span>Close menus</span>
+                            </div>
+                            <div className="about-h">Display</div>
+                            <p className="about-p">The contrast button switches light and dark. The moon turns on bridge night mode: red on black with five brightness levels, so you keep your night vision.</p>
+                            {installEvt && <button type="button" className="btn btn-primary" onClick={doInstall}>Install app</button>}
+                        </div>}
+                    </div>}
+                    {toast && <div className="tm-toast no-print" role="status">{toast}</div>}
+                    <main className="content" ref={mainRef} onScroll={(e) => { const s = e.currentTarget.scrollTop > 4; if (s !== scrolled) setScrolled(s); }}>
                     <div className="container">
                         <div className="tab-content" role="tabpanel" aria-labelledby={'tab-' + cur.key} key={cur.key}>
                             {activeTab === 0 && (
