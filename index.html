@@ -1651,11 +1651,44 @@
         .trs-opt.ok { background: var(--ok-soft); color: var(--ok); opacity: 1; box-shadow: inset 0 0 0 1.5px var(--ok); }
         .trs-opt.bad { background: var(--bad-soft); color: var(--bad); opacity: 1; box-shadow: inset 0 0 0 1.5px var(--bad); }
         .trs-tab td { vertical-align: top; font-size: 12.5px; line-height: 1.45; }
+    
+        /* Meteorology */
+        .met-sea { width: 100%; display: block; border-radius: 10px; margin: 8px 0; }
+        .met-sky { fill: #9cc7ec; } :root[data-theme="dark"] .met-sky { fill: #1e3a5f; }
+        .met-water { fill: #1d5c94; } :root[data-theme="dark"] .met-water { fill: #0c2d4d; }
+        .met-cap { fill: #fff; opacity: .9; }
+        .met-streak { stroke: #fff; stroke-width: 2; opacity: .65; }
+        .met-spray { fill: #fff; opacity: .35; }
+        .met-range { width: 100%; accent-color: var(--accent); }
+        .met-bft tr { cursor: pointer; } .met-bft tr.on td { background: var(--accent-soft); }
+        .met-barb { width: 130px; height: 130px; flex: none; }
+        .met-barbrow { display: flex; gap: 12px; align-items: center; }
+        .met-staff { stroke: var(--text); stroke-width: 2.2; stroke-linecap: round; }
+        .met-pen { fill: var(--text); }
+        .met-calm { fill: none; stroke: var(--text); stroke-width: 2; }
+        .tw-s { stroke: var(--muted); stroke-width: 2.5; color: var(--muted); }
+        .tw-a { stroke: #f59e0b; stroke-width: 2.5; color: #f59e0b; }
+        .tw-t { stroke: var(--accent); stroke-width: 3; color: var(--accent); }
+        .met-sys { width: 100%; display: block; margin: 8px 0; }
+        .met-iso { fill: none; stroke: var(--text-2); stroke-width: 1.2; opacity: .6; }
+        .met-isot { fill: var(--muted); font: 600 9.5px var(--font); }
+        .met-big { fill: var(--text); font: 800 22px var(--font); }
+        .met-wfl { fill: none; stroke: #dc2626; stroke-width: 3; }
+        .met-cfl { fill: none; stroke: #2563eb; stroke-width: 3; }
+        .met-wf { fill: #dc2626; }
+        .met-cf { fill: #2563eb; }
+        .met-warr { stroke: var(--ok); stroke-width: 2; }
+        .met-warrh { fill: var(--ok); }
+        .met-lab { fill: var(--text); font: 700 11px var(--font); }
+        .met-lab.r { fill: #dc2626; } .met-lab.b { fill: #2563eb; }
+        .met-cb { fill: var(--fill-3); stroke: var(--text-2); }
+        .met-seq td { font-size: 12.5px; vertical-align: top; }
+        .met-list { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.6; color: var(--text-2); }
     </style>
 </head>
 <body>
     <div id="root"></div>
-    <script src="app.js?v=29" defer></script>
+    <script src="app.js?v=30" defer></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(e){console.log("SW failed",e)})})}</script>
 </body>
 </html>

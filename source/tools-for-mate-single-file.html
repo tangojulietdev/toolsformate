@@ -1652,6 +1652,39 @@
         .trs-opt.ok { background: var(--ok-soft); color: var(--ok); opacity: 1; box-shadow: inset 0 0 0 1.5px var(--ok); }
         .trs-opt.bad { background: var(--bad-soft); color: var(--bad); opacity: 1; box-shadow: inset 0 0 0 1.5px var(--bad); }
         .trs-tab td { vertical-align: top; font-size: 12.5px; line-height: 1.45; }
+    
+        /* Meteorology */
+        .met-sea { width: 100%; display: block; border-radius: 10px; margin: 8px 0; }
+        .met-sky { fill: #9cc7ec; } :root[data-theme="dark"] .met-sky { fill: #1e3a5f; }
+        .met-water { fill: #1d5c94; } :root[data-theme="dark"] .met-water { fill: #0c2d4d; }
+        .met-cap { fill: #fff; opacity: .9; }
+        .met-streak { stroke: #fff; stroke-width: 2; opacity: .65; }
+        .met-spray { fill: #fff; opacity: .35; }
+        .met-range { width: 100%; accent-color: var(--accent); }
+        .met-bft tr { cursor: pointer; } .met-bft tr.on td { background: var(--accent-soft); }
+        .met-barb { width: 130px; height: 130px; flex: none; }
+        .met-barbrow { display: flex; gap: 12px; align-items: center; }
+        .met-staff { stroke: var(--text); stroke-width: 2.2; stroke-linecap: round; }
+        .met-pen { fill: var(--text); }
+        .met-calm { fill: none; stroke: var(--text); stroke-width: 2; }
+        .tw-s { stroke: var(--muted); stroke-width: 2.5; color: var(--muted); }
+        .tw-a { stroke: #f59e0b; stroke-width: 2.5; color: #f59e0b; }
+        .tw-t { stroke: var(--accent); stroke-width: 3; color: var(--accent); }
+        .met-sys { width: 100%; display: block; margin: 8px 0; }
+        .met-iso { fill: none; stroke: var(--text-2); stroke-width: 1.2; opacity: .6; }
+        .met-isot { fill: var(--muted); font: 600 9.5px var(--font); }
+        .met-big { fill: var(--text); font: 800 22px var(--font); }
+        .met-wfl { fill: none; stroke: #dc2626; stroke-width: 3; }
+        .met-cfl { fill: none; stroke: #2563eb; stroke-width: 3; }
+        .met-wf { fill: #dc2626; }
+        .met-cf { fill: #2563eb; }
+        .met-warr { stroke: var(--ok); stroke-width: 2; }
+        .met-warrh { fill: var(--ok); }
+        .met-lab { fill: var(--text); font: 700 11px var(--font); }
+        .met-lab.r { fill: #dc2626; } .met-lab.b { fill: #2563eb; }
+        .met-cb { fill: var(--fill-3); stroke: var(--text-2); }
+        .met-seq td { font-size: 12.5px; vertical-align: top; }
+        .met-list { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.6; color: var(--text-2); }
     </style>
 </head>
 <body>
@@ -9226,8 +9259,355 @@ const Proof = (function () {
             );
         }
 
-        const APP_VERSION = '3.5.0';
+        // ---------- Meteorology ----------
+        const MET_KEY = 'tfm_br_met_v1';
+        const MET_DEF = () => ({
+            tool: 'wind', wc: '', ws: '', wrel: '', wside: 'S', wa: '', bf: '6',
+            pr: '', ph: '', pt: '15', p3: '', ptime: '', trop: false,
+            db: '', wb: '', sst: '', iw: '', ia: '', is: '',
+            snh: 'n', sys: 'low',
+            wu: '', wf: '', wt: '', tp: '', vs: '', head: 'head', roll: ''
+        });
+        const BF = [
+            [0, 0, 1, 'Calm', 'Sea like a mirror', 0, 0], [1, 1, 3, 'Light air', 'Ripples, no foam crests', 0.1, 0.1], [2, 4, 6, 'Light breeze', 'Small wavelets, crests glassy, not breaking', 0.2, 0.3],
+            [3, 7, 10, 'Gentle breeze', 'Large wavelets, crests begin to break, scattered white horses', 0.6, 1], [4, 11, 16, 'Moderate breeze', 'Small waves becoming longer, fairly frequent white horses', 1, 1.5],
+            [5, 17, 21, 'Fresh breeze', 'Moderate waves, many white horses, chance of spray', 2, 2.5], [6, 22, 27, 'Strong breeze', 'Large waves forming, white foam crests everywhere, probably some spray', 3, 4],
+            [7, 28, 33, 'Near gale', 'Sea heaps up, white foam from breaking waves blown in streaks', 4, 5.5], [8, 34, 40, 'Gale', 'Moderately high waves of greater length, crests break into spindrift, foam in well marked streaks', 5.5, 7.5],
+            [9, 41, 47, 'Strong gale', 'High waves, dense streaks of foam, crests topple and roll over, spray may affect visibility', 7, 10], [10, 48, 55, 'Storm', 'Very high waves with long overhanging crests, sea white with foam, heavy tumbling, visibility affected', 9, 12.5],
+            [11, 56, 63, 'Violent storm', 'Exceptionally high waves, sea covered with long white patches of foam, visibility affected', 11.5, 16], [12, 64, 999, 'Hurricane', 'Air filled with foam and spray, sea completely white with driving spray, visibility very seriously affected', 14, 14]
+        ];
+        const DOUGLAS = [[0, 0, 'Calm (glassy)'], [0.1, 1, 'Calm (rippled)'], [0.5, 2, 'Smooth'], [1.25, 3, 'Slight'], [2.5, 4, 'Moderate'], [4, 5, 'Rough'], [6, 6, 'Very rough'], [9, 7, 'High'], [14, 8, 'Very high'], [99, 9, 'Phenomenal']];
+        const douglas = (h) => { for (const d of DOUGLAS) if (h <= d[0]) return d; return DOUGLAS[9]; };
+        const bfOf = (kn) => (isFinite(kn) ? BF.find((b) => kn < b[2] + 0.5 || b[0] === 12) : null);
+        function MetSea({ force }) { // sea surface picture for a Beaufort force
+            const f = Math.max(0, Math.min(12, force)), amp = [0, 1, 2, 4, 6, 9, 12, 16, 20, 24, 28, 31, 34][f], len = 60 + f * 8;
+            let d = 'M0 90'; for (let x = 0; x <= 400; x += 4) d += ' L' + x + ' ' + (90 - amp * Math.sin(x / len * 2 * Math.PI) - amp * 0.3 * Math.sin(x / (len * 0.43) * 2 * Math.PI + 1));
+            d += ' L400 160 L0 160z';
+            const caps = []; for (let i = 0; i < f * 3; i++) { const x = (i * 97) % 400; caps.push(<ellipse key={i} cx={x} cy={90 - amp * Math.sin(x / len * 2 * Math.PI) - amp * 0.3 * Math.sin(x / (len * 0.43) * 2 * Math.PI + 1) + 2} rx={3 + f * 0.6} ry={1.5 + f * 0.15} className="met-cap" />); }
+            const streaks = f >= 7 ? Array.from({ length: (f - 6) * 4 }, (_, i) => <line key={i} x1={(i * 61) % 400} y1={110 + (i * 13) % 40} x2={(i * 61) % 400 + 30} y2={110 + (i * 13) % 40} className="met-streak" />) : null;
+            return <svg className="met-sea" viewBox="0 0 400 160"><rect width="400" height="160" className="met-sky" /><path d={d} className="met-water" />{caps}{streaks}{f >= 10 && <rect width="400" height="160" className="met-spray" />}</svg>;
+        }
+        function MetBarb({ from, kn, size = 120 }) { // wind barb: staff points to where the wind comes from
+            if (!isFinite(from) || !isFinite(kn)) return null;
+            const C = size / 2, L = size * 0.42, a = from * AD, ux = Math.sin(a), uy = -Math.cos(a), px = -uy, py = ux;
+            const tip = [C + ux * L, C + uy * L]; const els = []; let k = Math.round(kn / 5) * 5, pos = 0;
+            const at = (t) => [C + ux * (L - t), C + uy * (L - t)];
+            while (k >= 50) { const [x1, y1] = at(pos), [x2, y2] = at(pos + 9); els.push(<path key={'p' + pos} d={`M${x1} ${y1}L${x1 + px * 16} ${y1 + py * 16}L${x2} ${y2}z`} className="met-pen" />); pos += 11; k -= 50; }
+            while (k >= 10) { const [x1, y1] = at(pos); els.push(<line key={'f' + pos} x1={x1} y1={y1} x2={x1 + px * 18 + ux * 5} y2={y1 + py * 18 + uy * 5} className="met-staff" />); pos += 6; k -= 10; }
+            if (k >= 5) { const [x1, y1] = at(pos === 0 ? 6 : pos); els.push(<line key="h" x1={x1} y1={y1} x2={x1 + px * 9 + ux * 2.5} y2={y1 + py * 9 + uy * 2.5} className="met-staff" />); }
+            return <svg className="met-barb" viewBox={`0 0 ${size} ${size}`}><circle cx={C} cy={C} r={size * 0.47} className="b-ring" /><text x={C} y={12} textAnchor="middle" className="b-txt">N</text><line x1={C} y1={C} x2={tip[0]} y2={tip[1]} className="met-staff" />{els}<circle cx={C} cy={C} r={4} className={kn < 2.5 ? 'met-calm' : 'b-dr'} /></svg>;
+        }
+        function MetSystem({ nh, kind }) { // plan view of a depression with fronts, or an anticyclone
+            const W = 420, H = 320, cx = 170, cy = 140, m = nh ? 1 : -1; // m mirrors north-south for the southern hemisphere
+            const Y = (y) => cy + m * (y - cy);
+            const iso = [40, 75, 110, 145, 180].map((r, i) => <ellipse key={r} cx={cx + 25} cy={Y(cy + 8)} rx={r * 1.12} ry={r} className="met-iso" />);
+            const lbl = [40, 75, 110, 145, 180].map((r, i) => <text key={r} x={cx + 25 + r * 1.12 - 24} y={Y(cy + 8) + 3} className="met-isot">{kind === 'low' ? 992 + i * 4 : 1032 - i * 4}</text>);
+            const ex = cx + 25, ey = Y(cy + 8);
+            const flow = (bb) => (kind === 'low' ? (nh ? bb - 110 : bb + 110) : (nh ? bb + 70 : bb - 70));
+            const wind = [20, 80, 140, 200, 260, 320].map((bb) => { const x = ex + Math.sin(bb * AD) * 92 * 1.25, y = ey - Math.cos(bb * AD) * 92; const t = flow(bb) * AD; const tx = Math.sin(t) * 14, ty = -Math.cos(t) * 14; return <line key={bb} x1={x - tx} y1={y - ty} x2={x + tx} y2={y + ty} className="met-warr" markerEnd="url(#metA)" />; });
+            const qb = (p0, p1, p2, t) => [(1 - t) * (1 - t) * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0], (1 - t) * (1 - t) * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1]];
+            const fronts = kind === 'low' ? (() => {
+                const W0 = [ex - 2, ey + m * 4], W1 = [ex + 80, Y(cy + 28)], W2 = [ex + 165, Y(cy + 78)], C1 = [ex - 20, Y(cy + 95)], C2 = [ex - 85, Y(cy + 170)];
+                const sem = [0.3, 0.55, 0.8].map((t, i) => { const [x, y] = qb(W0, W1, W2, t); return <circle key={i} cx={x} cy={y} r={7} className="met-wf" />; });
+                const tri = [0.3, 0.55, 0.8].map((t, i) => { const [x, y] = qb(W0, C1, C2, t); const [x2, y2] = qb(W0, C1, C2, t + 0.04); const dx = x2 - x, dy = y2 - y, l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l; const nx = uy * m, ny = -ux * m; return <path key={i} d={`M${x - ux * 8} ${y - uy * 8}L${x + ux * 8} ${y + uy * 8}L${x + nx * 11} ${y + ny * 11}z`} className="met-cf" />; });
+                return <><path d={`M${W0[0]} ${W0[1]} Q ${W1[0]} ${W1[1]} ${W2[0]} ${W2[1]}`} className="met-wfl" /><path d={`M${W0[0]} ${W0[1]} Q ${C1[0]} ${C1[1]} ${C2[0]} ${C2[1]}`} className="met-cfl" />{sem}{tri}<text x={cx + 95} y={Y(cy + 118)} className="met-lab">Warm sector</text><text x={cx + 150} y={Y(cy + 42)} className="met-lab r">Warm front</text><text x={cx - 112} y={Y(cy + 122)} className="met-lab b">Cold front</text></>;
+            })() : null;
+            return (
+                <svg className="met-sys" viewBox={`0 0 ${W} ${H}`}>
+                    <defs><marker id="metA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 10 5 0 10z" className="met-warrh" /></marker></defs>
+                    <rect width={W} height={H} rx="12" className="b-plot-bg" />
+                    {iso}{lbl}{fronts}{wind}
+                    <text x={cx + 25} y={Y(cy + 8) + (kind === 'low' ? -10 * m : 8)} textAnchor="middle" className="met-big">{kind === 'low' ? 'L' : 'H'}</text>
+                    <text x={W - 12} y={nh ? 20 : H - 10} textAnchor="end" className="b-txt">{nh ? 'North ↑' : 'North ↑ (southern hemisphere)'}</text>
+                    <text x={12} y={H - 10} className="b-txt">{kind === 'low' ? (nh ? 'Anticlockwise, in across the isobars' : 'Clockwise, in across the isobars') : (nh ? 'Clockwise, out across the isobars' : 'Anticlockwise, out across the isobars')}</text>
+                </svg>
+            );
+        }
+        function MetSection() { // cross-section through a warm and a cold front
+            return (
+                <svg className="met-sys" viewBox="0 0 420 170">
+                    <rect width="420" height="170" rx="12" className="b-plot-bg" />
+                    <line x1="10" y1="150" x2="410" y2="150" className="b-axis" />
+                    <path d="M70 150 L150 120 L230 90 L300 60 L380 30" className="met-wfl" fill="none" />
+                    <path d="M70 150 L45 110 L35 60" className="met-cfl" fill="none" />
+                    <path d="M20 150 L20 40 Q 35 15 60 30 Q 80 10 95 40 L95 150z" className="met-cb" />
+                    <text x="57" y="70" textAnchor="middle" className="met-lab">Cb</text>
+                    <text x="160" y="110" className="met-lab">Ns</text><text x="240" y="78" className="met-lab">As</text><text x="305" y="50" className="met-lab">Cs</text><text x="370" y="22" className="met-lab">Ci</text>
+                    <text x="120" y="142" className="met-isot">warm air rises over cold</text>
+                    <text x="12" y="165" className="b-txt">← Cold front · warm sector · warm front, movement →</text>
+                </svg>
+            );
+        }
+        const CLOUDS = [
+            ['Cirrus (Ci)', 'High, 5 to 13 km', 'White hair-like streaks', 'Fair now; thickening Ci from the west can be the first sign of a warm front 300 to 600 NM away'],
+            ['Cirrostratus (Cs)', 'High', 'Thin white veil, halo round Sun or Moon', 'Warm front approaching, rain in 12 to 24 h'],
+            ['Cirrocumulus (Cc)', 'High', 'Small white ripples, "mackerel sky"', 'Usually fair, unsettled if it thickens'],
+            ['Altostratus (As)', 'Middle, 2 to 7 km', 'Grey sheet, Sun as through ground glass', 'Warm front close, continuous rain soon'],
+            ['Altocumulus (Ac)', 'Middle', 'Grey-white rolls or patches', 'Fair; Ac castellanus in the morning: thunderstorms later'],
+            ['Nimbostratus (Ns)', 'Low to middle', 'Thick dark grey, ragged base', 'Continuous rain or snow, poor visibility'],
+            ['Stratocumulus (Sc)', 'Low, below 2 km', 'Grey lumpy layer', 'Mostly dry, light drizzle at times'],
+            ['Stratus (St)', 'Low, surface to 500 m', 'Uniform grey layer, fog lifting', 'Drizzle, poor visibility'],
+            ['Cumulus (Cu)', 'Low base', 'Detached heaps, flat base', 'Fair weather; large towering Cu: showers'],
+            ['Cumulonimbus (Cb)', 'Low base to 12 km top', 'Huge tower, anvil top', 'Heavy showers, squalls, sudden wind shifts, thunder, hail; waterspouts possible']
+        ];
+        function MetTab() {
+            const [s, setS, set] = useErStore(MET_KEY, MET_DEF);
+            const tools = [['wind', 'True wind'], ['bf', 'Beaufort'], ['pres', 'Pressure'], ['hum', 'Humidity, fog, icing'], ['sys', 'Weather systems'], ['wave', 'Waves'], ['cloud', 'Clouds']];
+            // true wind
+            const wc = pn(s.wc), ws = pn(s.ws) || 0, rel = pn(s.wrel), wa = pn(s.wa);
+            const relS = isFinite(rel) ? (s.wside === 'P' ? -rel : rel) : NaN;
+            let tw = null;
+            if (isFinite(wc) && isFinite(relS) && isFinite(wa)) {
+                const aFrom = anrm(wc + relS), va = bVec(aFrom + 180, wa), vs = bVec(wc, ws), vt = [va[0] + vs[0], va[1] + vs[1]];
+                const sp = Math.hypot(...vt), from = anrm(Math.atan2(vt[0], vt[1]) / AD + 180);
+                tw = { from, sp, aFrom, rel: bDz(from, wc), va, vs, vt };
+            }
+            const bfT = tw ? bfOf(tw.sp) : null;
+            // beaufort
+            const force = Math.max(0, Math.min(12, parseInt(s.bf) || 0)), B = BF[force];
+            // pressure
+            const pr = pn(s.pr), ph = pn(s.ph) || 0, pT = isFinite(pn(s.pt)) ? pn(s.pt) : 15;
+            const msl = isFinite(pr) ? pr * Math.exp(ph / (29.27 * (pT + 273.15))) : NaN;
+            const p3 = pn(s.p3), dP = isFinite(msl) && isFinite(p3) ? msl - p3 : NaN;
+            const tend = !isFinite(dP) ? '' : Math.abs(dP) < 0.1 ? 'Steady' : (dP > 0 ? 'Rising' : 'Falling') + (Math.abs(dP) <= 1.5 ? ' slowly' : Math.abs(dP) <= 3.5 ? '' : Math.abs(dP) <= 6 ? ' quickly' : ' very rapidly');
+            const lt = /^(\d{1,2}):(\d{2})$/.exec(s.ptime || ''); const hr = lt ? +lt[1] + +lt[2] / 60 : NaN;
+            const diur = isFinite(hr) ? 1.3 * Math.cos((hr - 10) / 12 * 2 * Math.PI) : NaN; // semi-diurnal tide, highs 10 and 22 LT
+            const pCorr = isFinite(msl) && isFinite(diur) ? msl - diur : NaN;
+            // humidity
+            const dpt = calculateDewPoint(s.db, s.wb), rh = calculateRH(s.db, s.wb), sst = pn(s.sst);
+            const fogM = isFinite(dpt) && isFinite(sst) ? dpt - sst : NaN;
+            const iw = pn(s.iw) * 0.5144, ia = pn(s.ia), isst = pn(s.is), Tf = -1.7;
+            const ppr = isFinite(iw) && isFinite(ia) && isFinite(isst) ? iw * (Tf - ia) / (1 + 0.3 * (isst - Tf)) : NaN;
+            const icing = !isFinite(ppr) ? '' : ppr <= 0 ? 'None' : ppr < 22.4 ? 'Light (under 0.7 cm/h)' : ppr < 53.3 ? 'Moderate (0.7 to 2 cm/h)' : ppr < 83 ? 'Heavy (2 to 4 cm/h)' : 'Extreme (over 4 cm/h)';
+            // waves
+            const U = pn(s.wu) * 0.5144, F = pn(s.wf) * 1852, g = 9.81;
+            let wv = null;
+            if (U > 0 && F > 0) {
+                const x = g * F / (U * U);
+                const hs = Math.min(0.0016 * Math.sqrt(x), 0.243) * U * U / g;
+                const tp = Math.min(0.286 * Math.cbrt(x), 8.13) * U / g;
+                const tmin = 68.8 * Math.pow(x, 2 / 3) * U / g / 3600; // h to reach the fetch-limited state
+                wv = { hs, tp, hmax: hs * 1.86, tmin, full: 0.0016 * Math.sqrt(x) >= 0.243 };
+            }
+            const T = pn(s.tp), V = (pn(s.vs) || 0) * 0.5144;
+            const Lw = T > 0 ? g * T * T / (2 * Math.PI) : NaN, cw = T > 0 ? g * T / (2 * Math.PI) : NaN;
+            const mu = { head: 0, bowq: 45, beam: 90, qtr: 135, follow: 180 }[s.head];
+            const Te = T > 0 ? Math.abs(Lw / (cw + V * Math.cos(mu * AD))) : NaN;
+            const TR = pn(s.roll);
+            const sync = isFinite(Te) && TR > 0 ? Math.abs(Te / TR - 1) < 0.3 : false, para = isFinite(Te) && TR > 0 ? Math.abs(Te / (TR / 2) - 1) < 0.3 : false;
+            const surf = isFinite(cw) && (s.head === 'follow' || s.head === 'qtr') && V > 0 ? V / cw : NaN; // surf-riding risk when ship speed near wave speed
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Meteorology</h2>
+                    <ErTabs tabs={tools} value={s.tool} onChange={set('tool')} />
+                    {s.tool === 'wind' && <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="card-title">True wind from apparent wind</div>
+                            <div className="cx-row">
+                                <CxField label="Course (°T)" value={s.wc} onChange={set('wc')} />
+                                <CxField label="Speed (kn)" value={s.ws} onChange={set('ws')} />
+                            </div>
+                            <div className="cx-row">
+                                <CxField label="Apparent wind, relative bearing (°)" value={s.wrel} onChange={set('wrel')} hint="0 = right ahead, 90 = abeam" />
+                                <ErSel label="Side" value={s.wside} onChange={set('wside')} opts={[['S', 'Starboard (green)'], ['P', 'Port (red)']]} />
+                                <CxField label="Apparent wind speed (kn)" value={s.wa} onChange={set('wa')} />
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l="True wind from" v={tw ? bZ(tw.from) : '-'} hi />
+                                <CxOut l="True wind speed" v={tw ? tw.sp.toFixed(1) : '-'} u="kn" hi sub={bfT ? 'Force ' + bfT[0] + ', ' + bfT[3] : ''} />
+                                <CxOut l="Relative to the bow" v={tw ? Math.abs(tw.rel).toFixed(0) + '° ' + (tw.rel >= 0 ? 'Starboard' : 'Port') : '-'} />
+                                <CxOut l="Apparent wind from" v={tw ? bZ(tw.aFrom) : '-'} />
+                            </div>
+                            <div className="cx-hint" style={{ marginTop: 8 }}>True wind = apparent wind + ship's motion. Enter the true wind in the log and weather reports, not the apparent.</div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Vector triangle and wind barb</div>
+                            {tw ? (() => {
+                                const mx = Math.max(tw.sp, wa, ws, 5), sc = 120 / mx, C = 160; const P = (v) => [C + v[0] * sc, C - v[1] * sc];
+                                const o = [C, C], a = P(tw.vs), b = P(tw.vt);
+                                return <svg className="b-plot" viewBox="0 0 320 320"><rect width="320" height="320" rx="12" className="b-plot-bg" /><defs><marker id="twA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 10 5 0 10z" fill="currentColor" /></marker></defs>
+                                    <line x1={o[0]} y1={o[1]} x2={a[0]} y2={a[1]} className="tw-s" markerEnd="url(#twA)" /><line x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} className="tw-a" markerEnd="url(#twA)" /><line x1={o[0]} y1={o[1]} x2={b[0]} y2={b[1]} className="tw-t" markerEnd="url(#twA)" />
+                                    <text x={(o[0] + a[0]) / 2 + 6} y={(o[1] + a[1]) / 2} className="b-txt">ship {ws} kn</text><text x={(a[0] + b[0]) / 2 + 6} y={(a[1] + b[1]) / 2} className="b-txt">apparent</text><text x={(o[0] + b[0]) / 2 - 40} y={(o[1] + b[1]) / 2 - 6} className="b-txt">true</text><text x="164" y="16" className="b-txt">N</text></svg>;
+                            })() : <div className="cx-hint">Enter the values to draw the triangle.</div>}
+                            <div className="met-barbrow">{tw && <MetBarb from={tw.from} kn={tw.sp} />}<div className="cx-hint">Arrows show air movement. The wind barb staff points to where the wind comes from; each full feather 10 kn, half 5 kn, flag 50 kn.</div></div>
+                        </div>
+                    </div>}
+                    {s.tool === 'bf' && <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="card-title">Force {force}: {B[3]}</div>
+                            <input type="range" min="0" max="12" step="1" value={force} onChange={(e) => set('bf')(e.target.value)} className="met-range" aria-label="Beaufort force" />
+                            <MetSea force={force} />
+                            <div className="cx-grid">
+                                <CxOut l="Wind" v={force === 12 ? '64+' : B[1] + ' to ' + B[2]} u="kn" hi sub={force === 12 ? '33+ m/s' : (B[1] * 0.514).toFixed(1) + ' to ' + (B[2] * 0.514).toFixed(1) + ' m/s'} />
+                                <CxOut l="Probable wave height" v={B[5] ? B[5] : '-'} u="m" sub={B[6] ? 'max about ' + B[6] + ' m' : ''} />
+                                <CxOut l="Sea state (Douglas)" v={douglas(B[5])[1]} sub={douglas(B[5])[2]} />
+                            </div>
+                            <div className="er-note" style={{ fontFamily: 'var(--font)' }}>{B[4]}.</div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Beaufort scale</div>
+                            <table className="bw-steps er-pt met-bft"><thead><tr><th className="n">F</th><th>Description</th><th className="n">Knots</th><th className="n">Wave (m)</th></tr></thead>
+                                <tbody>{BF.map((b) => <tr key={b[0]} className={b[0] === force ? 'on' : ''} onClick={() => set('bf')(String(b[0]))}><td className="n"><b>{b[0]}</b></td><td>{b[3]}</td><td className="n">{b[0] === 12 ? '64+' : b[1] + '–' + b[2]}</td><td className="n">{b[5] ? b[5] + (b[6] !== b[5] ? ' (' + b[6] + ')' : '') : '-'}</td></tr>)}</tbody></table>
+                            <div className="cx-hint" style={{ marginTop: 8 }}>Wave heights are probable heights in the open sea, well away from land, with the maximum in brackets (WMO). Swell from distant weather comes on top.</div>
+                        </div>
+                    </div>}
+                    {s.tool === 'pres' && <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="card-title">Barometer to mean sea level</div>
+                            <div className="cx-row">
+                                <CxField label="Barometer reading (hPa)" value={s.pr} onChange={set('pr')} />
+                                <CxField label="Height above sea (m)" value={s.ph} onChange={set('ph')} />
+                                <CxField label="Air temperature (°C)" value={s.pt} onChange={set('pt')} />
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l="Pressure at MSL" v={cxF(msl, 1)} u="hPa" hi sub={isFinite(msl) ? '+' + (msl - pr).toFixed(1) + ' hPa for height' : ''} />
+                                <CxOut l="In mmHg" v={cxF(msl * 0.750062, 1)} />
+                                <CxOut l="In inHg" v={cxF(msl * 0.0295300, 2)} />
+                            </div>
+                            <div className="cx-sub">Tendency</div>
+                            <div className="cx-row">
+                                <CxField label="MSL pressure 3 hours ago (hPa)" value={s.p3} onChange={set('p3')} />
+                                <CxField label="Ship's time now" type="time" value={s.ptime} onChange={set('ptime')} />
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l="Change in 3 h" v={isFinite(dP) ? (dP > 0 ? '+' : '') + dP.toFixed(1) : '-'} u="hPa" />
+                                <CxOut l="Tendency" v={tend || '-'} hi />
+                            </div>
+                            <label className="cx-check"><input type="checkbox" checked={!!s.trop} onChange={(e) => set('trop')(e.target.checked)} /> In the tropics: allow for the daily pressure tide</label>
+                            {s.trop && <><div className="cx-grid">
+                                <CxOut l="Daily tide now" v={isFinite(diur) ? (diur > 0 ? '+' : '') + diur.toFixed(1) : '-'} u="hPa" sub="highs about 10:00 and 22:00" />
+                                <CxOut l="Corrected for the tide" v={cxF(pCorr, 1)} u="hPa" hi />
+                            </div>
+                                <div className="cx-hint" style={{ marginTop: 8 }}>Compare the corrected pressure with the normal for the area and month (pilot charts or sailing directions). 3 hPa or more below normal: suspect a tropical storm. 5 hPa or more below: a storm is likely within about 200 NM. Report it.</div></>}
+                            <div className="cx-hint" style={{ marginTop: 8 }}>Pressure falling quickly with a rising wind means an approaching depression or storm; a rapid rise after a fall often brings a strong blow from the new direction ("first rise after low, foretells a stronger blow").</div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Tendency guide (per 3 hours)</div>
+                            <table className="bw-steps er-pt"><thead><tr><th>Change</th><th>Description</th><th>Usually means</th></tr></thead>
+                                <tbody>
+                                    <tr><td>under 0.1</td><td>Steady</td><td>No change in the weather pattern</td></tr>
+                                    <tr><td>0.1 to 1.5</td><td>Rising or falling slowly</td><td>Slow change</td></tr>
+                                    <tr><td>1.6 to 3.5</td><td>Rising or falling</td><td>Change within 12 to 24 h</td></tr>
+                                    <tr><td>3.6 to 6.0</td><td>Rising or falling quickly</td><td>Gale likely; strong change</td></tr>
+                                    <tr><td>over 6.0</td><td>Very rapidly</td><td>Storm or severe gale likely</td></tr>
+                                </tbody></table>
+                        </div>
+                    </div>}
+                    {s.tool === 'hum' && <div className="cx-two">
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">Dew point and fog</div>
+                                <div className="cx-row">
+                                    <CxField label="Dry bulb (°C)" value={s.db} onChange={set('db')} />
+                                    <CxField label="Wet bulb (°C)" value={s.wb} onChange={set('wb')} />
+                                    <CxField label="Sea temperature (°C)" value={s.sst} onChange={set('sst')} />
+                                </div>
+                                <div className="cx-grid">
+                                    <CxOut l="Dew point" v={cxF(dpt, 1)} u="°C" hi />
+                                    <CxOut l="Relative humidity" v={cxF(rh, 0)} u="%" />
+                                    <CxOut l="Dew point minus sea temperature" v={isFinite(fogM) ? (fogM > 0 ? '+' : '') + fogM.toFixed(1) : '-'} u="°C" />
+                                </div>
+                                {isFinite(fogM) && <div className={'cx-status ' + (fogM >= 0 ? 'bad' : fogM > -2 ? 'bad' : 'ok')} style={{ marginTop: 10 }}>{fogM >= 0 ? 'Sea fog (advection fog) likely: the air is cooled below its dew point over this sea. Prepare for restricted visibility.' : fogM > -2 ? 'Fog possible if the sea gets a little colder ahead. Watch the sea temperature.' : 'Fog unlikely over this sea.'}</div>}
+                                <div className="cx-hint" style={{ marginTop: 8 }}>Sea fog forms when warm moist air moves over colder water, for example the Grand Banks, the Yellow Sea in spring and off California in summer.</div>
+                            </div>
+                            <div className="card cx-card">
+                                <div className="card-title">Ice accretion (spray icing)</div>
+                                <div className="cx-row">
+                                    <CxField label="Wind speed (kn)" value={s.iw} onChange={set('iw')} />
+                                    <CxField label="Air temperature (°C)" value={s.ia} onChange={set('ia')} />
+                                    <CxField label="Sea temperature (°C)" value={s.is} onChange={set('is')} />
+                                </div>
+                                <div className="cx-grid"><CxOut l="Icing rate" v={icing || '-'} hi sub={isFinite(ppr) ? 'predictor ' + ppr.toFixed(1) : ''} /></div>
+                                <div className="cx-hint" style={{ marginTop: 8 }}>Overland method used by NOAA. Icing raises the centre of gravity: reduce speed, put the sea astern if safe, clear ice from high places first.</div>
+                            </div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Visibility scale</div>
+                            <table className="bw-steps er-pt"><thead><tr><th>Term</th><th>Visibility</th></tr></thead>
+                                <tbody>{[['Dense fog', 'under 50 m'], ['Thick fog', '50 to 200 m'], ['Fog', '200 to 1000 m'], ['Mist or haze', '1 to 2 km'], ['Poor', '2 to 4 km (1 to 2 NM)'], ['Moderate', '4 to 10 km (2 to 5 NM)'], ['Good', '10 to 30 km (5 to 16 NM)'], ['Very good', 'over 30 km']].map(([a, b]) => <tr key={a}><td><b>{a}</b></td><td>{b}</td></tr>)}</tbody></table>
+                            <div className="cx-hint" style={{ marginTop: 8 }}>In restricted visibility: COLREG Rule 19, safe speed, sound signals, extra lookout, radar on, engines ready, Master informed.</div>
+                        </div>
+                    </div>}
+                    {s.tool === 'sys' && <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="cx-row">
+                                <ErSel label="Hemisphere" value={s.snh} onChange={set('snh')} opts={[['n', 'Northern'], ['s', 'Southern']]} />
+                                <ErSel label="System" value={s.sys} onChange={set('sys')} opts={[['low', 'Frontal depression'], ['high', 'Anticyclone']]} />
+                            </div>
+                            <MetSystem nh={s.snh === 'n'} kind={s.sys} />
+                            {s.sys === 'low' && <><div className="cx-sub">Cross-section through the fronts</div><MetSection /></>}
+                            <div className="cx-hint">Isobars in hPa. Red line with half-circles: warm front. Blue line with triangles: cold front. Arrows: surface wind, about 15° to 30° across the isobars at sea.</div>
+                        </div>
+                        <div className="card cx-card">
+                            {s.sys === 'low' ? <>
+                                <div className="card-title">A depression passing, {s.snh === 'n' ? 'centre to the north of you (northern hemisphere)' : 'centre to the south of you (southern hemisphere)'}</div>
+                                <table className="bw-steps er-pt met-seq"><thead><tr><th /><th>Ahead of the warm front</th><th>Warm sector</th><th>Behind the cold front</th></tr></thead>
+                                    <tbody>
+                                        <tr><td><b>Pressure</b></td><td>Falling steadily</td><td>Steady or falling slowly</td><td>Rises sharply</td></tr>
+                                        <tr><td><b>Wind</b></td><td>{s.snh === 'n' ? 'S to SE, increasing, backing' : 'N to NE, increasing, veering'}</td><td>{s.snh === 'n' ? 'Veers to SW at the warm front, steady' : 'Backs to NW at the warm front, steady'}</td><td>{s.snh === 'n' ? 'Veers suddenly to W or NW, squalls' : 'Backs suddenly to W or SW, squalls'}</td></tr>
+                                        <tr><td><b>Temperature</b></td><td>Steady, rises at the front</td><td>Warm, humid</td><td>Falls sharply</td></tr>
+                                        <tr><td><b>Cloud</b></td><td>Ci, Cs, As, then Ns</td><td>St and Sc, low</td><td>Cb at the front, then Cu</td></tr>
+                                        <tr><td><b>Weather</b></td><td>Rain becoming continuous</td><td>Drizzle, fog patches</td><td>Heavy showers, hail, thunder, then clearing</td></tr>
+                                        <tr><td><b>Visibility</b></td><td>Good, then poor in rain</td><td>Poor, mist or fog</td><td>Very good except in showers</td></tr>
+                                    </tbody></table>
+                                <div className="cx-hint" style={{ marginTop: 8 }}>Buys Ballot: with your back to the wind, low pressure is on your {s.snh === 'n' ? 'left' : 'right'}. A wind that {s.snh === 'n' ? 'veers' : 'backs'} means the centre is passing on the poleward side; if it {s.snh === 'n' ? 'backs' : 'veers'}, the centre is passing equatorward of you and you are in the colder, cloudier side. Fronts usually move at 15 to 30 kn; the cold front catches the warm front and forms an occlusion.</div>
+                            </> : <>
+                                <div className="card-title">Anticyclone</div>
+                                <ul className="met-list">
+                                    <li>Winds {s.snh === 'n' ? 'clockwise' : 'anticlockwise'} and outwards, light near the centre, strongest on the edges where the isobars close up against a low.</li>
+                                    <li>Sinking air: little cloud, fine and dry. Fog or low stratus over cold water, haze over land.</li>
+                                    <li>Slow moving and can block depressions for days; a good spot for routing round the edges.</li>
+                                    <li>Subtropical highs (Azores, Pacific, South Atlantic, Indian Ocean) give the trade winds on their equator side.</li>
+                                </ul>
+                            </>}
+                        </div>
+                    </div>}
+                    {s.tool === 'wave' && <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="card-title">Wind sea from wind, fetch and time</div>
+                            <div className="cx-row">
+                                <CxField label="Wind speed (kn)" value={s.wu} onChange={set('wu')} />
+                                <CxField label="Fetch (NM)" value={s.wf} onChange={set('wf')} hint="Distance of open water upwind" />
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l="Significant wave height" v={wv ? wv.hs.toFixed(1) : '-'} u="m" hi sub={wv && wv.full ? 'fully developed' : 'fetch limited'} />
+                                <CxOut l="Maximum wave, about" v={wv ? wv.hmax.toFixed(1) : '-'} u="m" sub="1.86 × Hs in a storm" />
+                                <CxOut l="Peak period" v={wv ? wv.tp.toFixed(1) : '-'} u="s" />
+                                <CxOut l="Wind must blow for" v={wv ? wv.tmin.toFixed(0) : '-'} u="h" sub="to build this sea" />
+                            </div>
+                            <div className="cx-hint" style={{ marginTop: 8 }}>JONSWAP growth for deep water. Use the forecast or measured significant wave height when you have it.</div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Encounter period and dangerous rolling (MSC.1/Circ.1228)</div>
+                            <div className="cx-row">
+                                <CxField label="Wave period (s)" value={s.tp} onChange={set('tp')} />
+                                <CxField label="Ship speed (kn)" value={s.vs} onChange={set('vs')} />
+                                <ErSel label="Waves from" value={s.head} onChange={set('head')} opts={[['head', 'Ahead'], ['bowq', 'On the bow (45°)'], ['beam', 'Abeam'], ['qtr', 'On the quarter (135°)'], ['follow', 'Astern']]} />
+                                <CxField label="Roll period (s)" value={s.roll} onChange={set('roll')} hint="From the Calculator or the loading computer" />
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l="Wave length" v={cxF(Lw, 0)} u="m" />
+                                <CxOut l="Wave speed" v={cxF(cw / 0.5144, 1)} u="kn" />
+                                <CxOut l="Encounter period" v={cxF(Te, 1)} u="s" hi />
+                            </div>
+                            {isFinite(Te) && TR > 0 && <div className={'cx-status ' + (sync || para ? 'bad' : 'ok')} style={{ marginTop: 10 }}>{sync ? 'Encounter period close to the roll period: risk of synchronous rolling. Change course and speed.' : para ? 'Encounter period close to half the roll period: risk of parametric rolling, especially in head or following seas. Change course and speed.' : 'Encounter period well away from the roll period and half of it.'}</div>}
+                            {isFinite(surf) && surf > 0.6 && <div className="cx-status bad" style={{ marginTop: 8 }}>Ship speed is {Math.round(surf * 100)}% of the wave speed in following or quartering seas: risk of surf-riding and broaching. Reduce speed.</div>}
+                            <div className="cx-hint" style={{ marginTop: 8 }}>Deep water: wave length = 1.56 T², speed = 1.56 T m/s. Encounter period = L / (c + V cos μ).</div>
+                        </div>
+                    </div>}
+                    {s.tool === 'cloud' && <div className="card cx-card">
+                        <div className="card-title">Cloud types and what they tell you</div>
+                        <div className="bw-scroll"><table className="bw-steps er-pt"><thead><tr><th>Cloud</th><th>Level</th><th>Looks like</th><th>Weather</th></tr></thead>
+                            <tbody>{CLOUDS.map((c) => <tr key={c[0]}><td className="nw"><b>{c[0]}</b></td><td>{c[1]}</td><td>{c[2]}</td><td>{c[3]}</td></tr>)}</tbody></table></div>
+                        <div className="cx-hint" style={{ marginTop: 8 }}>Signs of a tropical storm: unusual long swell, a halo and thick cirrus spreading from one direction, a pressure fall of 3 hPa below normal, a change in the trade wind, a dark bank of cloud (the bar of the storm) on the horizon.</div>
+                    </div>}
+                </div>
+            );
+        }
+
+        const APP_VERSION = '3.6.0';
         const WHATS_NEW = [
+            ['3.6.0', ['New Meteorology tool in Bridge: true wind with vector triangle and wind barb, Beaufort scale with sea picture, barometer to MSL, tendency and tropical pressure tide, dew point, sea fog and icing, frontal depression and anticyclone diagrams for both hemispheres, wave growth, encounter period and dangerous rolling check, cloud guide']],
             ['3.5.0', ['Storm Avoidance: diagram of the storm for both hemispheres with semicircles, quadrants, path and wind, your own situation on the diagram, and a Practice test with scenarios and avoiding actions']],
             ['3.4.0', ['Nine more Bridge tools: Celestial Fix, Great Circle, Radar Plot, UKC & Squat, Tides, Wheel Over, Light Ranges, Storm Avoidance and Anchor Watch', 'Latitude and longitude entry with degrees, minutes and an N/S or E/W drop-down, plus Use device GPS']],
             ['3.3.0', ['New Bridge group with Compass Error: azimuth and amplitude by Sun, Moon, planets and 57 stars plus Polaris, gyro error, compass error and deviation, night sky chart, almanac page with sunrise and twilights, and a log', 'Alt+1 to 6 switch between the six groups']],
@@ -9276,11 +9656,12 @@ const Proof = (function () {
             { key: 'wop', label: 'Wheel Over', c: '#be123c', cd: '#fda4af' },
             { key: 'lights', label: 'Light Ranges', c: '#ca8a04', cd: '#fde047' },
             { key: 'storm', label: 'Storm Avoidance', c: '#475569', cd: '#cbd5e1' },
-            { key: 'anch', label: 'Anchor Watch', c: '#9d174d', cd: '#f9a8d4' }
+            { key: 'anch', label: 'Anchor Watch', c: '#9d174d', cd: '#f9a8d4' },
+            { key: 'met', label: 'Meteorology', c: '#65a30d', cd: '#bef264' }
         ];
         const TAB_GROUPS = [
             { name: 'Voyage', icon: 'g0', keys: ['rob', 'eta', 'speed', 'time', 'load'] },
-            { name: 'Bridge', icon: 'gB', keys: ['cerr', 'cfix', 'gcs', 'rplot', 'ukc', 'tide', 'wop', 'lights', 'storm', 'anch'] },
+            { name: 'Bridge', icon: 'gB', keys: ['cerr', 'cfix', 'gcs', 'rplot', 'ukc', 'tide', 'wop', 'lights', 'storm', 'anch', 'met'] },
             { name: 'Cargo & Stability', short: 'Cargo', icon: 'g1', keys: ['vent', 'dwt', 'hydro', 'bwe', 'calc'] },
             { name: 'Engine Room', short: 'Engine', icon: 'gE', keys: ['orb', 'fco', 'bunk', 'perf', 'ecalc'] },
             { name: "Ship's Office", short: 'Office', icon: 'g2', keys: ['ot', 'garbage', 'conv'] },
@@ -9301,6 +9682,7 @@ const Proof = (function () {
             calc: 'DWA, days, SF, trim, roll, anchor, mooring',
             nre: 'Days in India and NRI status per financial year',
             cerr: 'Azimuth and amplitude, sky chart and almanac',
+            met: 'True wind, Beaufort, pressure, fog, systems, waves, clouds',
             cfix: 'Sights to intercepts, fix and plot',
             gcs: 'Great circle and rhumb line, vertex, waypoints',
             rplot: 'CPA, TCPA, target course and speed, action',
@@ -9334,6 +9716,7 @@ const Proof = (function () {
             lights: 'light range geographical luminous nominal visibility dipping distance horizon radar horizon vertical sextant angle distance off',
             storm: 'tropical revolving storm cyclone typhoon hurricane dangerous navigable semicircle buys ballot 1-2-3 rule avoidance',
             anch: 'anchor watch anchoring swinging circle drag alarm scope shackles cable gps',
+            met: 'meteorology weather true wind apparent wind beaufort sea state douglas barometer pressure tendency msl dew point humidity fog icing depression front warm cold occlusion anticyclone isobars waves fetch swell encounter period synchronous parametric rolling cloud cirrus cumulonimbus visibility',
             cerr: 'compass error gyro error deviation variation azimuth amplitude sun moon star polaris planet venus jupiter almanac gha dec sha aries sunrise sunset twilight meridian passage night sky chart celestial',
             orb: 'oil record book orb part i marpol annex i sludge bilge incinerator evaporation 15 ppm ows reception facility bunkering code c d e f h i 11.1 12.1 12.2 12.3 12.4 circ 736',
             fco: 'fuel changeover eca seca sulphur 0.10 mgo ulsfo hfo vlsfo switch over annex vi regulation 14 timing flush',
@@ -9381,6 +9764,7 @@ const Proof = (function () {
             lights: <><path d="M10 21h4l-1-10h-2z" /><path d="M9 11h6" /><path d="M12 7V5" /><path d="m5 6 3 2M19 6l-3 2M4 11h3M17 11h3" /></>,
             storm: <><path d="M12 12m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0" /><path d="M12 3a9 9 0 0 1 7 4" /><path d="M21 12a9 9 0 0 1-4 7" /><path d="M12 21a9 9 0 0 1-7-4" /><path d="M3 12a9 9 0 0 1 4-7" /></>,
             anch: <><circle cx="12" cy="5" r="2" /><path d="M12 7v14" /><path d="M5 13a7 7 0 0 0 14 0" /><path d="M9 10h6" /></>,
+            met: <><path d="M7 17h9a4 4 0 0 0 0-8 6 6 0 0 0-11.5 2A3 3 0 0 0 7 17z" /><path d="M4 21h9M15 21h5" /></>,
             cerr: <><circle cx="12" cy="12" r="9" /><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21" /><path d="m12 7.5 1.6 4.5-1.6 4.5-1.6-4.5z" /></>,
             gE: <><circle cx="12" cy="12" r="3" /><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" /></>,
             orb: <><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z" /><path d="M5 17a3 3 0 0 1 3-3h11" /><path d="M9 8h6" /></>,
@@ -10434,6 +10818,7 @@ const Proof = (function () {
                             {activeTab === 29 && <LightsTab />}
                             {activeTab === 30 && <StormTab />}
                             {activeTab === 31 && <AnchTab />}
+                            {activeTab === 32 && <MetTab />}
                         </div>
                     </div>
                     </main>
