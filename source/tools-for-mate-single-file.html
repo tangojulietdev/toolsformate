@@ -1685,6 +1685,46 @@
         .met-cb { fill: var(--fill-3); stroke: var(--text-2); }
         .met-seq td { font-size: 12.5px; vertical-align: top; }
         .met-list { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.6; color: var(--text-2); }
+    
+        /* Sea, swell and currents */
+        .ss-anim { width: 100%; display: block; border-radius: 10px; margin: 4px 0 10px; }
+        .ss-bg { fill: var(--well); }
+        .ss-sea { fill: #2f7bbf; } .ss-swell { fill: #1f5f99; } .ss-sum { fill: #164a7a; }
+        :root[data-theme="dark"] .ss-sea { fill: #2563a8; } :root[data-theme="dark"] .ss-swell { fill: #1d4f86; } :root[data-theme="dark"] .ss-sum { fill: #173f6b; }
+        .ss-div { stroke: var(--sep-strong); }
+        .ss-t { fill: var(--text); font: 700 12px var(--font); }
+        .ss-sliders { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 6px 14px; margin: 4px 0 6px; }
+        .ss-sliders label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); font-weight: 600; }
+        .ss-sliders input { accent-color: var(--accent); }
+        .ss-tab td { font-size: 12.5px; vertical-align: top; line-height: 1.45; }
+        .sw-grid { display: grid; grid-template-columns: 84px repeat(3, minmax(0, 1fr)); gap: 6px; margin: 6px 0 4px; }
+        .sw-h { font-size: 12px; font-weight: 700; color: var(--text); display: flex; flex-direction: column; justify-content: center; text-align: center; }
+        .sw-h small { font-weight: 500; color: var(--muted); font-size: 10.5px; }
+        .sw-cell { border: 0; border-radius: 10px; padding: 10px 4px; background: var(--fill-2); color: var(--text); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .sw-cell b { font-size: 20px; } .sw-cell small { font-size: 10.5px; color: var(--muted); }
+        .sw-cell.on { background: var(--accent); color: #fff; } .sw-cell.on small { color: rgba(255,255,255,.85); }
+        .cur { fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: .85; vector-effect: none; cursor: pointer; }
+        .cur.w { stroke: #e0452e; } .cur.c { stroke: #2f6fd6; }
+        .cur.on { opacity: 1; filter: drop-shadow(0 0 4px rgba(0,0,0,.4)); }
+        .cur.dim { opacity: .3; }
+        .cur-hw { fill: #e0452e; } .cur-hc { fill: #2f6fd6; }
+        .cur-ctl { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-weight: 500; }
+        .cur-ctl .cx-tools { margin: 0; }
+        .cur-key { display: inline-block; width: 16px; height: 4px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
+        .cur-key.w { background: #e0452e; } .cur-key.c { background: #2f6fd6; }
+        .cur-info { margin: 10px 0; padding: 10px 12px; border-radius: 10px; background: var(--well); font-size: 13.5px; min-height: 44px; }
+        .cur-info p { margin: 4px 0 0; color: var(--text-2); }
+        .cur-info .cw { color: #e0452e; } .cur-info .cc { color: #2f6fd6; }
+        .cur-list, .cur-types { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+        .cur-chip { border: 0; border-radius: 999px; padding: 5px 10px; background: var(--fill-2); color: var(--text); font: 500 12px var(--font); cursor: pointer; display: inline-flex; align-items: center; }
+        .cur-chip.on { background: var(--accent); color: #fff; }
+        .cur-gyre { width: 100%; max-width: 380px; display: block; margin: 10px auto; }
+        .cur-ek { width: 100%; max-width: 300px; display: block; margin: 10px auto; }
+        .cur-land { fill: var(--fill-3); }
+        .cur-loop { fill: none; stroke: var(--sep-strong); stroke-dasharray: 5 4; stroke-width: 2; }
+        .ek-w { stroke: var(--muted); stroke-width: 4; color: var(--muted); }
+        .ek-s { stroke: var(--accent); stroke-width: 2.5; color: var(--accent); }
+        .ek-t { stroke: var(--ok); stroke-width: 4; color: var(--ok); }
     </style>
 </head>
 <body>
@@ -9266,7 +9306,8 @@ const Proof = (function () {
             pr: '', ph: '', pt: '15', p3: '', ptime: '', trop: false,
             db: '', wb: '', sst: '', iw: '', ia: '', is: '',
             snh: 'n', sys: 'low',
-            wu: '', wf: '', wt: '', tp: '', vs: '', head: 'head', roll: ''
+            wu: '', wf: '', wt: '', tp: '', vs: '', head: 'head', roll: '',
+            sh1: '2', st1: '5', sh2: '3', st2: '13', cH: '', cT: '', cL: '', dist: '', t1p: '', t2p: '', dth: '', csel: '', ctype: 'drift', ekw: '0', eknh: 'n', ekc: 'w'
         });
         const BF = [
             [0, 0, 1, 'Calm', 'Sea like a mirror', 0, 0], [1, 1, 3, 'Light air', 'Ripples, no foam crests', 0.1, 0.1], [2, 4, 6, 'Light breeze', 'Small wavelets, crests glassy, not breaking', 0.2, 0.3],
@@ -9352,7 +9393,7 @@ const Proof = (function () {
         ];
         function MetTab() {
             const [s, setS, set] = useErStore(MET_KEY, MET_DEF);
-            const tools = [['wind', 'True wind'], ['bf', 'Beaufort'], ['pres', 'Pressure'], ['hum', 'Humidity, fog, icing'], ['sys', 'Weather systems'], ['wave', 'Waves'], ['cloud', 'Clouds']];
+            const tools = [['wind', 'True wind'], ['bf', 'Beaufort'], ['pres', 'Pressure'], ['hum', 'Humidity, fog, icing'], ['sys', 'Weather systems'], ['ss', 'Sea and swell'], ['swc', 'Swell classes'], ['wave', 'Waves and rolling'], ['cur', 'Currents'], ['cloud', 'Clouds']];
             // true wind
             const wc = pn(s.wc), ws = pn(s.ws) || 0, rel = pn(s.wrel), wa = pn(s.wa);
             const relS = isFinite(rel) ? (s.wside === 'P' ? -rel : rel) : NaN;
@@ -9595,6 +9636,9 @@ const Proof = (function () {
                             <div className="cx-hint" style={{ marginTop: 8 }}>Deep water: wave length = 1.56 T², speed = 1.56 T m/s. Encounter period = L / (c + V cos μ).</div>
                         </div>
                     </div>}
+                    {s.tool === 'ss' && <MetSeaSwell s={s} set={set} />}
+                    {s.tool === 'swc' && <MetSwellClass s={s} set={set} />}
+                    {s.tool === 'cur' && <MetCurrents s={s} set={set} />}
                     {s.tool === 'cloud' && <div className="card cx-card">
                         <div className="card-title">Cloud types and what they tell you</div>
                         <div className="bw-scroll"><table className="bw-steps er-pt"><thead><tr><th>Cloud</th><th>Level</th><th>Looks like</th><th>Weather</th></tr></thead>
@@ -9605,8 +9649,303 @@ const Proof = (function () {
             );
         }
 
-        const APP_VERSION = '3.6.0';
+        // ---------- Meteorology: sea and swell, swell classes, ocean currents ----------
+        function WaveAnim({ sea, swell, show }) { // animated profiles: wind sea, swell and the sea surface you see
+            const refs = { sea: useRef(null), swell: useRef(null), sum: useRef(null) };
+            useEffect(() => {
+                let raf = 0; const t0 = performance.now();
+                const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+                const W = 600, y0 = { sea: 55, swell: 150, sum: 255 }, px = 6; // 6 px per metre of wave height, 1 px per 0.5 m length
+                const prof = (h, T, x, t, ph) => { if (!(h > 0 && T > 0)) return 0; const L = 1.56 * T * T, k = 2 * Math.PI / L, w = 2 * Math.PI / T, st = Math.min(0.5, (h / L) * 4); const a = h / 2; const th = k * x * 2 - w * t + ph; return a * (Math.cos(th) + st * Math.cos(2 * th)); };
+                const draw = (now) => {
+                    const t = reduce ? 0 : (now - t0) / 1000;
+                    const pts = { sea: '', swell: '', sum: '' };
+                    for (let x = 0; x <= W; x += 6) {
+                        const a = prof(sea.h, sea.T, x, t, 0) + prof(sea.h * 0.45, sea.T * 0.7, x, t * 1.1, 2) * 0.6;
+                        const b = prof(swell.h, swell.T, x, t, 1);
+                        pts.sea += (x ? 'L' : 'M') + x + ' ' + (y0.sea - a * px).toFixed(1);
+                        pts.swell += (x ? 'L' : 'M') + x + ' ' + (y0.swell - b * px).toFixed(1);
+                        pts.sum += (x ? 'L' : 'M') + x + ' ' + (y0.sum - (a + b) * px).toFixed(1);
+                    }
+                    ['sea', 'swell', 'sum'].forEach((k) => { const r = refs[k].current; if (r) r.setAttribute('d', pts[k] + ` L${W} 330 L0 330z`); });
+                    if (!reduce) raf = requestAnimationFrame(draw);
+                };
+                raf = requestAnimationFrame(draw);
+                return () => cancelAnimationFrame(raf);
+            }, [sea.h, sea.T, swell.h, swell.T]);
+            return (
+                <svg className="ss-anim" viewBox="0 0 600 330">
+                    <defs><clipPath id="ssA"><rect width="600" height="100" /></clipPath><clipPath id="ssB"><rect y="100" width="600" height="100" /></clipPath><clipPath id="ssC"><rect y="200" width="600" height="130" /></clipPath></defs>
+                    <rect width="600" height="330" className="ss-bg" />
+                    <path ref={refs.sea} clipPath="url(#ssA)" className="ss-sea" style={{ opacity: show.sea ? 1 : 0.15 }} />
+                    <path ref={refs.swell} clipPath="url(#ssB)" className="ss-swell" style={{ opacity: show.swell ? 1 : 0.15 }} />
+                    <path ref={refs.sum} clipPath="url(#ssC)" className="ss-sum" />
+                    <line x1="0" y1="100" x2="600" y2="100" className="ss-div" /><line x1="0" y1="200" x2="600" y2="200" className="ss-div" />
+                    <text x="8" y="16" className="ss-t">Wind sea: short, steep, confused</text>
+                    <text x="8" y="116" className="ss-t">Swell: long, smooth, regular</text>
+                    <text x="8" y="216" className="ss-t">What you see: both together</text>
+                </svg>
+            );
+        }
+        const SWELL_CODE = [['short', 'low', 1], ['average', 'low', 1], ['long', 'low', 2], ['short', 'moderate', 3], ['average', 'moderate', 4], ['long', 'moderate', 5], ['short', 'heavy', 6], ['average', 'heavy', 7], ['long', 'heavy', 8]];
+        function MetSeaSwell({ s, set }) {
+            const sea = { h: pn(s.sh1) || 0, T: pn(s.st1) || 0 }, sw = { h: pn(s.sh2) || 0, T: pn(s.st2) || 0 };
+            const comb = Math.sqrt(sea.h * sea.h + sw.h * sw.h);
+            const show = { sea: s.ss1 !== false, swell: s.ss2 !== false };
+            const rows = [
+                ['Cause', 'The wind blowing now, where you are', 'Wind that blew earlier or far away (a storm hundreds or thousands of miles off)'],
+                ['Shape', 'Short, steep, peaked, breaking crests, white horses', 'Long, smooth, rounded, regular, rarely breaks in deep water'],
+                ['Period', 'About 2 to 8 s', 'About 8 to 20 s or more'],
+                ['Length', 'Short, under about 100 m', 'Long, 100 to over 600 m'],
+                ['Direction', 'Same as the wind, usually several mixed directions', 'Any direction, often not the wind direction; one clear direction'],
+                ['Grows or dies', 'Grows with wind speed, fetch and duration; dies quickly when the wind drops', 'Decays slowly over long distances, travels faster than the storm'],
+                ['Ship motion', 'Pitching, slamming, spray, short jerky rolls', 'Long heavy rolling or pitching; synchronous or parametric rolling risk'],
+                ['Reported as', 'Wind sea height and period', 'Swell direction, height and period, up to two swell trains']
+            ];
+            return (
+                <div>
+                    <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="card-title">See the difference</div>
+                            <WaveAnim sea={sea} swell={sw} show={show} />
+                            <div className="cx-row">
+                                <CxField label="Wind sea height (m)" value={s.sh1} onChange={set('sh1')} />
+                                <CxField label="Wind sea period (s)" value={s.st1} onChange={set('st1')} />
+                                <CxField label="Swell height (m)" value={s.sh2} onChange={set('sh2')} />
+                                <CxField label="Swell period (s)" value={s.st2} onChange={set('st2')} />
+                            </div>
+                            <div className="ss-sliders">
+                                <label>Sea height <input type="range" min="0" max="8" step="0.5" value={sea.h} onChange={(e) => set('sh1')(e.target.value)} /></label>
+                                <label>Sea period <input type="range" min="2" max="9" step="0.5" value={sea.T || 2} onChange={(e) => set('st1')(e.target.value)} /></label>
+                                <label>Swell height <input type="range" min="0" max="8" step="0.5" value={sw.h} onChange={(e) => set('sh2')(e.target.value)} /></label>
+                                <label>Swell period <input type="range" min="6" max="20" step="1" value={sw.T || 6} onChange={(e) => set('st2')(e.target.value)} /></label>
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l="Combined sea (total)" v={comb.toFixed(1)} u="m" hi sub="√(sea² + swell²)" />
+                                <CxOut l="Wind sea length" v={sea.T ? (1.56 * sea.T * sea.T).toFixed(0) : '-'} u="m" sub={sea.T ? 'speed ' + (3.03 * sea.T).toFixed(0) + ' kn' : ''} />
+                                <CxOut l="Swell length" v={sw.T ? (1.56 * sw.T * sw.T).toFixed(0) : '-'} u="m" sub={sw.T ? 'speed ' + (3.03 * sw.T).toFixed(0) + ' kn' : ''} />
+                            </div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Sea and swell compared</div>
+                            <table className="bw-steps er-pt ss-tab"><thead><tr><th /><th>Wind sea</th><th>Swell</th></tr></thead>
+                                <tbody>{rows.map((r) => <tr key={r[0]}><td><b>{r[0]}</b></td><td>{r[1]}</td><td>{r[2]}</td></tr>)}</tbody></table>
+                            <div className="cx-hint" style={{ marginTop: 8 }}>The combined (significant) height is what the ship feels. A long swell from an unusual direction with a falling barometer is an early sign of a tropical storm.</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        function MetSwellClass({ s, set }) {
+            const h = pn(s.cH), T = pn(s.cT); const Lc = isFinite(pn(s.cL)) ? pn(s.cL) : T > 0 ? 1.56 * T * T : NaN;
+            const lenC = !isFinite(Lc) ? '' : Lc < 100 ? 'short' : Lc <= 200 ? 'average' : 'long';
+            const hC = !isFinite(h) ? '' : h < 2 ? 'low' : h <= 4 ? 'moderate' : 'heavy';
+            const hit = SWELL_CODE.find((c) => c[0] === lenC && c[1] === hC);
+            const cg = T > 0 ? 1.517 * T : NaN; // group speed, knots
+            const D = pn(s.dist), tTravel = isFinite(cg) && D > 0 ? D / cg : NaN;
+            // distance to the storm from two swell arrivals (dispersion)
+            const T1 = pn(s.t1p), T2 = pn(s.t2p), dt = pn(s.dth);
+            const Dst = T1 > 0 && T2 > 0 && dt > 0 && T1 > T2 ? dt / (1 / (1.517 * T2) - 1 / (1.517 * T1)) : NaN;
+            return (
+                <div className="cx-two">
+                    <div className="card cx-card">
+                        <div className="card-title">Classify a swell</div>
+                        <div className="cx-row">
+                            <CxField label="Swell height (m)" value={s.cH} onChange={set('cH')} />
+                            <CxField label="Swell period (s)" value={s.cT} onChange={set('cT')} />
+                            <CxField label="or wave length (m)" value={s.cL} onChange={set('cL')} />
+                        </div>
+                        <div className="sw-grid">
+                            <div /><div className="sw-h">Short<small>under 100 m</small></div><div className="sw-h">Average<small>100 to 200 m</small></div><div className="sw-h">Long<small>over 200 m</small></div>
+                            {['low', 'moderate', 'heavy'].map((hh) => <React.Fragment key={hh}>
+                                <div className="sw-h">{hh[0].toUpperCase() + hh.slice(1)}<small>{hh === 'low' ? 'under 2 m' : hh === 'moderate' ? '2 to 4 m' : 'over 4 m'}</small></div>
+                                {['short', 'average', 'long'].map((ll) => { const c = SWELL_CODE.find((x) => x[0] === ll && x[1] === hh); const on = hit && hit === c; return <button key={ll} type="button" className={'sw-cell' + (on ? ' on' : '')} onClick={() => setS2(set, ll, hh)}><b>{c[2]}</b><small>{ll} {hh}</small></button>; })}
+                            </React.Fragment>)}
+                        </div>
+                        <div className="cx-grid">
+                            <CxOut l="Swell" v={hit ? hit[0][0].toUpperCase() + hit[0].slice(1) + ' ' + hit[1] : '-'} hi sub={hit ? 'code ' + hit[2] : ''} />
+                            <CxOut l="Wave length" v={cxF(Lc, 0)} u="m" />
+                            <CxOut l="Swell travels at" v={cxF(cg, 1)} u="kn" sub="group speed, half the wave speed" />
+                        </div>
+                        <div className="cx-hint" style={{ marginTop: 8 }}>WMO swell scale (Douglas). Code 0: no swell; code 9: confused swell from several directions. Tap a cell to see an example.</div>
+                    </div>
+                    <div className="card cx-card">
+                        <div className="card-title">Where is the storm?</div>
+                        <div className="cx-row">
+                            <CxField label="Distance to the storm (NM)" value={s.dist} onChange={set('dist')} />
+                        </div>
+                        <div className="cx-grid"><CxOut l="Swell of this period takes" v={isFinite(tTravel) ? tTravel.toFixed(0) : '-'} u="h" sub={isFinite(tTravel) ? (tTravel / 24).toFixed(1) + ' days' : 'enter period and distance'} /></div>
+                        <div className="cx-sub">From two swell arrivals</div>
+                        <div className="cx-row">
+                            <CxField label="First swell period (s)" value={s.t1p} onChange={set('t1p')} hint="Longest swell arrives first" />
+                            <CxField label="Later swell period (s)" value={s.t2p} onChange={set('t2p')} />
+                            <CxField label="Hours between them" value={s.dth} onChange={set('dth')} />
+                        </div>
+                        <div className="cx-grid"><CxOut l="Storm was about" v={cxF(Dst, 0)} u="NM" hi sub="away when the swell was made" /></div>
+                        <div className="cx-hint" style={{ marginTop: 8 }}>Long swells outrun short ones. Watching the period shorten over the day shows how far away the generating storm is; the swell direction points back towards it.</div>
+                    </div>
+                </div>
+            );
+        }
+        function setS2(set, ll, hh) { const L = { short: 70, average: 150, long: 300 }[ll], H = { low: 1, moderate: 3, heavy: 5.5 }[hh]; set('cL')(String(L)); set('cH')(String(H)); set('cT')(''); }
+        // Ocean surface currents: [name, warm?, speed kn, ocean, note, segments [[lon,lat]...]]
+        const CURRENTS = [
+            ['Gulf Stream', 1, '2 to 4, up to 5', 'N Atlantic', 'Western boundary current; strongest off Florida and Cape Hatteras. Wind against it raises steep, dangerous seas.', [[[-81, 24.5], [-80, 27], [-79.5, 30], [-77, 33], [-74, 35.5], [-70, 37.5], [-60, 40], [-50, 41.5]]]],
+            ['North Atlantic Drift', 1, '0.5 to 1', 'N Atlantic', 'Keeps NW Europe and Norway ice free in winter.', [[[-48, 43], [-38, 46], [-28, 49], [-18, 53], [-10, 57], [-2, 60.5], [6, 63]]]],
+            ['Norwegian Current', 1, '0.5 to 1', 'N Atlantic', 'Brings warm water past North Cape.', [[[6, 63.5], [11, 67], [16, 70], [26, 72]]]],
+            ['Labrador Current', 0, '0.5 to 1', 'N Atlantic', 'Carries icebergs south to the Grand Banks; fog where it meets the Gulf Stream.', [[[-61, 61], [-58, 56], [-54, 51], [-51, 47], [-50, 43.5]]]],
+            ['East Greenland Current', 0, '0.5 to 1', 'N Atlantic', 'Ice-laden, along the east coast of Greenland.', [[[-12, 77], [-20, 72], [-30, 66], [-40, 61]]]],
+            ['Canary Current', 0, 'about 0.5', 'N Atlantic', 'Cool water and upwelling off NW Africa, coastal fog.', [[[-13, 39], [-15, 33], [-18, 26], [-20, 20], [-24, 15]]]],
+            ['North Equatorial Current (Atlantic)', 1, '0.5 to 1', 'N Atlantic', 'Driven by the NE trades.', [[[-25, 15], [-35, 15], [-45, 15], [-55, 16], [-62, 15]]]],
+            ['Caribbean Current', 1, '1 to 1.5', 'N Atlantic', 'Feeds the Gulf of Mexico Loop Current and the Gulf Stream.', [[[-62, 14], [-70, 14], [-80, 15.5], [-86, 20]]]],
+            ['Equatorial Counter Current (Atlantic)', 1, '0.5 to 1', 'Atlantic', 'Flows east in the doldrums between the trade-wind currents.', [[[-45, 6], [-35, 6], [-25, 6], [-15, 5], [-8, 4.5]]]],
+            ['Guinea Current', 1, '1 to 2', 'Atlantic', 'Strong along the Gulf of Guinea coast.', [[[-8, 4.5], [0, 4], [8, 3.5]]]],
+            ['South Equatorial Current (Atlantic)', 1, '0.5 to 1.5', 'S Atlantic', 'Driven by the SE trades; splits at Cape São Roque.', [[[8, -2], [0, -2], [-15, -3], [-25, -4], [-34, -5.5]]]],
+            ['Brazil Current', 1, '0.5 to 1', 'S Atlantic', 'Warm current down the coast of Brazil.', [[[-35, -8], [-37, -15], [-40, -22], [-46, -28], [-52, -35]]]],
+            ['Falkland Current', 0, '0.5 to 1', 'S Atlantic', 'Cold water north from Cape Horn; icebergs at times.', [[[-63, -55], [-60, -50], [-57, -45], [-55, -40]]]],
+            ['Benguela Current', 0, 'about 0.5', 'S Atlantic', 'Upwelling off Namibia, cold and foggy coast, rich fishing.', [[[17, -34], [14, -28], [12, -22], [10, -15], [8, -8]]]],
+            ['West Wind Drift (Antarctic Circumpolar)', 0, '0.5 to 1', 'Southern Ocean', 'The largest current, round Antarctica with the westerlies; big swell.', [[[-70, -57], [-40, -52], [-10, -48], [20, -46], [60, -47], [100, -48], [140, -52], [180, -55]], [[-180, -55], [-140, -57], [-100, -58], [-72, -58]]]],
+            ['Kuroshio', 1, '2 to 4', 'N Pacific', 'Western boundary current off Japan, like the Gulf Stream.', [[[121.5, 22], [123, 25], [127, 28], [131, 31], [136, 33.5], [141, 35.5], [150, 36.5]]]],
+            ['North Pacific Current', 1, '0.5', 'N Pacific', 'Slow drift east across the Pacific with the westerlies.', [[[151, 38], [165, 40], [180, 41]], [[-180, 41], [-160, 42], [-140, 43], [-130, 45]]]],
+            ['Oyashio', 0, '0.5 to 1', 'N Pacific', 'Cold current from the Kamchatka side; fog off Hokkaido.', [[[165, 56], [160, 51], [152, 45], [146, 41]]]],
+            ['Alaska Current', 1, '0.5 to 1', 'N Pacific', 'Counter-clockwise round the Gulf of Alaska.', [[[-135, 52], [-143, 57], [-150, 59], [-160, 56.5]]]],
+            ['California Current', 0, '0.5', 'N Pacific', 'Cool, upwelling and summer fog off California.', [[[-128, 48], [-126, 42], [-123, 36], [-119, 30], [-114, 24], [-110, 20]]]],
+            ['North Equatorial Current (Pacific)', 1, '0.5 to 1', 'N Pacific', 'Driven by the NE trades across the whole Pacific.', [[[-110, 15], [-130, 14], [-150, 13], [-180, 13]], [[180, 13], [160, 13.5], [140, 14.5], [126, 16]]]],
+            ['Equatorial Counter Current (Pacific)', 1, '0.5 to 1', 'Pacific', 'Flows east in the doldrums.', [[[130, 6], [150, 6], [170, 6], [180, 6]], [[-180, 6], [-150, 6], [-120, 6], [-90, 6.5]]]],
+            ['South Equatorial Current (Pacific)', 1, '0.5 to 1.5', 'S Pacific', 'Driven by the SE trades; weakens in El Niño years.', [[[-82, -2], [-100, -3], [-130, -4], [-160, -5], [-180, -6]], [[180, -6], [165, -8], [155, -11]]]],
+            ['East Australian Current', 1, '1 to 2, up to 4', 'S Pacific', 'Strong southgoing current along NSW; eddies.', [[[154, -15], [154, -22], [153.8, -28], [152, -33], [151, -37]]]],
+            ['Humboldt (Peru) Current', 0, '0.5 to 1', 'S Pacific', 'Cold upwelling off Chile and Peru, rich fishing; fails in El Niño.', [[[-76, -45], [-74, -35], [-72, -25], [-76, -15], [-81, -5]]]],
+            ['Agulhas Current', 1, '2 to 4, up to 5', 'S Indian', 'Strong SW-going current off South Africa; against a SW gale it makes freak waves near the 200 m line.', [[[41, -13], [38, -20], [35, -26], [31.5, -30.5], [28, -33.5], [24, -35.5], [20, -37]]]],
+            ['South Equatorial Current (Indian)', 1, '0.5 to 1.5', 'S Indian', 'Westgoing all year, south of the equator.', [[[110, -12], [95, -12], [80, -12], [65, -13], [52, -12.5]]]],
+            ['West Australian Current', 0, '0.5', 'S Indian', 'Slow cool current north along Western Australia.', [[[113, -35], [111.5, -30], [110.5, -25], [108, -20]]]]
+        ];
+        const MONSOON = {
+            sw: [['Somali Current (SW monsoon)', 1, '3 to 5, up to 7', 'Arabian Sea', 'Very strong NE-going current off Somalia from June to September, with upwelling and cold water off Socotra.', [[[42, -2], [45.5, 2], [49, 6], [52, 10], [55, 13]]]],
+                ['Southwest Monsoon Current', 1, '1 to 2', 'N Indian', 'East-going south of India and Sri Lanka, May to September.', [[[55, 9], [65, 7], [75, 5.5], [82, 5.5], [90, 7], [95, 8]]]]],
+            ne: [['Somali Current (NE monsoon)', 1, '0.5 to 1', 'Arabian Sea', 'Southwest-going off Somalia, November to March.', [[[52, 10], [49, 6], [45.5, 2], [42, -2]]]],
+                ['Northeast Monsoon Current', 1, '1 to 2', 'N Indian', 'West-going south of Sri Lanka and India, November to March.', [[[95, 7], [88, 6], [80, 5.5], [72, 6], [62, 7], [54, 8]]]]]
+        };
+        const CUR_TYPES = [
+            ['drift', 'Wind drift currents', 'Made by steady winds blowing over the sea, such as the trade winds and westerlies. Turned by the Coriolis effect: to the right in the north, to the left in the south. Most ocean surface currents are mainly wind driven.'],
+            ['gradient', 'Gradient (geostrophic) currents', 'Water piled up by the wind or by differences in density slopes slightly; it flows down the slope but is turned by the Coriolis effect until it runs along the slope. The big gyres are balanced this way.'],
+            ['density', 'Density (thermohaline) currents', 'Differences in temperature and salinity make water sink or rise: cold salty water sinks near Greenland and Antarctica and spreads along the ocean floor. Also the flow in and out of the Mediterranean and Red Sea through their straits.'],
+            ['boundary', 'Western boundary currents', 'On the west side of each ocean the gyre current is narrow, deep and fast: Gulf Stream, Kuroshio, Agulhas, Brazil, East Australian. Eastern side currents are wide, slow and cold: Canary, California, Benguela, Humboldt.'],
+            ['ekman', 'Ekman transport and upwelling', 'The surface current runs about 45° to the right of the wind (north) or left (south); the whole moving layer goes 90°. Along a coast this can push surface water offshore, and cold deep water rises: upwelling, with fog, cold sea and good fishing.'],
+            ['counter', 'Equatorial counter currents', 'Between the two trade-wind equatorial currents, in the light winds of the doldrums, water flows back east.'],
+            ['monsoon', 'Monsoon (seasonal) currents', 'In the north Indian Ocean the currents reverse with the monsoon: the Somali Current runs NE at up to 7 kn in the SW monsoon and SW in the NE monsoon.'],
+            ['tidal', 'Tidal streams', 'Driven by the tide, reversing about every 6 h 12 min. Strongest in narrows and at headlands; given in tidal diamonds and atlases. Called streams, not currents, in British usage.'],
+            ['coastal', 'Coastal, rip and river currents', 'Longshore currents from waves breaking at an angle, rip currents running seaward through the surf, and outflow from big rivers (Amazon, Plate, Congo) that can be felt well offshore.']
+        ];
+        function curDist(lat, lon, seg) { let best = Infinity; for (let i = 0; i < seg.length - 1; i++) { const [x1, y1] = seg[i], [x2, y2] = seg[i + 1]; const dx = x2 - x1, dy = y2 - y1, l2 = dx * dx + dy * dy; let t = l2 ? ((lon - x1) * dx + (lat - y1) * dy) / l2 : 0; t = Math.max(0, Math.min(1, t)); best = Math.min(best, Math.hypot(lon - (x1 + t * dx), lat - (y1 + t * dy))); } return best; }
+        function MetCurrents({ s, set }) {
+            const mon = s.mon || (() => { const m = new Date().getMonth() + 1; return m >= 5 && m <= 9 ? 'sw' : 'ne'; })();
+            const list = [...CURRENTS, ...MONSOON[mon]];
+            const vis = list.filter((c) => (c[1] ? s.cw !== false : s.cc !== false));
+            const sel = list.find((c) => c[0] === s.csel);
+            const X = (lon) => (lon + 180) * 10, Y = (lat) => (90 - lat) * 10;
+            const over = (z) => <g>
+                <defs><marker id="curArrW" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 1 9 5 0 9z" className="cur-hw" /></marker><marker id="curArrC" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 1 9 5 0 9z" className="cur-hc" /></marker></defs>
+                {vis.map((c) => c[5].map((seg, k) => {
+                    const d = seg.map((p, i) => (i ? 'L' : 'M') + X(p[0]) + ' ' + Y(p[1])).join('');
+                    const on = sel && sel[0] === c[0];
+                    const sw = (on ? 14 : 9) / Math.sqrt(z);
+                    return <path key={c[0] + k} d={d} className={'cur ' + (c[1] ? 'w' : 'c') + (on ? ' on' : '') + (sel && !on ? ' dim' : '')} style={{ strokeWidth: sw }} markerMid={'url(#curArr' + (c[1] ? 'W' : 'C') + ')'} markerEnd={'url(#curArr' + (c[1] ? 'W' : 'C') + ')'} />;
+                }))}
+            </g>;
+            const pick = (lat, lon) => { let best = null, bd = Infinity; vis.forEach((c) => c[5].forEach((seg) => { const d = curDist(lat, lon, seg); if (d < bd) { bd = d; best = c; } })); set('csel')(best && bd < 6 ? best[0] : ''); };
+            // set and drift, course to steer
+            const dla = bLat(s.dlat), dlo = bLon(s.dlon), fla = bLat(s.flat), flo = bLon(s.flon), hrs = pn(s.chrs);
+            let sd = null; if ([dla, dlo, fla, flo].every(isFinite)) { const [x, y] = bToXY(fla, flo, dla, dlo); sd = { set: anrm(Math.atan2(x, y) / AD), drift: Math.hypot(x, y) }; }
+            const trk = pn(s.ctrk), V = pn(s.cspd), cs = pn(s.cset), cr = pn(s.crate);
+            let cts = null;
+            if ([trk, V, cs, cr].every(isFinite) && V > 0) { const q = cr * Math.sin((cs - trk) * AD) / V; if (Math.abs(q) <= 1) { const x = Math.asin(q) / AD; cts = { c: anrm(trk - x), smg: V * Math.cos(x * AD) + cr * Math.cos((cs - trk) * AD), x }; } else cts = { bad: true }; }
+            const ek = pn(s.ekw); const ekNh = s.eknh !== 's';
+            const surf = isFinite(ek) ? anrm(ek + 180 + (ekNh ? 45 : -45)) : NaN, trans = isFinite(ek) ? anrm(ek + 180 + (ekNh ? 90 : -90)) : NaN; // ek = wind FROM
+            const coast = s.ekc || 'w'; // west coast of a continent: land to the east
+            const offshore = isFinite(trans) ? (coast === 'w' ? Math.sin(trans * AD) < -0.3 : Math.sin(trans * AD) > 0.3) : false;
+            const ty = CUR_TYPES.find((t) => t[0] === (s.ctype || 'drift'));
+            return (
+                <div>
+                    <div className="card cx-card">
+                        <div className="card-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>Main ocean surface currents
+                            <div className="cur-ctl">
+                                <label className="cx-check" style={{ minHeight: 0 }}><input type="checkbox" checked={s.cw !== false} onChange={(e) => set('cw')(e.target.checked)} /> <span className="cur-key w" />Warm</label>
+                                <label className="cx-check" style={{ minHeight: 0 }}><input type="checkbox" checked={s.cc !== false} onChange={(e) => set('cc')(e.target.checked)} /> <span className="cur-key c" />Cold</label>
+                                <ErTabs tabs={[['sw', 'SW monsoon (May to Sep)'], ['ne', 'NE monsoon (Nov to Mar)']]} value={mon} onChange={set('mon')} />
+                            </div>
+                        </div>
+                        <WorldMap over={over} onPick={pick} label="Ocean currents map" />
+                        <div className="cur-info">{sel ? <><b className={sel[1] ? 'cw' : 'cc'}>{sel[0]}</b> · {sel[1] ? 'warm' : 'cold'} · {sel[3]} · usually {sel[2]} kn<p>{sel[4]}</p></> : <span className="cx-hint">Tap a current on the map or in the list. Zoom with + and −, drag to move when zoomed.</span>}</div>
+                        <div className="cur-list">{vis.map((c) => <button key={c[0]} type="button" className={'cur-chip' + (sel && sel[0] === c[0] ? ' on' : '')} onClick={() => set('csel')(sel && sel[0] === c[0] ? '' : c[0])}><span className={'cur-key ' + (c[1] ? 'w' : 'c')} />{c[0]}</button>)}</div>
+                        <div className="cx-hint">Typical positions and rates from pilot charts and the Mariner's Handbook; actual currents vary with season and weather. Use the routeing charts and current atlases for passage planning.</div>
+                    </div>
+                    <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="card-title">Types of current</div>
+                            <div className="cur-types">{CUR_TYPES.map((t) => <button key={t[0]} type="button" className={'md-chip' + ((s.ctype || 'drift') === t[0] ? ' on' : '')} onClick={() => set('ctype')(t[0])}>{t[1]}</button>)}</div>
+                            <div className="er-note" style={{ fontFamily: 'var(--font)' }}><b>{ty[1]}.</b> {ty[2]}</div>
+                            {(s.ctype || 'drift') === 'boundary' && <svg className="cur-gyre" viewBox="0 0 360 200"><rect width="360" height="200" rx="12" className="b-plot-bg" /><rect x="0" y="0" width="30" height="200" className="cur-land" /><rect x="330" y="0" width="30" height="200" className="cur-land" /><path d="M60 160 C 40 120 40 70 70 40 L 280 40 C 300 60 300 140 290 160 Z" className="cur-loop" /><path d="M48 150 C 38 110 38 70 64 44" className="cur w on" style={{ strokeWidth: 9 }} /><path d="M296 60 C 304 100 302 130 292 156" className="cur c" style={{ strokeWidth: 4 }} /><text x="44" y="190" className="b-txt">West: narrow, fast, warm</text><text x="216" y="190" className="b-txt">East: wide, slow, cold</text><text x="150" y="28" className="b-txt">Westerlies →</text><text x="140" y="176" className="b-txt">← Trade winds</text><text x="150" y="104" className="b-txt">Gyre (north)</text></svg>}
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Ekman transport and upwelling</div>
+                            <div className="cx-row">
+                                <ErSel label="Hemisphere" value={s.eknh || 'n'} onChange={set('eknh')} opts={[['n', 'Northern'], ['s', 'Southern']]} />
+                                <CxField label="Wind from (°)" value={s.ekw} onChange={set('ekw')} />
+                                <ErSel label="Coast" value={coast} onChange={set('ekc')} opts={[['w', 'West coast of a continent (land east)'], ['e', 'East coast of a continent (land west)']]} />
+                            </div>
+                            <input type="range" min="0" max="355" step="5" value={isFinite(ek) ? ek : 0} onChange={(e) => set('ekw')(e.target.value)} className="met-range" aria-label="Wind direction" />
+                            {isFinite(ek) && (() => {
+                                const C = 120, A = (b, l) => [C + Math.sin(b * AD) * l, C - Math.cos(b * AD) * l];
+                                const wt = anrm(ek + 180), w1 = A(ek, 70), w2 = A(wt, 70), sv = A(surf, 75), tv = A(trans, 85);
+                                return <svg className="cur-ek" viewBox="0 0 240 240"><rect width="240" height="240" rx="12" className="b-plot-bg" />
+                                    <rect x={coast === 'w' ? 205 : 0} y="0" width="35" height="240" className="cur-land" />
+                                    <defs><marker id="ekA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 10 5 0 10z" fill="currentColor" /></marker></defs>
+                                    <line x1={w1[0]} y1={w1[1]} x2={w2[0]} y2={w2[1]} className="ek-w" markerEnd="url(#ekA)" />
+                                    {[1, 0.75, 0.55, 0.4, 0.28].map((f, i) => { const b = surf + (ekNh ? 1 : -1) * i * 22; const p = A(b, 75 * f); return <line key={i} x1={C} y1={C} x2={p[0]} y2={p[1]} className="ek-s" style={{ opacity: 1 - i * 0.17 }} markerEnd="url(#ekA)" />; })}
+                                    <line x1={C} y1={C} x2={tv[0]} y2={tv[1]} className="ek-t" markerEnd="url(#ekA)" />
+                                    <text x="8" y="16" className="b-txt">N ↑</text><text x="8" y="220" className="b-txt">Grey: wind. Blue: current with depth.</text><text x="8" y="233" className="b-txt">Green: net transport.</text></svg>;
+                            })()}
+                            <div className="cx-grid">
+                                <CxOut l="Surface current" v={bZ(surf)} sub={'45° ' + (ekNh ? 'right' : 'left') + ' of the wind'} />
+                                <CxOut l="Net transport" v={bZ(trans)} hi sub={'90° ' + (ekNh ? 'right' : 'left')} />
+                                <CxOut l="At this coast" v={isFinite(trans) ? (offshore ? 'Upwelling' : 'No upwelling') : '-'} sub={isFinite(trans) ? (offshore ? 'cold water, fog, rich fishing' : 'water pushed onshore or along') : ''} />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="card-title">Set and drift from a fix</div>
+                            <ErPosPair title="DR position" lat={s.dlat} lon={s.dlon} setLat={set('dlat')} setLon={set('dlon')} gps={false} />
+                            <ErPosPair title="Fix at the same time" lat={s.flat} lon={s.flon} setLat={set('flat')} setLon={set('flon')} />
+                            <CxField label="Hours since the last fix" value={s.chrs} onChange={set('chrs')} />
+                            <div className="cx-grid">
+                                <CxOut l="Set" v={sd ? bZ(sd.set) : '-'} hi />
+                                <CxOut l="Drift" v={sd ? sd.drift.toFixed(1) : '-'} u="NM" />
+                                <CxOut l="Rate" v={sd && hrs > 0 ? (sd.drift / hrs).toFixed(1) : '-'} u="kn" hi />
+                            </div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Course to steer for a current</div>
+                            <div className="cx-row">
+                                <CxField label="Track wanted (°T)" value={s.ctrk} onChange={set('ctrk')} />
+                                <CxField label="Speed through water (kn)" value={s.cspd} onChange={set('cspd')} />
+                                <CxField label="Current set (°T)" value={s.cset} onChange={set('cset')} />
+                                <CxField label="Current rate (kn)" value={s.crate} onChange={set('crate')} />
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l="Course to steer" v={cts && !cts.bad ? bZ(cts.c) : '-'} hi sub={cts && !cts.bad ? Math.abs(cts.x).toFixed(1) + '° into the current' : cts && cts.bad ? 'current too strong for this speed' : ''} />
+                                <CxOut l="Speed made good" v={cts && !cts.bad ? cts.smg.toFixed(1) : '-'} u="kn" hi />
+                            </div>
+                            <div className="cx-hint" style={{ marginTop: 8 }}>The set and rate found from the last fixes can be used here to hold the track.</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const APP_VERSION = '3.7.0';
         const WHATS_NEW = [
+            ['3.7.0', ['Meteorology: animated sea and swell comparison, swell classification with the WMO swell code and storm distance from swell, and an interactive ocean currents map with monsoon currents, types of current, Ekman transport and upwelling, set and drift, and course to steer']],
             ['3.6.0', ['New Meteorology tool in Bridge: true wind with vector triangle and wind barb, Beaufort scale with sea picture, barometer to MSL, tendency and tropical pressure tide, dew point, sea fog and icing, frontal depression and anticyclone diagrams for both hemispheres, wave growth, encounter period and dangerous rolling check, cloud guide']],
             ['3.5.0', ['Storm Avoidance: diagram of the storm for both hemispheres with semicircles, quadrants, path and wind, your own situation on the diagram, and a Practice test with scenarios and avoiding actions']],
             ['3.4.0', ['Nine more Bridge tools: Celestial Fix, Great Circle, Radar Plot, UKC & Squat, Tides, Wheel Over, Light Ranges, Storm Avoidance and Anchor Watch', 'Latitude and longitude entry with degrees, minutes and an N/S or E/W drop-down, plus Use device GPS']],
@@ -9682,7 +10021,7 @@ const Proof = (function () {
             calc: 'DWA, days, SF, trim, roll, anchor, mooring',
             nre: 'Days in India and NRI status per financial year',
             cerr: 'Azimuth and amplitude, sky chart and almanac',
-            met: 'True wind, Beaufort, pressure, fog, systems, waves, clouds',
+            met: 'Wind, Beaufort, pressure, fog, systems, swell, currents',
             cfix: 'Sights to intercepts, fix and plot',
             gcs: 'Great circle and rhumb line, vertex, waypoints',
             rplot: 'CPA, TCPA, target course and speed, action',
@@ -9716,7 +10055,7 @@ const Proof = (function () {
             lights: 'light range geographical luminous nominal visibility dipping distance horizon radar horizon vertical sextant angle distance off',
             storm: 'tropical revolving storm cyclone typhoon hurricane dangerous navigable semicircle buys ballot 1-2-3 rule avoidance',
             anch: 'anchor watch anchoring swinging circle drag alarm scope shackles cable gps',
-            met: 'meteorology weather true wind apparent wind beaufort sea state douglas barometer pressure tendency msl dew point humidity fog icing depression front warm cold occlusion anticyclone isobars waves fetch swell encounter period synchronous parametric rolling cloud cirrus cumulonimbus visibility',
+            met: 'meteorology weather true wind apparent wind beaufort sea state douglas barometer pressure tendency msl dew point humidity fog icing depression front warm cold occlusion anticyclone isobars waves fetch swell sea difference swell code douglas classification currents ocean gulf stream kuroshio agulhas somali monsoon ekman upwelling set drift course to steer encounter period synchronous parametric rolling cloud cirrus cumulonimbus visibility',
             cerr: 'compass error gyro error deviation variation azimuth amplitude sun moon star polaris planet venus jupiter almanac gha dec sha aries sunrise sunset twilight meridian passage night sky chart celestial',
             orb: 'oil record book orb part i marpol annex i sludge bilge incinerator evaporation 15 ppm ows reception facility bunkering code c d e f h i 11.1 12.1 12.2 12.3 12.4 circ 736',
             fco: 'fuel changeover eca seca sulphur 0.10 mgo ulsfo hfo vlsfo switch over annex vi regulation 14 timing flush',

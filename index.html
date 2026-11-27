@@ -1684,11 +1684,51 @@
         .met-cb { fill: var(--fill-3); stroke: var(--text-2); }
         .met-seq td { font-size: 12.5px; vertical-align: top; }
         .met-list { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.6; color: var(--text-2); }
+    
+        /* Sea, swell and currents */
+        .ss-anim { width: 100%; display: block; border-radius: 10px; margin: 4px 0 10px; }
+        .ss-bg { fill: var(--well); }
+        .ss-sea { fill: #2f7bbf; } .ss-swell { fill: #1f5f99; } .ss-sum { fill: #164a7a; }
+        :root[data-theme="dark"] .ss-sea { fill: #2563a8; } :root[data-theme="dark"] .ss-swell { fill: #1d4f86; } :root[data-theme="dark"] .ss-sum { fill: #173f6b; }
+        .ss-div { stroke: var(--sep-strong); }
+        .ss-t { fill: var(--text); font: 700 12px var(--font); }
+        .ss-sliders { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 6px 14px; margin: 4px 0 6px; }
+        .ss-sliders label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); font-weight: 600; }
+        .ss-sliders input { accent-color: var(--accent); }
+        .ss-tab td { font-size: 12.5px; vertical-align: top; line-height: 1.45; }
+        .sw-grid { display: grid; grid-template-columns: 84px repeat(3, minmax(0, 1fr)); gap: 6px; margin: 6px 0 4px; }
+        .sw-h { font-size: 12px; font-weight: 700; color: var(--text); display: flex; flex-direction: column; justify-content: center; text-align: center; }
+        .sw-h small { font-weight: 500; color: var(--muted); font-size: 10.5px; }
+        .sw-cell { border: 0; border-radius: 10px; padding: 10px 4px; background: var(--fill-2); color: var(--text); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .sw-cell b { font-size: 20px; } .sw-cell small { font-size: 10.5px; color: var(--muted); }
+        .sw-cell.on { background: var(--accent); color: #fff; } .sw-cell.on small { color: rgba(255,255,255,.85); }
+        .cur { fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: .85; vector-effect: none; cursor: pointer; }
+        .cur.w { stroke: #e0452e; } .cur.c { stroke: #2f6fd6; }
+        .cur.on { opacity: 1; filter: drop-shadow(0 0 4px rgba(0,0,0,.4)); }
+        .cur.dim { opacity: .3; }
+        .cur-hw { fill: #e0452e; } .cur-hc { fill: #2f6fd6; }
+        .cur-ctl { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-weight: 500; }
+        .cur-ctl .cx-tools { margin: 0; }
+        .cur-key { display: inline-block; width: 16px; height: 4px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
+        .cur-key.w { background: #e0452e; } .cur-key.c { background: #2f6fd6; }
+        .cur-info { margin: 10px 0; padding: 10px 12px; border-radius: 10px; background: var(--well); font-size: 13.5px; min-height: 44px; }
+        .cur-info p { margin: 4px 0 0; color: var(--text-2); }
+        .cur-info .cw { color: #e0452e; } .cur-info .cc { color: #2f6fd6; }
+        .cur-list, .cur-types { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+        .cur-chip { border: 0; border-radius: 999px; padding: 5px 10px; background: var(--fill-2); color: var(--text); font: 500 12px var(--font); cursor: pointer; display: inline-flex; align-items: center; }
+        .cur-chip.on { background: var(--accent); color: #fff; }
+        .cur-gyre { width: 100%; max-width: 380px; display: block; margin: 10px auto; }
+        .cur-ek { width: 100%; max-width: 300px; display: block; margin: 10px auto; }
+        .cur-land { fill: var(--fill-3); }
+        .cur-loop { fill: none; stroke: var(--sep-strong); stroke-dasharray: 5 4; stroke-width: 2; }
+        .ek-w { stroke: var(--muted); stroke-width: 4; color: var(--muted); }
+        .ek-s { stroke: var(--accent); stroke-width: 2.5; color: var(--accent); }
+        .ek-t { stroke: var(--ok); stroke-width: 4; color: var(--ok); }
     </style>
 </head>
 <body>
     <div id="root"></div>
-    <script src="app.js?v=30" defer></script>
+    <script src="app.js?v=31" defer></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(e){console.log("SW failed",e)})})}</script>
 </body>
 </html>
