@@ -1461,11 +1461,67 @@
             .content > .container { padding: 0 !important; max-width: none; }
             .card, .summary-card, .calc-result, .info-section { box-shadow: 0 0 0 .5px #bbb !important; }
         }
+    
+        /* i menu, sheets, guide, tour (as in Meridian PDF Mate) */
+        .tm-menu.infopop { width: 296px; min-width: 0; }
+        .tm-menu > button.ip-tile { height: auto; gap: 12px; padding: 9px 10px; border-radius: 10px; }
+        .ip-ic { flex: none; width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; background: var(--fill-2); color: var(--accent); }
+        .tm-menu > button.ip-tile .ip-ic svg { width: 19px; height: 19px; color: var(--accent); }
+        .tm-menu > button.ip-tile:hover .ip-ic { background: rgba(255, 255, 255, .22); }
+        .tm-menu > button.ip-tile:hover .ip-ic svg { color: #fff; }
+        .ip-tx { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+        .ip-tx b { font-size: 13.5px; font-weight: 600; }
+        .ip-tx small { font-size: 11.5px; opacity: .65; }
+        .about-ic { width: 52px; height: 52px; border-radius: 14px; flex: none; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0a84ff, #0040dd); color: #fff; box-shadow: 0 4px 14px rgba(0, 64, 221, .3); }
+        .about-ic svg { width: 26px; height: 26px; fill: none; stroke: #fff; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+        .about-ic.spin svg { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .about-hero h3 { font-size: 17px; font-weight: 700; letter-spacing: -.015em; margin: 0; }
+        .about-lead { margin: 0 0 14px; font-size: 14.5px; line-height: 1.45; color: var(--label); }
+        .about-facts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+        .about-facts span { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; background: var(--fill); font-size: 12.5px; color: var(--label-2); }
+        .about-facts svg { width: 15px; height: 15px; fill: none; stroke: var(--accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+        .about-mail { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--fill); margin-bottom: 12px; }
+        .about-mail div { display: flex; flex-direction: column; font-size: 13px; }
+        .about-mail span { color: var(--label-3); }
+        .about-mail .btn svg, .tm-acts .btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+        .about-small { font-size: 11.5px; color: var(--label-3); line-height: 1.45; margin: 0; }
+        .tm-acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+        .tm-acts .btn { margin-top: 0; height: 36px; padding: 0 18px; }
+        .tm-wide { max-width: 600px; }
+        .gd-list { display: flex; flex-direction: column; gap: 6px; margin: 4px 0; }
+        .gd { border-radius: 12px; background: var(--fill); overflow: hidden; }
+        .gd summary { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; list-style: none; font-size: 14px; }
+        .gd summary::-webkit-details-marker { display: none; }
+        .gd summary b { flex: 1; font-weight: 600; }
+        .gd-chev { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; opacity: .6; transition: transform .2s; }
+        .gd[open] .gd-chev { transform: rotate(180deg); }
+        .gd-ic { width: 28px; height: 28px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; flex: none; }
+        .gd-ic svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+        .gd-b { padding: 0 14px 12px 50px; font-size: 13px; line-height: 1.55; color: var(--label-2); }
+        .gd-b p { margin: 0 0 8px; } .gd-b ul { margin: 0 0 8px; padding-left: 18px; } .gd-b li { margin: 3px 0; } .gd-b b { color: var(--label); }
+        .wn-list { display: flex; flex-direction: column; gap: 10px; max-height: 240px; overflow-y: auto; }
+        .wn { padding: 10px 12px; border-radius: 12px; background: var(--fill); font-size: 13px; }
+        .wn b { font-size: 13px; }
+        .wn ul { margin: 6px 0 0; padding-left: 18px; color: var(--label-2); line-height: 1.5; }
+        .tour { position: fixed; inset: 0; z-index: 140; }
+        .tour-spot { position: fixed; border-radius: 14px; box-shadow: 0 0 0 4px var(--accent), 0 0 0 9999px rgba(0, 0, 0, .45); transition: all .3s var(--ease); pointer-events: none; }
+        .tour-dim { position: fixed; inset: 0; background: rgba(0, 0, 0, .45); }
+        .tour-card { position: fixed; width: 320px; max-width: calc(100vw - 24px); padding: 16px; border-radius: 16px; color: var(--label);
+            background-color: var(--mat-strong); background-image: var(--sheen); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+            box-shadow: inset 0 1px 0 var(--rim-top), inset 0 0 0 .5px var(--rim-side), var(--glass-shadow); transition: top .3s var(--ease), left .3s var(--ease); }
+        .tour-card small { font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); }
+        .tour-card b { display: block; font-size: 16px; margin: 4px 0 6px; }
+        .tour-card p { font-size: 13.5px; line-height: 1.5; color: var(--label-2); margin: 0; }
+        .tour-acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+        .tour-acts .btn { margin-top: 0; height: 34px; padding: 0 16px; }
+        @media (max-width: 760px) { .gd-b { padding-left: 14px; } .tour-card { left: 12px !important; right: 12px; width: auto; } }
+        @media (prefers-reduced-motion: reduce) { .tour-spot, .tour-card { transition: none; } .about-ic.spin svg { animation: none; } }
     </style>
 </head>
 <body>
     <div id="root"></div>
-    <script src="app.js?v=24" defer></script>
+    <script src="app.js?v=25" defer></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(e){console.log("SW failed",e)})})}</script>
 </body>
 </html>

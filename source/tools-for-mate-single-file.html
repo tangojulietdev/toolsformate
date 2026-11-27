@@ -1462,6 +1462,62 @@
             .content > .container { padding: 0 !important; max-width: none; }
             .card, .summary-card, .calc-result, .info-section { box-shadow: 0 0 0 .5px #bbb !important; }
         }
+    
+        /* i menu, sheets, guide, tour (as in Meridian PDF Mate) */
+        .tm-menu.infopop { width: 296px; min-width: 0; }
+        .tm-menu > button.ip-tile { height: auto; gap: 12px; padding: 9px 10px; border-radius: 10px; }
+        .ip-ic { flex: none; width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; background: var(--fill-2); color: var(--accent); }
+        .tm-menu > button.ip-tile .ip-ic svg { width: 19px; height: 19px; color: var(--accent); }
+        .tm-menu > button.ip-tile:hover .ip-ic { background: rgba(255, 255, 255, .22); }
+        .tm-menu > button.ip-tile:hover .ip-ic svg { color: #fff; }
+        .ip-tx { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+        .ip-tx b { font-size: 13.5px; font-weight: 600; }
+        .ip-tx small { font-size: 11.5px; opacity: .65; }
+        .about-ic { width: 52px; height: 52px; border-radius: 14px; flex: none; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0a84ff, #0040dd); color: #fff; box-shadow: 0 4px 14px rgba(0, 64, 221, .3); }
+        .about-ic svg { width: 26px; height: 26px; fill: none; stroke: #fff; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+        .about-ic.spin svg { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .about-hero h3 { font-size: 17px; font-weight: 700; letter-spacing: -.015em; margin: 0; }
+        .about-lead { margin: 0 0 14px; font-size: 14.5px; line-height: 1.45; color: var(--label); }
+        .about-facts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+        .about-facts span { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; background: var(--fill); font-size: 12.5px; color: var(--label-2); }
+        .about-facts svg { width: 15px; height: 15px; fill: none; stroke: var(--accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+        .about-mail { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--fill); margin-bottom: 12px; }
+        .about-mail div { display: flex; flex-direction: column; font-size: 13px; }
+        .about-mail span { color: var(--label-3); }
+        .about-mail .btn svg, .tm-acts .btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+        .about-small { font-size: 11.5px; color: var(--label-3); line-height: 1.45; margin: 0; }
+        .tm-acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+        .tm-acts .btn { margin-top: 0; height: 36px; padding: 0 18px; }
+        .tm-wide { max-width: 600px; }
+        .gd-list { display: flex; flex-direction: column; gap: 6px; margin: 4px 0; }
+        .gd { border-radius: 12px; background: var(--fill); overflow: hidden; }
+        .gd summary { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; list-style: none; font-size: 14px; }
+        .gd summary::-webkit-details-marker { display: none; }
+        .gd summary b { flex: 1; font-weight: 600; }
+        .gd-chev { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; opacity: .6; transition: transform .2s; }
+        .gd[open] .gd-chev { transform: rotate(180deg); }
+        .gd-ic { width: 28px; height: 28px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; flex: none; }
+        .gd-ic svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+        .gd-b { padding: 0 14px 12px 50px; font-size: 13px; line-height: 1.55; color: var(--label-2); }
+        .gd-b p { margin: 0 0 8px; } .gd-b ul { margin: 0 0 8px; padding-left: 18px; } .gd-b li { margin: 3px 0; } .gd-b b { color: var(--label); }
+        .wn-list { display: flex; flex-direction: column; gap: 10px; max-height: 240px; overflow-y: auto; }
+        .wn { padding: 10px 12px; border-radius: 12px; background: var(--fill); font-size: 13px; }
+        .wn b { font-size: 13px; }
+        .wn ul { margin: 6px 0 0; padding-left: 18px; color: var(--label-2); line-height: 1.5; }
+        .tour { position: fixed; inset: 0; z-index: 140; }
+        .tour-spot { position: fixed; border-radius: 14px; box-shadow: 0 0 0 4px var(--accent), 0 0 0 9999px rgba(0, 0, 0, .45); transition: all .3s var(--ease); pointer-events: none; }
+        .tour-dim { position: fixed; inset: 0; background: rgba(0, 0, 0, .45); }
+        .tour-card { position: fixed; width: 320px; max-width: calc(100vw - 24px); padding: 16px; border-radius: 16px; color: var(--label);
+            background-color: var(--mat-strong); background-image: var(--sheen); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+            box-shadow: inset 0 1px 0 var(--rim-top), inset 0 0 0 .5px var(--rim-side), var(--glass-shadow); transition: top .3s var(--ease), left .3s var(--ease); }
+        .tour-card small { font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); }
+        .tour-card b { display: block; font-size: 16px; margin: 4px 0 6px; }
+        .tour-card p { font-size: 13.5px; line-height: 1.5; color: var(--label-2); margin: 0; }
+        .tour-acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+        .tour-acts .btn { margin-top: 0; height: 34px; padding: 0 16px; }
+        @media (max-width: 760px) { .gd-b { padding-left: 14px; } .tour-card { left: 12px !important; right: 12px; width: auto; } }
+        @media (prefers-reduced-motion: reduce) { .tour-spot, .tour-card { transition: none; } .about-ic.spin svg { animation: none; } }
     </style>
 </head>
 <body>
@@ -6735,6 +6791,20 @@ const Proof = (function () {
             );
         }
 
+        const APP_VERSION = '3.1.0';
+        const WHATS_NEW = [
+            ['3.1.0', ['i button like Meridian PDF Mate: keyboard shortcuts, quick tour, about, app guide and update', 'NRE Days is its own tool under Personal', 'Media and Proofread moved to Personal']],
+            ['3.0.0', ['New interface shared with Meridian PDF Mate: glass top bar, tool groups and a tool row in colour', 'Phone dock with group switcher', 'Bridge night mode with five brightness levels', 'Search all tools with Ctrl K']]
+        ];
+        const TOUR = [
+            { sel: '.cats, .catsw', t: 'Tool groups', d: 'Voyage, Cargo & Stability, Ship\'s Office and Personal. Each group remembers the last tool you used.' },
+            { sel: '.ribbon .tools, .dk-tools', t: 'Tools', d: 'The tools in the chosen group, each in its own colour. Arrow keys move between them.' },
+            { sel: '.tsearch, .tb-search-m', t: 'Search', d: 'Find any tool by name or by what it does, for example "dew point" or "salary". Ctrl K opens it.' },
+            { sel: '[aria-label="Bridge night mode"]', t: 'Bridge night mode', d: 'Red on black so you keep your night vision. Tap the moon again for five brightness levels.' },
+            { sel: '.tb-primary', t: 'Print', d: 'Print the current tool or save it as a PDF.' },
+            { sel: '[aria-label="About and help"]', t: 'Help and updates', d: 'Shortcuts, this tour, the app guide and Update live here.' }
+        ];
+        const verNum = (v) => String(v).split('.').map((n) => parseInt(n, 10) || 0).reduce((a, n) => a * 1000 + n, 0);
         const TABS = [
             { key: 'rob', label: 'ROB', c: '#0369a1', cd: '#38bdf8' },
             { key: 'eta', label: 'ETA', c: '#4f46e5', cd: '#a5b4fc' },
@@ -6808,6 +6878,13 @@ const Proof = (function () {
             bwe: <><path d="M3 15h18l-2.5 5h-13z" /><path d="M12 15V4" /><path d="M8.5 7.5 12 4l3.5 3.5" /><path d="M2 21.5c2 0 2-1 4.5-1" /></>,
             nre: <><rect x="5" y="3" width="14" height="18" rx="2" /><circle cx="12" cy="10" r="3" /><path d="M9 16.5h6" /></>,
             calc: <><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M8 7h8" /><path d="M8 11h.01M12 11h.01M16 11h.01M8 14.5h.01M12 14.5h.01M16 14.5h.01M8 18h4M16 18h.01" /></>,
+            kbd: <><rect x="2.5" y="6" width="19" height="12" rx="2" /><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10" /></>,
+            tour: <><path d="M3 12a9 9 0 1 0 9-9" /><path d="M3 4v5h5" /><path d="M12 8v4l3 2" /></>,
+            guide: <><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" /><path d="M4 19V5" /><path d="M9 7h6M9 11h6" /></>,
+            refresh: <><path d="M20 12a8 8 0 1 1-2.3-5.6" /><path d="M20 4v5h-5" /></>,
+            mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3.5 6.5 8.5 6.5 8.5-6.5" /></>,
+            lock: <><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></>,
+            offline: <><path d="M2 8.5a15 15 0 0 1 20 0" /><path d="M5.5 12a10 10 0 0 1 13 0" /><path d="M9 15.5a5 5 0 0 1 6 0" /><path d="M12 19h.01" /><path d="M3 3l18 18" /></>,
             g0: <><circle cx="12" cy="12" r="9" /><path d="m15.5 8.5-2 5-5 2 2-5z" /></>,
             g1: <><path d="M21 8l-9-5-9 5 9 5 9-5z" /><path d="M3 12.5l9 5 9-5" /><path d="M3 17l9 5 9-5" /></>,
             g2: <><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" /><path d="M3 12.5h18" /></>,
@@ -6873,7 +6950,11 @@ const Proof = (function () {
             const [searchOpen, setSearchOpen] = useState(false);
             const [scrolled, setScrolled] = useState(false);
             const [menu, setMenu] = useState(null); // { kind: 'night' | 'groups', x, y }
-            const [sheet, setSheet] = useState(null); // 'about'
+            const [sheet, setSheet] = useState(null); // search | about | keys | guide | update
+            const [upd, setUpd] = useState(null); // { busy, latest, err }
+            const [tour, setTour] = useState(-1);
+            const [tourBox, setTourBox] = useState(null);
+            const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
             const [installEvt, setInstallEvt] = useState(null);
             const [toast, setToast] = useState('');
             const searchRef = useRef(null);
@@ -6945,6 +7026,63 @@ const Proof = (function () {
                 const n = order[Math.min(order.length - 1, Math.max(0, p + (e.key === 'ArrowRight' ? 1 : -1)))];
                 if (n !== undefined && n !== activeTab) { e.preventDefault(); openTab(n); setTimeout(() => { const el = document.getElementById('tab-' + TABS[n].key); if (el) el.focus(); }, 0); }
             };
+            const openInfo = (e) => {
+                if (menu && menu.kind === 'info') { setMenu(null); return; }
+                const r = e.currentTarget.getBoundingClientRect();
+                setMenu({ kind: 'info', x: Math.min(r.right - 296, window.innerWidth - 304), y: r.bottom + 8 });
+            };
+            const checkUpdate = async () => {
+                setSheet('update');
+                if (!navigator.onLine) { setUpd({ err: 'offline' }); return; }
+                setUpd({ busy: true });
+                try {
+                    const r = await fetch('version.json?fresh=' + Date.now(), { cache: 'no-store' });
+                    if (!r.ok) throw new Error('http ' + r.status);
+                    setUpd({ latest: String((await r.json()).version || '') });
+                } catch (er) { setUpd({ err: 'server' }); }
+            };
+            const applyUpdate = async () => {
+                setUpd((u) => ({ ...(u || {}), applying: true }));
+                try {
+                    if ('serviceWorker' in navigator) {
+                        const reg = await navigator.serviceWorker.getRegistration();
+                        if (reg) {
+                            const changed = new Promise((res) => { navigator.serviceWorker.addEventListener('controllerchange', res, { once: true }); setTimeout(res, 15000); });
+                            await reg.update().catch(() => {});
+                            if (reg.installing || reg.waiting) { (reg.waiting || reg.installing).postMessage('skip'); await changed; }
+                        }
+                    }
+                    if ('caches' in window) { const keys = await caches.keys(); await Promise.all(keys.filter((k) => k.startsWith('tools-for-mate-')).map((k) => caches.delete(k))); }
+                } catch (er) {}
+                const u = new URL(location.href); u.searchParams.set('updated', Date.now()); location.replace(u.toString());
+            };
+            useEffect(() => { // after an update, show what changed once
+                try {
+                    const seen = localStorage.getItem('tfm_ver');
+                    if (seen && seen !== APP_VERSION) flash('Updated to version ' + APP_VERSION + '. Open i, Update to see what is new');
+                    localStorage.setItem('tfm_ver', APP_VERSION);
+                    const u = new URL(location.href); if (u.searchParams.has('updated')) { u.searchParams.delete('updated'); history.replaceState(null, '', u.pathname + u.search + u.hash); }
+                } catch (er) {}
+            }, []);
+            const startTour = () => { setSheet(null); setMenu(null); setTour(0); };
+            useEffect(() => {
+                if (tour < 0) { setTourBox(null); return; }
+                const place = () => {
+                    const st = TOUR[tour]; if (!st) return;
+                    const el = st.sel.split(',').map((x) => document.querySelector(x.trim())).find((x) => x && x.offsetParent !== null && x.getBoundingClientRect().width > 0);
+                    if (!el) { setTourBox({ none: true }); return; }
+                    const r = el.getBoundingClientRect();
+                    setTourBox({ x: r.left - 6, y: r.top - 6, w: r.width + 12, h: r.height + 12 });
+                };
+                place(); window.addEventListener('resize', place);
+                return () => window.removeEventListener('resize', place);
+            }, [tour]);
+            useEffect(() => {
+                if (tour < 0) return;
+                const k = (e) => { if (e.key === 'Escape') setTour(-1); if (e.key === 'ArrowRight' || e.key === 'Enter') setTour((t) => (t + 1 < TOUR.length ? t + 1 : -1)); if (e.key === 'ArrowLeft') setTour((t) => Math.max(0, t - 1)); };
+                window.addEventListener('keydown', k, true);
+                return () => window.removeEventListener('keydown', k, true);
+            }, [tour]);
             const doInstall = async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch (e) {} setInstallEvt(null); };
 
             // Speed profiles
@@ -7196,7 +7334,7 @@ const Proof = (function () {
                                     <button type="button" className="tbtn" onClick={toggleTheme} aria-label={theme === 'dark' && night === 'off' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' && night === 'off' ? 'Light mode' : 'Dark mode'}><Icon name="contrast" /></button>
                                     <button type="button" className="tbtn" data-menu-btn="1" onClick={onNight} aria-pressed={night !== 'off'} aria-label="Bridge night mode" title="Bridge night mode: red light, keeps your night vision"><Icon name="moon" /></button>
                                     {installEvt && <button type="button" className="tbtn" onClick={doInstall} aria-label="Install app" title="Install Meridian Tools for Mate"><Icon name="install" /></button>}
-                                    <button type="button" className="tbtn" onClick={() => setSheet('about')} aria-label="About and help" title="About Meridian Tools for Mate"><Icon name="info" /></button>
+                                    <button type="button" className="tbtn" data-menu-btn="1" aria-haspopup="menu" onClick={openInfo} aria-label="About and help" title="About Meridian Tools for Mate"><Icon name="info" /></button>
                                 </div>
                                 <button type="button" className="tbtn primary tb-primary" onClick={() => window.print()}><Icon name="share" /><span>Print</span></button>
                             </div>
@@ -7224,13 +7362,24 @@ const Proof = (function () {
                             ); })}
                         </div>
                     </nav>
-                    {menu && <div className={'tm-menu tm-pop' + (menu.up ? ' up' : '')} role="menu" style={menu.up ? { left: Math.max(8, menu.x), bottom: window.innerHeight - menu.y } : { left: Math.max(8, menu.x), top: menu.y }}>
+                    {menu && <div className={'tm-menu tm-pop' + (menu.up ? ' up' : '') + (menu.kind === 'info' ? ' infopop' : '')} role="menu" style={menu.up ? { left: Math.max(8, menu.x), bottom: window.innerHeight - menu.y } : { left: Math.max(8, menu.x), top: menu.y }}>
                         {menu.kind === 'night' && <>
                             <div className="tm-mh">Night brightness</div>
                             {NIGHT_LEVELS.map(([k, l]) => <button key={k} type="button" role="menuitemradio" aria-checked={Math.abs(k - night) < 0.01} onClick={() => { setNightLevel(k); setMenu(null); }}><Icon name={Math.abs(k - night) < 0.01 ? 'check' : 'moon'} />{l}</button>)}
                             <div className="tm-msep" />
                             <button type="button" role="menuitem" onClick={() => { setNightLevel('off'); setMenu(null); }}><Icon name="close" />Turn night mode off</button>
                         </>}
+                        {menu.kind === 'info' && [
+                            ['keys', 'kbd', 'Keyboard shortcuts', 'Search, groups, tools, print'],
+                            ['tour', 'tour', 'Quick tour', 'A one minute walk through'],
+                            ['about', 'info', 'About', 'Version ' + APP_VERSION + ', contact'],
+                            ['guide', 'guide', 'App guide', 'How it works, safety, installing'],
+                            ['update', 'install', 'Update', 'Check for a new version and refresh']
+                        ].map(([k, ic, t, d]) => (
+                            <button key={k} type="button" role="menuitem" className="ip-tile" onClick={() => { setMenu(null); if (k === 'tour') startTour(); else if (k === 'update') checkUpdate(); else setSheet(k); }}>
+                                <span className="ip-ic"><Icon name={ic} /></span><span className="ip-tx"><b>{t}</b><small>{d}</small></span>
+                            </button>
+                        ))}
                         {menu.kind === 'groups' && <>
                             <div className="tm-mh">Tool groups</div>
                             {TAB_GROUPS.map((g, gi) => <button key={g.name} type="button" role="menuitemradio" aria-checked={gi === curGroup} onClick={() => { setMenu(null); openGroup(gi); }}><Icon name={'g' + gi} />{g.name}<small>{g.keys.length}</small></button>)}
@@ -7245,20 +7394,69 @@ const Proof = (function () {
                             <div onClick={(e) => { if (e.target.closest('.tm-ritem')) { setSheet(null); setQ(''); } }}>{searchList}</div>
                         </div>}
                         {sheet === 'about' && <div className="tm-sheet" role="dialog" aria-label="About">
-                            <div className="tm-sheet-h"><div className="about-hero"><img src="icons/icon-192.png" alt="" width="52" height="52" /><div><h3>Meridian Tools for Mate</h3><small>Tango Juliet Dev</small></div></div><button type="button" className="tbtn solo" onClick={() => setSheet(null)} aria-label="Close"><Icon name="close" /></button></div>
-                            <p className="about-p">Maritime calculators for the watchkeeper and the chief mate. {TABS.length} tools in four groups. Works fully offline, and everything you enter stays on this device.</p>
-                            <div className="about-h">Keyboard shortcuts</div>
+                            <div className="tm-sheet-h"><div className="about-hero"><img src="icons/icon-192.png" alt="" width="52" height="52" /><div><h3>Meridian Tools for Mate</h3><small>Version {APP_VERSION} · Tango Juliet Dev</small></div></div><button type="button" className="tbtn solo" onClick={() => setSheet(null)} aria-label="Close"><Icon name="close" /></button></div>
+                            <p className="about-lead">Calculators and planners for the watchkeeper and the chief mate, plus personal tools. {TABS.length} tools in four groups.</p>
+                            <div className="about-facts"><span><Icon name="offline" />Works offline</span><span><Icon name="install" />No installation needed</span><span><Icon name="lock" />Data stays on this device</span></div>
+                            <div className="about-mail"><div><b>Suggestions or problems</b><span>tangojulietdev@gmail.com</span></div><a className="btn btn-ghost" href={'mailto:tangojulietdev@gmail.com?subject=Meridian%20Tools%20for%20Mate%20' + APP_VERSION}><Icon name="mail" />Email</a></div>
+                            <p className="about-small">Media uses Mediabunny (MPL-2.0), pdf.js (Apache-2.0), pdf-lib (MIT), heic-to (LGPL-3.0) and gifenc (MIT). Built with React (MIT).</p>
+                            <div className="tm-acts">{!isStandalone() && installEvt && <button type="button" className="btn btn-ghost" onClick={doInstall}><Icon name="install" />Install</button>}<button type="button" className="btn btn-primary" onClick={() => setSheet(null)}>Done</button></div>
+                        </div>}
+                        {sheet === 'keys' && <div className="tm-sheet" role="dialog" aria-label="Keyboard shortcuts">
+                            <div className="tm-sheet-h"><div className="about-hero"><span className="about-ic"><Icon name="kbd" /></span><div><h3>Keyboard shortcuts</h3><small>Work faster on a computer</small></div></div><button type="button" className="tbtn solo" onClick={() => setSheet(null)} aria-label="Close"><Icon name="close" /></button></div>
                             <div className="kgrid">
                                 <span><kbd>{isMac ? '⌘' : 'Ctrl'}</kbd><kbd>K</kbd></span><span>Search tools</span>
-                                <span><kbd>Alt</kbd><kbd>1</kbd> to <kbd>4</kbd></span><span>Switch group</span>
-                                <span><kbd>←</kbd><kbd>→</kbd></span><span>Previous or next tool in the tool row</span>
+                                <span><kbd>Enter</kbd></span><span>Open the first search result</span>
+                                <span><kbd>Alt</kbd><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></span><span>Voyage, Cargo & Stability, Ship's Office, Personal</span>
+                                <span><kbd>←</kbd><kbd>→</kbd></span><span>Previous or next tool, when the tool row has focus</span>
                                 <span><kbd>{isMac ? '⌘' : 'Ctrl'}</kbd><kbd>P</kbd></span><span>Print or save as PDF</span>
-                                <span><kbd>Esc</kbd></span><span>Close menus</span>
+                                <span><kbd>Esc</kbd></span><span>Close menus, sheets and search</span>
                             </div>
-                            <div className="about-h">Display</div>
-                            <p className="about-p">The contrast button switches light and dark. The moon turns on bridge night mode: red on black with five brightness levels, so you keep your night vision.</p>
-                            {installEvt && <button type="button" className="btn btn-primary" onClick={doInstall}>Install app</button>}
+                            <div className="tm-acts"><button type="button" className="btn btn-primary" onClick={() => setSheet(null)}>Done</button></div>
                         </div>}
+                        {sheet === 'guide' && <div className="tm-sheet tm-wide" role="dialog" aria-label="App guide">
+                            <div className="tm-sheet-h"><div className="about-hero"><span className="about-ic"><Icon name="guide" /></span><div><h3>App guide</h3><small>Meridian Tools for Mate · version {APP_VERSION}</small></div></div><button type="button" className="tbtn solo" onClick={() => setSheet(null)} aria-label="Close"><Icon name="close" /></button></div>
+                            <div className="gd-list">
+                                {[
+                                    ['info', 'What this app is', <><p>A set of calculators and planners for life on board: ROB, ETA and speed, ventilation, deadweight, hydrostatics, ballast exchange, load line, crew overtime, garbage stowage and more. Personal tools cover your budget, NRE days, media conversion and proofreading.</p><p>It was built by a serving seafarer for ships with slow or no internet.</p></>, true],
+                                    ['refresh', 'How it works', <><p>The app is a set of files your browser downloads once. After that every tool runs on your own device.</p><ul><li>Nothing is sent to a server.</li><li>After the first visit it works fully offline, including at sea.</li><li>What you enter is saved on this device and is there next time.</li></ul></>],
+                                    ['lock', 'Why it is safe', <ul><li><b>Your data never leaves the device.</b> No upload, no cloud copy, no account.</li><li><b>No tracking.</b> No analytics or adverts.</li><li><b>Browser sandbox.</b> It cannot reach your other files unless you choose one.</li><li><b>Works without internet.</b> Switch off Wi-Fi and it keeps working.</li></ul>],
+                                    ['install', 'Install it as an app', <><p>Installing adds an icon and its own window, needs no administrator rights and can be removed like any app.</p><ul><li><b>Windows or Mac, Chrome or Edge:</b> click the install icon in the address bar, or the browser menu, Install.</li><li><b>Android, Chrome:</b> menu, Install app or Add to Home screen.</li><li><b>iPhone or iPad, Safari:</b> Share, Add to Home Screen.</li></ul></>],
+                                    ['moon', 'Display', <p>The contrast button switches light and dark. The moon turns on bridge night mode: red on black with five brightness levels. Print always comes out in normal colours.</p>],
+                                    ['offline', 'Your data and backups', <p>Data is kept in this browser on this device. Clearing site data or using a private window removes it. Tools with Excel export or Backup (Budget, Crew OT, Ballast Exchange, Garbage) let you keep a copy. Each device keeps its own data; nothing syncs.</p>],
+                                    ['install', 'Updates', <p>When a new version is published the app downloads it quietly. To switch at once open i, then Update. Your data is kept.</p>],
+                                    ['mail', 'Help and feedback', <p>Suggestions, problems or requests: <b>tangojulietdev@gmail.com</b>. Every message is read.</p>]
+                                ].map(([ic, t, body, open]) => (
+                                    <details key={t} className="gd" open={!!open}><summary><span className="gd-ic"><Icon name={ic} /></span><b>{t}</b><svg className="gd-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg></summary><div className="gd-b">{body}</div></details>
+                                ))}
+                            </div>
+                            <div className="tm-acts">{!isStandalone() && installEvt && <button type="button" className="btn btn-ghost" onClick={doInstall}><Icon name="install" />Install</button>}<button type="button" className="btn btn-primary" onClick={() => setSheet(null)}>Done</button></div>
+                        </div>}
+                        {sheet === 'update' && (() => {
+                            const u = upd || {};
+                            const newer = u.latest && verNum(u.latest) > verNum(APP_VERSION);
+                            const title = u.busy ? 'Checking for updates' : u.err === 'offline' ? 'You are offline' : u.err ? 'Could not check' : newer ? 'Update available' : 'You are up to date';
+                            const lead = u.busy ? 'Asking the server for the latest version.' : u.err === 'offline' ? 'Connect to the internet to check for updates. Everything keeps working offline meanwhile.' : u.err ? 'The update server did not answer. Try again in a moment, or do a full refresh.' : newer ? 'The app will download the new version and restart. Everything you entered is kept.' : 'You already have the newest version. A full refresh reloads every app file from the internet, which can fix a screen that looks wrong. Your data is kept.';
+                            return <div className="tm-sheet" role="dialog" aria-label="Update">
+                                <div className="tm-sheet-h"><div className="about-hero"><span className={'about-ic' + (u.busy || u.applying ? ' spin' : '')}><Icon name={u.busy || u.applying ? 'refresh' : 'install'} /></span><div><h3>{u.applying ? 'Updating' : title}</h3><small>This device: version {APP_VERSION}{u.latest ? ' · Latest: version ' + u.latest : ''}</small></div></div><button type="button" className="tbtn solo" onClick={() => setSheet(null)} aria-label="Close"><Icon name="close" /></button></div>
+                                <p className="about-lead">{lead}</p>
+                                <div className="about-h">What's new</div>
+                                <div className="wn-list">{WHATS_NEW.map(([v, items]) => <div key={v} className="wn"><b>Version {v}{v === APP_VERSION ? ' (this device)' : ''}</b><ul>{items.map((x) => <li key={x}>{x}</li>)}</ul></div>)}</div>
+                                <div className="tm-acts"><button type="button" className="btn btn-ghost" onClick={() => setSheet(null)}>Close</button><button type="button" className={'btn ' + (newer ? 'btn-primary' : 'btn-ghost')} disabled={u.busy || u.applying || u.err === 'offline'} onClick={applyUpdate}><Icon name="refresh" />{newer ? 'Update now' : 'Full refresh'}</button></div>
+                            </div>;
+                        })()}
+                    </div>}
+                    {tour >= 0 && TOUR[tour] && <div className="tour no-print" role="dialog" aria-label="Quick tour">
+                        {tourBox && !tourBox.none ? <div className="tour-spot" style={{ left: tourBox.x, top: tourBox.y, width: tourBox.w, height: tourBox.h }} /> : <div className="tour-dim" />}
+                        <div className="tour-card" style={tourBox && !tourBox.none ? (tourBox.y + tourBox.h + 190 < window.innerHeight ? { top: tourBox.y + tourBox.h + 12, left: Math.min(Math.max(12, tourBox.x), window.innerWidth - 332) } : { top: Math.max(12, tourBox.y - 182), left: Math.min(Math.max(12, tourBox.x), window.innerWidth - 332) }) : { top: '30%', left: 'calc(50% - 160px)' }}>
+                            <small>{tour + 1} of {TOUR.length}</small>
+                            <b>{TOUR[tour].t}</b>
+                            <p>{TOUR[tour].d}</p>
+                            <div className="tour-acts">
+                                <button type="button" className="btn btn-ghost" onClick={() => setTour(-1)}>Skip</button>
+                                {tour > 0 && <button type="button" className="btn btn-ghost" onClick={() => setTour(tour - 1)}>Back</button>}
+                                <button type="button" className="btn btn-primary" onClick={() => setTour(tour + 1 < TOUR.length ? tour + 1 : -1)}>{tour + 1 < TOUR.length ? 'Next' : 'Done'}</button>
+                            </div>
+                        </div>
                     </div>}
                     {toast && <div className="tm-toast no-print" role="status">{toast}</div>}
                     <main className="content" ref={mainRef} onScroll={(e) => { const s = e.currentTarget.scrollTop > 4; if (s !== scrolled) setScrolled(s); }}>

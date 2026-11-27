@@ -1,9 +1,11 @@
-const VERSION = 'tools-for-mate-v26';
-const CORE = ['./', 'index.html', 'app.js?v=24', 'manifest.webmanifest', 'dict-en.txt', 'dict-common.txt', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png', 'media.js?v=1', 'media.js'];
+const VERSION = 'tools-for-mate-v27';
+const CORE = ['./', 'index.html', 'app.js?v=25', 'manifest.webmanifest', 'dict-en.txt', 'dict-common.txt', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png', 'media.js?v=1', 'media.js'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));
 });
+
+self.addEventListener('message', (e) => { if (e.data === 'skip') self.skipWaiting(); });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
@@ -16,6 +18,7 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  if (url.pathname.endsWith('/version.json')) return;
   // Pages: network first so updates arrive, cache when offline
   if (req.mode === 'navigate') {
     e.respondWith(
