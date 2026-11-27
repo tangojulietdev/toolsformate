@@ -1576,11 +1576,53 @@
         .ce-alm { font-size: 12.5px; }
         .ce-alm td, .ce-alm th { padding: 4px 8px; }
         .card .ce-alm { margin-bottom: 8px; }
+    
+        /* Bridge tools */
+        .er-pos { display: grid; grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1.2fr) 8px 64px; gap: 4px; align-items: center; }
+        .er-pos.er-ew { grid-template-columns: minmax(0, 1fr) 10px 64px; }
+        .er-pos .input-field { margin-bottom: 10px; text-align: center; padding-left: 6px; padding-right: 6px; }
+        .er-pos select.input-field { padding-right: 22px; background-position: right 7px center; font-weight: 700; }
+        .er-pos span { margin-bottom: 10px; color: var(--muted); font-weight: 700; text-align: center; }
+        .er-pos.bad .input-field:not(select) { box-shadow: 0 0 0 1.5px var(--bad) !important; }
+        @media (max-width: 640px) { .er-pospair .cx-row { grid-template-columns: minmax(0, 1fr) !important; } .er-pos { grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1.2fr) 8px 70px; } }
+        .er-gps { display: flex; align-items: center; gap: 10px; margin: -2px 0 10px; flex-wrap: wrap; }
+        .er-pospair + .er-pospair { margin-top: 6px; }
+        .b-plot { width: 100%; max-width: 360px; display: block; margin: 12px auto 6px; }
+        .b-plot-bg { fill: var(--well); }
+        .b-ring { fill: none; stroke: var(--sep-strong); stroke-dasharray: 3 4; }
+        .b-axis { stroke: var(--sep); }
+        .b-txt { fill: var(--muted); font: 600 10px var(--font); }
+        .b-dr { fill: var(--text); }
+        .b-fix { fill: var(--ok); stroke: #fff; stroke-width: 1.5; }
+        .b-lop { stroke: var(--accent); stroke-width: 2; }
+        .b-az { stroke: var(--muted); stroke-dasharray: 2 3; }
+        .b-own { stroke: var(--text); stroke-width: 2; fill: none; }
+        .b-tgt { fill: var(--bad); }
+        .b-rel { stroke: var(--muted); stroke-width: 2; stroke-dasharray: 5 3; }
+        .b-cpa { stroke: var(--bad); stroke-width: 1.5; }
+        .b-true { stroke: #f59e0b; stroke-width: 2.5; }
+        .b-act { stroke: var(--accent); stroke-width: 2.5; }
+        .cf-sight { position: relative; padding: 10px 0; border-bottom: .5px solid var(--sep); }
+        .cf-sight:last-of-type { border-bottom: 0; }
+        .cf-res { font-size: 13px; line-height: 1.5; color: var(--text-2); }
+        .cf-res b { color: var(--text); }
+        .cf-res small { display: block; color: var(--muted); font-size: 11.5px; }
+        .cf-del { position: absolute; top: 6px; right: 0; }
+        .td-curve { width: 100%; height: auto; margin: 10px 0; background: var(--well); border-radius: 10px; }
+        .td-curve polyline { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+        .td-curve line { stroke: var(--sep-strong); stroke-dasharray: 3 4; }
+        .td-curve circle { fill: var(--bad); }
+        .td-curve text { fill: var(--muted); font: 600 10px var(--font); }
+        .an-alarmc { fill: color-mix(in srgb, var(--bad) 8%, transparent); stroke: var(--bad); stroke-dasharray: 5 3; }
+        .an-swing { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+        .an-trk { fill: none; stroke: var(--accent); stroke-width: 1.5; opacity: .8; }
+        .an-alarm { animation: anflash 1s steps(2) infinite; font-weight: 700; }
+        @keyframes anflash { 50% { opacity: .35; } }
     </style>
 </head>
 <body>
     <div id="root"></div>
-    <script src="app.js?v=27" defer></script>
+    <script src="app.js?v=28" defer></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(e){console.log("SW failed",e)})})}</script>
 </body>
 </html>

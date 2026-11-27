@@ -1577,6 +1577,48 @@
         .ce-alm { font-size: 12.5px; }
         .ce-alm td, .ce-alm th { padding: 4px 8px; }
         .card .ce-alm { margin-bottom: 8px; }
+    
+        /* Bridge tools */
+        .er-pos { display: grid; grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1.2fr) 8px 64px; gap: 4px; align-items: center; }
+        .er-pos.er-ew { grid-template-columns: minmax(0, 1fr) 10px 64px; }
+        .er-pos .input-field { margin-bottom: 10px; text-align: center; padding-left: 6px; padding-right: 6px; }
+        .er-pos select.input-field { padding-right: 22px; background-position: right 7px center; font-weight: 700; }
+        .er-pos span { margin-bottom: 10px; color: var(--muted); font-weight: 700; text-align: center; }
+        .er-pos.bad .input-field:not(select) { box-shadow: 0 0 0 1.5px var(--bad) !important; }
+        @media (max-width: 640px) { .er-pospair .cx-row { grid-template-columns: minmax(0, 1fr) !important; } .er-pos { grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1.2fr) 8px 70px; } }
+        .er-gps { display: flex; align-items: center; gap: 10px; margin: -2px 0 10px; flex-wrap: wrap; }
+        .er-pospair + .er-pospair { margin-top: 6px; }
+        .b-plot { width: 100%; max-width: 360px; display: block; margin: 12px auto 6px; }
+        .b-plot-bg { fill: var(--well); }
+        .b-ring { fill: none; stroke: var(--sep-strong); stroke-dasharray: 3 4; }
+        .b-axis { stroke: var(--sep); }
+        .b-txt { fill: var(--muted); font: 600 10px var(--font); }
+        .b-dr { fill: var(--text); }
+        .b-fix { fill: var(--ok); stroke: #fff; stroke-width: 1.5; }
+        .b-lop { stroke: var(--accent); stroke-width: 2; }
+        .b-az { stroke: var(--muted); stroke-dasharray: 2 3; }
+        .b-own { stroke: var(--text); stroke-width: 2; fill: none; }
+        .b-tgt { fill: var(--bad); }
+        .b-rel { stroke: var(--muted); stroke-width: 2; stroke-dasharray: 5 3; }
+        .b-cpa { stroke: var(--bad); stroke-width: 1.5; }
+        .b-true { stroke: #f59e0b; stroke-width: 2.5; }
+        .b-act { stroke: var(--accent); stroke-width: 2.5; }
+        .cf-sight { position: relative; padding: 10px 0; border-bottom: .5px solid var(--sep); }
+        .cf-sight:last-of-type { border-bottom: 0; }
+        .cf-res { font-size: 13px; line-height: 1.5; color: var(--text-2); }
+        .cf-res b { color: var(--text); }
+        .cf-res small { display: block; color: var(--muted); font-size: 11.5px; }
+        .cf-del { position: absolute; top: 6px; right: 0; }
+        .td-curve { width: 100%; height: auto; margin: 10px 0; background: var(--well); border-radius: 10px; }
+        .td-curve polyline { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+        .td-curve line { stroke: var(--sep-strong); stroke-dasharray: 3 4; }
+        .td-curve circle { fill: var(--bad); }
+        .td-curve text { fill: var(--muted); font: 600 10px var(--font); }
+        .an-alarmc { fill: color-mix(in srgb, var(--bad) 8%, transparent); stroke: var(--bad); stroke-dasharray: 5 3; }
+        .an-swing { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+        .an-trk { fill: none; stroke: var(--accent); stroke-width: 1.5; opacity: .8; }
+        .an-alarm { animation: anflash 1s steps(2) infinite; font-weight: 700; }
+        @keyframes anflash { 50% { opacity: .35; } }
     </style>
 </head>
 <body>
@@ -7982,9 +8024,8 @@ const Proof = (function () {
                     <h2 className="section-title">Compass Error</h2>
                     <ErTabs tabs={[['err', 'Compass error'], ['sky', 'Sky'], ['alm', 'Almanac'], ['log', 'Log (' + (s.log || []).length + ')']]} value={s.view} onChange={set('view')} />
                     <div className="card cx-card">
+                        <ErPosPair lat={s.lat} lon={s.lon} setLat={set('lat')} setLon={set('lon')} />
                         <div className="cx-row">
-                            <CxField label="Latitude" value={s.lat} onChange={set('lat')} type="text" placeholder="35 12.4 N" />
-                            <CxField label="Longitude" value={s.lon} onChange={set('lon')} type="text" placeholder="139 45.1 E" />
                             <div>
                                 <label className="input-label">Time {s.live ? '(now)' : ''}</label>
                                 <div className="ce-time">
@@ -7994,7 +8035,7 @@ const Proof = (function () {
                             </div>
                             <CxTz label="Zone of the time" value={s.tz} onChange={set('tz')} />
                         </div>
-                        {!posOk && <div className="cx-hint">Enter the DR or GPS position. Examples: 35 12.4 N, 139°45.1'E, or decimals with minus for S and W.</div>}
+                        {!posOk && <div className="cx-hint">Enter the DR or GPS position: degrees, minutes and N/S or E/W.</div>}
                         {posOk && <div className="cx-hint">UTC {cxFmt(ms, 0)} · LMT offset {(lon / 15).toFixed(2)} h · {night ? 'Night' : sun && sun.aa && sun.aa.h > 0 ? 'Day' : 'Twilight'} (Sun altitude {sun && sun.aa ? sun.aa.h.toFixed(1) : '-'}°)</div>}
                     </div>
 
@@ -8011,7 +8052,7 @@ const Proof = (function () {
                                 <div className="cx-row">
                                     <CxField label="Gyro bearing (°)" value={s.gyro} onChange={set('gyro')} />
                                     <CxField label="Magnetic compass bearing (°)" value={s.mag} onChange={set('mag')} />
-                                    <CxField label="Variation" value={s.vari} onChange={set('vari')} type="text" placeholder="3.5 W" />
+                                    <ErEW label="Variation" value={s.vari} onChange={set('vari')} />
                                     <CxField label="Ship's head by compass (°)" value={s.head} onChange={set('head')} />
                                 </div>
                                 {good.length > 0 && !useAmp && <><div className="cx-sub">Good for a bearing now (low and bright)</div>
@@ -8149,8 +8190,821 @@ const Proof = (function () {
             );
         }
 
-        const APP_VERSION = '3.3.0';
+        // =====================================================================
+        // ===== Bridge tools =====
+        // =====================================================================
+        // Position input: degrees, minutes and a hemisphere drop-down. Stored as "35 12.4 N".
+        function erPosParts(value, lat) {
+            const t = String(value || '').replace(/[°'′″,]/g, ' ').trim().toUpperCase();
+            const h0 = (/([NSEW])\s*$/.exec(t) || [])[1];
+            const nums = t.replace(/[NSEW]/g, ' ').trim().split(/\s+/).filter(Boolean);
+            let d = nums[0] || '', m = nums[1] || '', h = h0 || (lat ? 'N' : 'E');
+            if (d.startsWith('-')) { d = d.slice(1); h = lat ? 'S' : 'W'; }
+            return { d, m, h };
+        }
+        function ErPos({ label, value, onChange, lat }) {
+            const p = erPosParts(value, lat);
+            const put = (k, v) => { const n = { ...p, [k]: v }; onChange((n.d + ' ' + n.m + ' ' + n.h).replace(/\s+/g, ' ').trim()); };
+            const deg = parseFloat(p.d), min = parseFloat(p.m);
+            const bad = (p.d !== '' && (!isFinite(deg) || deg > (lat ? 90 : 180) || deg < 0)) || (p.m !== '' && (!isFinite(min) || min >= 60 || min < 0));
+            return (
+                <div>
+                    <label className="input-label">{label}</label>
+                    <div className={'er-pos' + (bad ? ' bad' : '')}>
+                        <input className="input-field" inputMode="decimal" value={p.d} placeholder={lat ? '35' : '139'} aria-label={label + ' degrees'} onChange={(e) => put('d', e.target.value.replace(/[^\d.]/g, ''))} />
+                        <span>°</span>
+                        <input className="input-field" inputMode="decimal" value={p.m} placeholder="12.4" aria-label={label + ' minutes'} onChange={(e) => put('m', e.target.value.replace(/[^\d.]/g, ''))} />
+                        <span>'</span>
+                        <select className="input-field" value={p.h} aria-label={label + ' hemisphere'} onChange={(e) => put('h', e.target.value)}>
+                            {(lat ? ['N', 'S'] : ['E', 'W']).map((x) => <option key={x} value={x}>{x}</option>)}
+                        </select>
+                    </div>
+                </div>
+            );
+        }
+        const erPosStr = (v, lat) => { if (!isFinite(v)) return ''; const a = Math.abs(v); let d = Math.floor(a), m = Math.round((a - d) * 600) / 10; if (m >= 60) { d += 1; m = 0; } return d + ' ' + m.toFixed(1) + ' ' + (lat ? (v < 0 ? 'S' : 'N') : (v < 0 ? 'W' : 'E')); };
+        function ErPosPair({ title, lat, lon, setLat, setLon, gps = true }) {
+            const [busy, setBusy] = useState('');
+            const fromGps = () => {
+                if (!navigator.geolocation) { setBusy('No GPS on this device'); return; }
+                setBusy('Getting position…');
+                navigator.geolocation.getCurrentPosition((p) => { setLat(erPosStr(p.coords.latitude, true)); setLon(erPosStr(p.coords.longitude, false)); setBusy(''); }, (e) => setBusy(e.code === 1 ? 'Location permission denied' : 'No GPS fix'), { enableHighAccuracy: true, timeout: 20000, maximumAge: 10000 });
+            };
+            return (
+                <div className="er-pospair">
+                    {title && <div className="cx-sub" style={{ marginTop: 0 }}>{title}</div>}
+                    <div className="cx-row">
+                        <ErPos label="Latitude" value={lat} onChange={setLat} lat />
+                        <ErPos label="Longitude" value={lon} onChange={setLon} />
+                    </div>
+                    {gps && <div className="er-gps"><button type="button" className="btn-ghost" onClick={fromGps}>Use device GPS</button>{busy && <span className="cx-hint">{busy}</span>}</div>}
+                </div>
+            );
+        }
+        const bLat = (s) => aParse(s, 'N', 'S'), bLon = (s) => aParse(s, 'E', 'W');
+        const bAng = (s) => { const t = String(s || '').replace(/[°'′,]/g, ' ').trim(); if (!t) return NaN; const n = t.split(/\s+/).map(Number); if (!n.every(isFinite)) return NaN; return (n[0] < 0 || t.startsWith('-') ? -1 : 1) * (Math.abs(n[0]) + (n[1] || 0) / 60); }; // "34 12.5" -> 34.208
+        const bZ = (v) => (isFinite(v) ? anrm(v).toFixed(1).padStart(5, '0') + '°' : '-');
+        const bDz = (a, b) => { let d = a - b; while (d > 180) d -= 360; while (d < -180) d += 360; return d; };
+        const bHM = (min) => (isFinite(min) ? (min < 0 ? '−' : '') + Math.floor(Math.abs(min) / 60) + 'h ' + String(Math.round(Math.abs(min) % 60)).padStart(2, '0') + 'm' : '-');
+        // flat local frame in NM around a reference position
+        const bToXY = (la, lo, la0, lo0) => [bDz(lo, lo0) * 60 * Math.cos(la0 * AD), (la - la0) * 60];
+        const bFromXY = (x, y, la0, lo0) => [la0 + y / 60, anrm(lo0 + x / (60 * Math.cos(la0 * AD)) + 180) - 180];
+        const bVec = (c, v) => [v * Math.sin(c * AD), v * Math.cos(c * AD)];
+        function BPlot({ size = 320, children, rings, scale, label }) {
+            const C = size / 2;
+            return (
+                <svg className="b-plot" viewBox={`0 0 ${size} ${size}`}>
+                    <rect width={size} height={size} rx="12" className="b-plot-bg" />
+                    {(rings || []).map((r, i) => <circle key={i} cx={C} cy={C} r={r * scale} className="b-ring" />)}
+                    <line x1={C} y1={6} x2={C} y2={size - 6} className="b-axis" /><line x1={6} y1={C} x2={size - 6} y2={C} className="b-axis" />
+                    <text x={C + 4} y={16} className="b-txt">N</text>
+                    {label && <text x={8} y={size - 8} className="b-txt">{label}</text>}
+                    {children}
+                </svg>
+            );
+        }
+
+        // ---------- 1. Celestial fix ----------
+        const CF_KEY = 'tfm_br_cfix_v1';
+        const CF_DEF = () => ({ lat: '', lon: '', tz: 'GMT+0:00', fixT: '', crs: '', spd: '', he: '20', ie: '0', ieOn: 'off', sights: [{ body: 'sun', limb: 'L', t: '', hs: '' }] });
+        function cfCorr(sg, b, he, ieMin) {
+            const hs = bAng(sg.hs); if (!isFinite(hs)) return null;
+            const dip = 1.76 * Math.sqrt(Math.max(0, he)) / 60;
+            const ha = hs + ieMin / 60 - dip;
+            const R = 1 / Math.tan((ha + 7.31 / (ha + 4.4)) * AD) / 60;
+            let ho = ha - R, extra = 0;
+            if (sg.body === 'sun') { extra = 0.0024 * Math.cos(ha * AD) + (sg.limb === 'U' ? -1 : 1) * b.sd; }
+            else if (sg.body === 'moon') { extra = b.hp * Math.cos(ha * AD) + (sg.limb === 'U' ? -1 : 1) * b.sd; }
+            ho += extra;
+            return { hs, dip, ha, R, extra, ho };
+        }
+        function CfixTab() {
+            const [s, setS, set] = useErStore(CF_KEY, CF_DEF);
+            const off = cxTzMin(s.tz);
+            const dlat = bLat(s.lat), dlon = bLon(s.lon);
+            const fixMs = cxWallToUtc(s.fixT, off);
+            const crs = pn(s.crs) || 0, spd = pn(s.spd) || 0, he = pn(s.he) || 0;
+            const ieMin = (pn(s.ie) || 0) * (s.ieOn === 'on' ? -1 : 1);
+            const setSg = (i, k, v) => setS((o) => ({ ...o, sights: o.sights.map((x, j) => (j === i ? { ...x, [k]: v } : x)) }));
+            const ok = isFinite(dlat) && isFinite(dlon);
+            const refMs = isFinite(fixMs) ? fixMs : NaN;
+            // DR at time t from the reference position at fix time
+            const drAt = (la, lo, t) => { if (!isFinite(refMs) || !isFinite(t)) return [la, lo]; const h = (t - refMs) / 3600000; const [x, y] = bVec(crs, spd * h); return bFromXY(x, y, la, lo); };
+            const reduce = (la, lo) => s.sights.map((sg) => {
+                const t = cxWallToUtc(sg.t, off); if (!isFinite(t)) return null;
+                const key = sg.body; const b = aBody(key, t); const c = cfCorr(sg, b, he, ieMin); if (!c) return null;
+                const [sl, so] = drAt(la, lo, t); const aa = aAltAz(b, sl, so);
+                return { t, b, c, hc: aa.h, zn: aa.z, p: (c.ho - aa.h) * 60, lha: aa.lha, sl, so };
+            });
+            let fix = null, red = ok ? reduce(dlat, dlon) : [];
+            const valid = red.filter(Boolean);
+            if (ok && valid.length >= 2) {
+                let la = dlat, lo = dlon, r = red;
+                for (let it = 0; it < 4; it++) {
+                    const v = r.filter(Boolean); let A = 0, B = 0, C = 0, D = 0, E = 0;
+                    v.forEach((x) => { const z = x.zn * AD; A += Math.cos(z) ** 2; B += Math.sin(z) * Math.cos(z); C += Math.sin(z) ** 2; D += x.p * Math.cos(z); E += x.p * Math.sin(z); });
+                    const G = A * C - B * B; if (Math.abs(G) < 1e-6) break;
+                    const dy = (C * D - B * E) / G, dx = (A * E - B * D) / G;
+                    [la, lo] = bFromXY(dx, dy, la, lo); r = reduce(la, lo);
+                    if (Math.hypot(dx, dy) < 0.01) break;
+                }
+                const [fx, fy] = bToXY(la, lo, dlat, dlon);
+                fix = { la, lo, dist: Math.hypot(fx, fy), brg: anrm(Math.atan2(fx, fy) / AD), fx, fy, red: r };
+            }
+            const sun0 = ok && isFinite(refMs) ? (() => { const day = Math.floor(refMs / 86400000) * 86400000; let t = day + ((360 - anrm(aBody('sun', day).gha + dlon)) % 360) / 360 * 86400000; for (let k = 0; k < 2; k++) t += bDz(0, anrm(aBody('sun', t).gha + dlon)) / 360 * 86400000; return t; })() : NaN;
+            const plotPts = valid;
+            const maxP = Math.max(5, ...plotPts.map((x) => Math.abs(x.p)), fix ? fix.dist : 0) * 1.3;
+            const sc = 140 / maxP;
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Celestial Fix</h2>
+                    <div className="cx-two">
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">DR at the time of the fix</div>
+                                <ErPosPair lat={s.lat} lon={s.lon} setLat={set('lat')} setLon={set('lon')} />
+                                <div className="cx-row">
+                                    <CxField label="Fix time" type="datetime-local" value={s.fixT} onChange={set('fixT')} />
+                                    <CxTz label="Zone of all times" value={s.tz} onChange={set('tz')} />
+                                    <CxField label="Course (°T)" value={s.crs} onChange={set('crs')} hint="For a running fix" />
+                                    <CxField label="Speed (kn)" value={s.spd} onChange={set('spd')} />
+                                </div>
+                                <div className="cx-row">
+                                    <CxField label="Height of eye (m)" value={s.he} onChange={set('he')} />
+                                    <CxField label="Index error (′)" value={s.ie} onChange={set('ie')} />
+                                    <ErSel label="Index error is" value={s.ieOn} onChange={set('ieOn')} opts={[['off', 'Off the arc (add)'], ['on', 'On the arc (subtract)']]} />
+                                </div>
+                            </div>
+                            <div className="card cx-card">
+                                <div className="card-title">Sights</div>
+                                {s.sights.map((sg, i) => {
+                                    const r = red[i];
+                                    return (
+                                        <div key={i} className="cf-sight">
+                                            <div className="cx-row">
+                                                <ErSel label={'Body ' + (i + 1)} value={sg.body} onChange={(v) => setSg(i, 'body', v)} opts={[['sun', 'Sun'], ['moon', 'Moon'], ...CE_PL.map((p) => ['pl:' + p, p]), ...A_STARS.map((st, k) => ['s:' + k, st[0]]).sort((a, b) => a[1].localeCompare(b[1]))]} />
+                                                {(sg.body === 'sun' || sg.body === 'moon') && <ErSel label="Limb" value={sg.limb} onChange={(v) => setSg(i, 'limb', v)} opts={[['L', 'Lower'], ['U', 'Upper']]} />}
+                                                <CxField label="Time of sight" type="datetime-local" value={sg.t} onChange={(v) => setSg(i, 't', v)} />
+                                                <CxField label="Sextant altitude (° ′)" value={sg.hs} onChange={(v) => setSg(i, 'hs', v)} type="text" placeholder="34 12.5" />
+                                            </div>
+                                            {r ? <div className="cf-res">Ho {aFmtDM(r.c.ho, '', '')} · Hc {aFmtDM(r.hc, '', '')} · Zn {bZ(r.zn)} · Intercept <b>{Math.abs(r.p).toFixed(1)}′ {r.p >= 0 ? 'Towards' : 'Away'}</b>{Math.abs(bDz(r.zn, 0)) < 3 || Math.abs(bDz(r.zn, 180)) < 3 ? <> · Lat by meridian altitude <b>{aFmtDM(r.b.dec + (Math.abs(bDz(r.zn, 180)) < 3 ? 1 : -1) * (90 - r.c.ho), 'N', 'S')}</b></> : null}
+                                                <small>Dip −{(r.c.dip * 60).toFixed(1)}′, refraction −{(r.c.R * 60).toFixed(1)}′{r.c.extra ? ', SD/parallax ' + (r.c.extra * 60 >= 0 ? '+' : '') + (r.c.extra * 60).toFixed(1) + '′' : ''}, GHA {aFmtAng(r.b.gha)}, Dec {aFmtDM(r.b.dec, 'N', 'S')}</small></div> : <div className="cx-hint">Enter the time and sextant altitude.</div>}
+                                            {s.sights.length > 1 && <button type="button" className="icon-btn cf-del" aria-label="Remove sight" onClick={() => setS((o) => ({ ...o, sights: o.sights.filter((_, j) => j !== i) }))}>×</button>}
+                                        </div>
+                                    );
+                                })}
+                                <div className="cx-btns"><button type="button" className="btn-ghost" onClick={() => setS((o) => ({ ...o, sights: [...o.sights, { body: 's:17', limb: 'L', t: o.sights[o.sights.length - 1].t, hs: '' }] }))}>+ Add sight</button></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">{fix ? 'Fix' : 'Position lines'}</div>
+                                {valid.some((x) => Math.abs(x.p) > 60) && <div className="cx-status bad" style={{ marginBottom: 10 }}>An intercept is over 60 miles. Check the sextant altitude, the time (zone), the body and the DR before using this fix.</div>}
+                                <div className="cx-grid" style={{ marginTop: 0 }}>
+                                    <CxOut l="Latitude" v={fix ? aFmtDM(fix.la, 'N', 'S') : '-'} hi />
+                                    <CxOut l="Longitude" v={fix ? aFmtDM(fix.lo, 'E', 'W') : '-'} hi />
+                                    <CxOut l="From DR" v={fix ? fix.dist.toFixed(1) : '-'} u="NM" sub={fix ? 'bearing ' + bZ(fix.brg) : ''} />
+                                    <CxOut l="Sun meridian passage" v={isFinite(sun0) ? cxFmt(sun0, off).slice(-5) : '-'} sub="at DR longitude" />
+                                </div>
+                                <BPlot rings={[maxP / 2, maxP]} scale={sc} label={'rings ' + (maxP / 2).toFixed(0) + ' and ' + maxP.toFixed(0) + ' NM'}>
+                                    {plotPts.map((x, i) => { const z = x.zn * AD; const px = 160 + x.p * Math.sin(z) * sc, py = 160 - x.p * Math.cos(z) * sc; const L = 150; const dx = Math.cos(z) * L, dy = Math.sin(z) * L; return <g key={i}><line x1={160} y1={160} x2={160 + Math.sin(z) * 30} y2={160 - Math.cos(z) * 30} className="b-az" /><line x1={px - dx} y1={py - dy} x2={px + dx} y2={py + dy} className="b-lop" /><text x={px + 4} y={py - 4} className="b-txt">{i + 1}</text></g>; })}
+                                    <circle cx={160} cy={160} r={4} className="b-dr" />
+                                    {fix && <circle cx={160 + fix.fx * sc} cy={160 - fix.fy * sc} r={5} className="b-fix" />}
+                                </BPlot>
+                                <div className="cx-hint">DR in the centre, position lines across the azimuth lines, fix in green. Sights at other times are run up to the fix time on the course and speed.</div>
+                            </div>
+                            <div className="cx-hint">Corrections: dip 1.76√h, refraction (Bennett), Sun semi-diameter and parallax, Moon horizontal parallax and semi-diameter. Almanac from the device (Sun and stars about 0.1′, Moon about 0.3°); for Moon sights and examination work use the Nautical Almanac.</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ---------- 2. Great circle and rhumb line ----------
+        const GC_KEY = 'tfm_br_gc_v1';
+        const GC_DEF = () => ({ alat: '', alon: '', blat: '', blon: '', spd: '', step: '5', mode: 'lon', lim: '' });
+        function bRhumb(la1, lo1, la2, lo2) {
+            const f1 = la1 * AD, f2 = la2 * AD, dl = bDz(lo2, lo1) * AD, df = f2 - f1;
+            const dP = Math.log(Math.tan(Math.PI / 4 + f2 / 2) / Math.tan(Math.PI / 4 + f1 / 2));
+            const q = Math.abs(dP) > 1e-12 ? df / dP : Math.cos(f1);
+            return { c: anrm(Math.atan2(dl, dP) / AD), d: Math.sqrt(df * df + q * q * dl * dl) / AD * 60, dmp: dP / AD * 60 };
+        }
+        function bGcDist(la1, lo1, la2, lo2) { const f1 = la1 * AD, f2 = la2 * AD, dl = (lo2 - lo1) * AD; return Math.acos(Math.min(1, Math.max(-1, Math.sin(f1) * Math.sin(f2) + Math.cos(f1) * Math.cos(f2) * Math.cos(dl)))) / AD * 60; }
+        function bGcCourse(la1, lo1, la2, lo2) { const f1 = la1 * AD, f2 = la2 * AD, dl = (lo2 - lo1) * AD; return anrm(Math.atan2(Math.sin(dl) * Math.cos(f2), Math.cos(f1) * Math.sin(f2) - Math.sin(f1) * Math.cos(f2) * Math.cos(dl)) / AD); }
+        const bV = (la, lo) => [Math.cos(la * AD) * Math.cos(lo * AD), Math.cos(la * AD) * Math.sin(lo * AD), Math.sin(la * AD)];
+        const bP = (v) => [Math.atan2(v[2], Math.hypot(v[0], v[1])) / AD, Math.atan2(v[1], v[0]) / AD];
+        function bSlerp(a, b, f) { const om = Math.acos(Math.min(1, Math.max(-1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]))); if (om < 1e-9) return a; const s1 = Math.sin((1 - f) * om) / Math.sin(om), s2 = Math.sin(f * om) / Math.sin(om); return [a[0] * s1 + b[0] * s2, a[1] * s1 + b[1] * s2, a[2] * s1 + b[2] * s2]; }
+        function GcTab() {
+            const [s, , set] = useErStore(GC_KEY, GC_DEF);
+            const [msg, flash] = useErMsg();
+            const a1 = bLat(s.alat), o1 = bLon(s.alon), a2 = bLat(s.blat), o2 = bLon(s.blon);
+            const ok = [a1, o1, a2, o2].every(isFinite);
+            const spd = pn(s.spd);
+            let r = null;
+            if (ok) {
+                const rl = bRhumb(a1, o1, a2, o2), gd = bGcDist(a1, o1, a2, o2), c0 = bGcCourse(a1, o1, a2, o2), cf = anrm(bGcCourse(a2, o2, a1, o1) + 180);
+                const A = bV(a1, o1), B = bV(a2, o2);
+                const n = [A[1] * B[2] - A[2] * B[1], A[2] * B[0] - A[0] * B[2], A[0] * B[1] - A[1] * B[0]], nn = Math.hypot(...n);
+                let vtx = null;
+                if (nn > 1e-9) {
+                    const k = n[2] / (nn * nn); let V = [-k * n[0], -k * n[1], 1 - k * n[2]]; const vl = Math.hypot(...V); V = V.map((x) => x / vl);
+                    [V, V.map((x) => -x)].forEach((W) => { const [la, lo] = bP(W); if (Math.abs(bGcDist(a1, o1, la, lo) + bGcDist(la, lo, a2, o2) - gd) < 0.5 && (!vtx || Math.abs(la) > Math.abs(vtx[0]))) vtx = [la, lo]; });
+                }
+                // waypoints
+                const pts = [[a1, o1]];
+                const dlon = bDz(o2, o1), step = Math.max(0.5, pn(s.step) || 5);
+                if (s.mode === 'lon' && Math.abs(dlon) > step) {
+                    const sg = dlon > 0 ? 1 : -1; let L = Math.ceil(o1 / step) * step; if (sg < 0) L = Math.floor(o1 / step) * step; if (Math.abs(bDz(L, o1)) < 1e-6) L += sg * step;
+                    const f1 = a1 * AD, f2 = a2 * AD, l1 = o1 * AD, l2 = (o1 + dlon) * AD;
+                    for (let i = 0; i < 400; i++) { const lon = L + sg * step * i; if (sg * (lon - (o1 + dlon)) >= -1e-6) break; const l = lon * AD; const la = Math.atan((Math.sin(f1) * Math.cos(f2) * Math.sin(l - l2) - Math.sin(f2) * Math.cos(f1) * Math.sin(l - l1)) / (Math.cos(f1) * Math.cos(f2) * Math.sin(l1 - l2))) / AD; pts.push([la, anrm(lon + 180) - 180]); }
+                } else if (s.mode === 'nm') {
+                    const stepNm = Math.max(10, pn(s.step) || 300); const k = Math.floor(gd / stepNm);
+                    for (let i = 1; i <= k && i < 400; i++) { const f = i * stepNm / gd; if (f >= 0.999) break; pts.push(bP(bSlerp(A, B, f))); }
+                }
+                pts.push([a2, o2]);
+                const legs = pts.slice(1).map((p, i) => ({ from: pts[i], to: p, ...bRhumb(pts[i][0], pts[i][1], p[0], p[1]) }));
+                const sail = legs.reduce((x, l) => x + l.d, 0);
+                // composite
+                let comp = null; const lim = Math.abs(bLat(s.lim));
+                if (isFinite(lim) && lim > 0 && vtx && Math.abs(vtx[0]) > lim && Math.abs(a1) < lim && Math.abs(a2) < lim && Math.sign(a1 || vtx[0]) === Math.sign(vtx[0]) && Math.sign(a2 || vtx[0]) === Math.sign(vtx[0])) {
+                    const sgn = Math.sign(vtx[0]), L = lim * AD;
+                    const d1 = Math.acos(Math.sin(Math.abs(a1) * AD) / Math.sin(L)) / AD * 60, d3 = Math.acos(Math.sin(Math.abs(a2) * AD) / Math.sin(L)) / AD * 60;
+                    const dl1 = Math.acos(Math.tan(Math.abs(a1) * AD) / Math.tan(L)) / AD, dl3 = Math.acos(Math.tan(Math.abs(a2) * AD) / Math.tan(L)) / AD;
+                    const dir = dlon >= 0 ? 1 : -1; const v1 = o1 + dir * dl1, v2 = o1 + dlon - dir * dl3;
+                    const par = Math.max(0, dir * (v2 - v1)) * 60 * Math.cos(L);
+                    comp = { d: d1 + par + d3, v1: [sgn * lim, anrm(v1 + 180) - 180], v2: [sgn * lim, anrm(v2 + 180) - 180], par };
+                }
+                r = { rl, gd, c0, cf, vtx, legs, sail, comp };
+            }
+            const csv = r ? ['WP,Lat,Lon,Course,Dist NM', ...[r.legs[0].from, ...r.legs.map((l) => l.to)].map((p, i) => [i, aFmtDM(p[0], 'N', 'S'), aFmtDM(p[1], 'E', 'W'), i < r.legs.length ? bZ(r.legs[i].c) : '', i < r.legs.length ? r.legs[i].d.toFixed(1) : ''].join(','))].join('\n') : '';
+            const days = (d) => (spd > 0 ? (d / spd / 24).toFixed(2) + ' days' : '');
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Great Circle and Rhumb Line</h2>
+                    <div className="cx-two">
+                        <div className="card cx-card">
+                            <ErPosPair title="From" lat={s.alat} lon={s.alon} setLat={set('alat')} setLon={set('alon')} />
+                            <ErPosPair title="To" lat={s.blat} lon={s.blon} setLat={set('blat')} setLon={set('blon')} gps={false} />
+                            <div className="cx-row">
+                                <CxField label="Speed (kn)" value={s.spd} onChange={set('spd')} />
+                                <ErSel label="Waypoints" value={s.mode} onChange={set('mode')} opts={[['lon', 'Every n° of longitude'], ['nm', 'Every n miles']]} />
+                                <CxField label={s.mode === 'lon' ? 'Step (° longitude)' : 'Step (NM)'} value={s.step} onChange={set('step')} />
+                                <ErPos label="Limiting latitude (optional)" value={s.lim} onChange={set('lim')} lat />
+                            </div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Result</div>
+                            {r ? <div className="cx-grid" style={{ marginTop: 0 }}>
+                                <CxOut l="Great circle distance" v={r.gd.toFixed(1)} u="NM" hi sub={days(r.gd)} />
+                                <CxOut l="Initial course" v={bZ(r.c0)} hi />
+                                <CxOut l="Final course" v={bZ(r.cf)} />
+                                <CxOut l="Rhumb line distance" v={r.rl.d.toFixed(1)} u="NM" sub={days(r.rl.d)} />
+                                <CxOut l="Rhumb line course" v={bZ(r.rl.c)} />
+                                <CxOut l="Saving by great circle" v={(r.rl.d - r.gd).toFixed(1)} u="NM" />
+                                <CxOut l="Vertex" v={r.vtx ? aFmtDM(r.vtx[0], 'N', 'S') : 'not on route'} sub={r.vtx ? aFmtDM(r.vtx[1], 'E', 'W') : ''} />
+                                <CxOut l="Sailing the waypoints" v={r.sail.toFixed(1)} u="NM" sub={(r.legs.length) + ' legs on rhumb lines'} />
+                                <CxOut l="DMP" v={r.rl.dmp.toFixed(1)} />
+                                {r.comp && <CxOut l="Composite distance" v={r.comp.d.toFixed(1)} u="NM" hi sub={'along ' + aFmtDM(r.comp.v1[0], 'N', 'S') + ' from ' + aFmtDM(r.comp.v1[1], 'E', 'W') + ' to ' + aFmtDM(r.comp.v2[1], 'E', 'W')} />}
+                            </div> : <div className="cx-hint">Enter both positions.</div>}
+                        </div>
+                    </div>
+                    {r && <div className="card cx-card">
+                        <div className="card-title">Waypoints</div>
+                        <div className="bw-scroll"><table className="bw-steps er-pt"><thead><tr><th>WP</th><th>Latitude</th><th>Longitude</th><th className="n">Course to next</th><th className="n">Distance (NM)</th><th className="n">To go (NM)</th></tr></thead>
+                            <tbody>{[r.legs[0].from, ...r.legs.map((l) => l.to)].map((p, i) => { const togo = r.legs.slice(i).reduce((x, l) => x + l.d, 0); return <tr key={i}><td>{i}</td><td>{aFmtDM(p[0], 'N', 'S')}</td><td>{aFmtDM(p[1], 'E', 'W')}</td><td className="n">{i < r.legs.length ? bZ(r.legs[i].c) : '-'}</td><td className="n">{i < r.legs.length ? r.legs[i].d.toFixed(1) : '-'}</td><td className="n">{togo.toFixed(1)}</td></tr>; })}</tbody></table></div>
+                        <div className="cx-btns"><button type="button" className="btn-ghost" onClick={() => erCopy(csv, flash)}>Copy as CSV</button>{msg && <span className="cx-hint" style={{ color: 'var(--ok)' }}>{msg}</span>}</div>
+                        <div className="cx-hint">Spherical earth, distances in nautical miles of 1′ of arc. Check the route against charts, load line zones, ice limits and weather routing.</div>
+                    </div>}
+                </div>
+            );
+        }
+
+        // ---------- 3. Radar plotting ----------
+        const RP_KEY = 'tfm_br_rplot_v1';
+        const RP_DEF = () => ({ oc: '', os: '', t1: '0', b1: '', r1: '', t2: '6', b2: '', r2: '', aT: '', aC: '', aS: '', want: '2' });
+        function rpCpa(p, v) { const vv = v[0] * v[0] + v[1] * v[1]; if (vv < 1e-12) return { t: Infinity, d: Math.hypot(...p), pt: p }; const t = -(p[0] * v[0] + p[1] * v[1]) / vv; const pt = [p[0] + v[0] * t, p[1] + v[1] * t]; return { t, d: Math.hypot(...pt), pt }; }
+        function RplotTab() {
+            const [s, , set] = useErStore(RP_KEY, RP_DEF);
+            const oc = pn(s.oc), os = pn(s.os), t1 = pn(s.t1), t2 = pn(s.t2);
+            const P1 = bVec(pn(s.b1), pn(s.r1)), P2 = bVec(pn(s.b2), pn(s.r2));
+            const ok = [oc, os, t1, t2, pn(s.b1), pn(s.r1), pn(s.b2), pn(s.r2)].every(isFinite) && t2 > t1;
+            let r = null;
+            if (ok) {
+                const dt = (t2 - t1) / 60; // h
+                const vr = [(P2[0] - P1[0]) / dt, (P2[1] - P1[1]) / dt];
+                const vo = bVec(oc, os), vt = [vr[0] + vo[0], vr[1] + vo[1]];
+                const cp = rpCpa(P2, vr);
+                const tSpd = Math.hypot(...vt), tCrs = anrm(Math.atan2(vt[0], vt[1]) / AD);
+                const aspect = bDz(anrm(pn(s.b2) + 180), tCrs);
+                // bow crossing: own frame, ahead axis = own course
+                const ah = [Math.sin(oc * AD), Math.cos(oc * AD)], side = [Math.cos(oc * AD), -Math.sin(oc * AD)];
+                const lat2 = P2[0] * side[0] + P2[1] * side[1], latV = vr[0] * side[0] + vr[1] * side[1];
+                const tB = Math.abs(latV) > 1e-9 ? -lat2 / latV : NaN;
+                const bcr = isFinite(tB) && tB > 0 ? (P2[0] + vr[0] * tB) * ah[0] + (P2[1] + vr[1] * tB) * ah[1] : NaN;
+                // action
+                const aT = pn(s.aT), aC = isFinite(pn(s.aC)) ? pn(s.aC) : oc, aS = isFinite(pn(s.aS)) ? pn(s.aS) : os;
+                let act = null;
+                if (isFinite(aT) && aT >= t2) {
+                    const ta = (aT - t2) / 60; const PA = [P2[0] + vr[0] * ta, P2[1] + vr[1] * ta];
+                    const vo2 = bVec(aC, aS), vr2 = [vt[0] - vo2[0], vt[1] - vo2[1]]; const cp2 = rpCpa(PA, vr2);
+                    act = { PA, vr2, cp: cp2 };
+                }
+                // starboard alteration that gives the wanted CPA, taken at the action time or now
+                const want = pn(s.want) || 2; let sug = null;
+                const PA0 = act ? act.PA : P2;
+                for (let a = 0; a <= 90; a += 5) { const c = anrm(oc + a); const vr3 = [vt[0] - bVec(c, os)[0], vt[1] - bVec(c, os)[1]]; const q = rpCpa(PA0, vr3); if (q.t < 0 || q.d >= want) { sug = { c, a, d: q.t < 0 ? Math.hypot(...PA0) : q.d }; break; } }
+                r = { vr, vt, cp, tSpd, tCrs, aspect, bcr, tB, act, sug, rspd: Math.hypot(...vr), rcrs: anrm(Math.atan2(vr[0], vr[1]) / AD) };
+            }
+            const maxR = Math.max(6, pn(s.r1) || 0, pn(s.r2) || 0) * 1.1;
+            const sc = 150 / maxR, C = 160;
+            const X = (p) => C + p[0] * sc, Y = (p) => C - p[1] * sc;
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Radar Plotting</h2>
+                    <div className="cx-two">
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">Own ship and target</div>
+                                <div className="cx-row">
+                                    <CxField label="Own course (°T)" value={s.oc} onChange={set('oc')} />
+                                    <CxField label="Own speed (kn)" value={s.os} onChange={set('os')} />
+                                </div>
+                                <div className="cx-sub">First observation</div>
+                                <div className="cx-row">
+                                    <CxField label="Time (min)" value={s.t1} onChange={set('t1')} />
+                                    <CxField label="True bearing (°)" value={s.b1} onChange={set('b1')} />
+                                    <CxField label="Range (NM)" value={s.r1} onChange={set('r1')} />
+                                </div>
+                                <div className="cx-sub">Second observation</div>
+                                <div className="cx-row">
+                                    <CxField label="Time (min)" value={s.t2} onChange={set('t2')} />
+                                    <CxField label="True bearing (°)" value={s.b2} onChange={set('b2')} />
+                                    <CxField label="Range (NM)" value={s.r2} onChange={set('r2')} />
+                                </div>
+                            </div>
+                            <div className="card cx-card">
+                                <div className="card-title">Action</div>
+                                <div className="cx-row">
+                                    <CxField label="At time (min)" value={s.aT} onChange={set('aT')} placeholder={'≥ ' + (s.t2 || '')} />
+                                    <CxField label="New course (°T)" value={s.aC} onChange={set('aC')} />
+                                    <CxField label="New speed (kn)" value={s.aS} onChange={set('aS')} />
+                                    <CxField label="Wanted CPA (NM)" value={s.want} onChange={set('want')} />
+                                </div>
+                                {r && r.act && <div className="cx-grid">
+                                    <CxOut l="New CPA" v={r.act.cp.d.toFixed(2)} u="NM" hi />
+                                    <CxOut l="New TCPA" v={isFinite(r.act.cp.t) && r.act.cp.t > 0 ? (r.act.cp.t * 60).toFixed(0) : 'passed'} u={isFinite(r.act.cp.t) && r.act.cp.t > 0 ? 'min after action' : ''} />
+                                </div>}
+                                {r && r.sug && <div className={'cx-status ' + (r.sug.a === 0 ? 'ok' : 'bad')} style={{ marginTop: 10 }}>{r.sug.a === 0 ? 'Present course already gives CPA ' + r.sug.d.toFixed(1) + ' NM.' : 'Alter to starboard ' + r.sug.a + '° to ' + bZ(r.sug.c) + ' for CPA about ' + r.sug.d.toFixed(1) + ' NM, keeping speed.'}</div>}
+                                {r && !r.sug && <div className="cx-status bad" style={{ marginTop: 10 }}>No starboard alteration up to 90° gives the wanted CPA. Consider reducing speed.</div>}
+                                <div className="cx-hint" style={{ marginTop: 8 }}>A check on the plot, not a decision. Apply the COLREGs and act early and substantially.</div>
+                            </div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Result</div>
+                            {r ? <div className="cx-grid" style={{ marginTop: 0 }}>
+                                <CxOut l="CPA" v={r.cp.d.toFixed(2)} u="NM" hi />
+                                <CxOut l="TCPA" v={r.cp.t > 0 ? (r.cp.t * 60).toFixed(1) : 'passed'} u={r.cp.t > 0 ? 'min' : ''} sub={r.cp.t > 0 ? 'at ' + (t2 + r.cp.t * 60).toFixed(0) + ' min on the plot' : ''} />
+                                <CxOut l="Bearing at CPA" v={bZ(Math.atan2(r.cp.pt[0], r.cp.pt[1]) / AD)} />
+                                <CxOut l="Target course" v={bZ(r.tCrs)} hi />
+                                <CxOut l="Target speed" v={r.tSpd.toFixed(1)} u="kn" hi />
+                                <CxOut l="Aspect" v={Math.abs(r.aspect).toFixed(0) + '° ' + (r.aspect >= 0 ? 'Red' : 'Green')} />
+                                <CxOut l="Relative course / speed" v={bZ(r.rcrs)} sub={r.rspd.toFixed(1) + ' kn'} />
+                                <CxOut l="Crosses ahead at" v={isFinite(r.bcr) && r.bcr > 0 ? r.bcr.toFixed(2) : isFinite(r.bcr) ? 'passes astern' : '-'} u={isFinite(r.bcr) && r.bcr > 0 ? 'NM' : ''} sub={isFinite(r.tB) && r.tB > 0 ? 'in ' + (r.tB * 60).toFixed(0) + ' min' : ''} />
+                            </div> : <div className="cx-hint">Enter own course and speed and two observations.</div>}
+                            <BPlot rings={[maxR / 2, maxR]} scale={sc} label={'rings ' + (maxR / 2).toFixed(1) + ' and ' + maxR.toFixed(1) + ' NM'}>
+                                {isFinite(oc) && <line x1={C} y1={C} x2={C + Math.sin(oc * AD) * 40} y2={C - Math.cos(oc * AD) * 40} className="b-own" />}
+                                <circle cx={C} cy={C} r={4} className="b-dr" />
+                                {ok && <><circle cx={X(P1)} cy={Y(P1)} r={3.5} className="b-tgt" /><circle cx={X(P2)} cy={Y(P2)} r={4} className="b-tgt" />
+                                    {r && <><line x1={X(P1)} y1={Y(P1)} x2={X(r.cp.t > 0 ? r.cp.pt : P2)} y2={Y(r.cp.t > 0 ? r.cp.pt : P2)} className="b-rel" />{r.cp.t > 0 && <><line x1={C} y1={C} x2={X(r.cp.pt)} y2={Y(r.cp.pt)} className="b-cpa" /><circle cx={X(r.cp.pt)} cy={Y(r.cp.pt)} r={3} className="b-fix" /></>}
+                                        <line x1={X(P2)} y1={Y(P2)} x2={X(P2) + r.vt[0] / 6 * sc} y2={Y(P2) - r.vt[1] / 6 * sc} className="b-true" />
+                                        {r.act && <line x1={X(r.act.PA)} y1={Y(r.act.PA)} x2={X(r.act.cp.t > 0 ? r.act.cp.pt : r.act.PA)} y2={Y(r.act.cp.t > 0 ? r.act.cp.pt : r.act.PA)} className="b-act" />}</>}</>}
+                            </BPlot>
+                            <div className="cx-hint">Own ship in the centre with heading line. Grey: relative motion and CPA. Orange: target's true vector for 10 minutes. Blue: relative motion after your action.</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ---------- 4. UKC and squat ----------
+        const UK_KEY = 'tfm_br_ukc_v1';
+        const UK_DEF = () => ({ depth: '', tide: '', draft: '', B: '', L: '', cb: '0.80', v: '', chan: 'open', wch: '', hch: '', heel: '', swell: '', req: '10', reqM: '' });
+        function UkcTab() {
+            const [s, , set] = useErStore(UK_KEY, UK_DEF);
+            const depth = pn(s.depth), tide = pn(s.tide) || 0, T = pn(s.draft), B = pn(s.B), cb = pn(s.cb), v = pn(s.v);
+            const h = depth + tide;
+            const Fb = isFinite(B) && isFinite(cb) ? (7.7 + 20 * (1 - cb) ** 2) * B : NaN; // Barrass width of influence
+            const wch = s.chan === 'open' ? Fb : Math.min(pn(s.wch), isFinite(Fb) ? Fb : Infinity);
+            const hch = s.chan === 'cut' && isFinite(pn(s.hch)) ? pn(s.hch) : h;
+            const S = isFinite(B * T / (wch * h)) ? Math.min(0.5, Math.max(0.06, (B * T) / (wch * h))) : NaN; // blockage
+            const squat = (vk) => (isFinite(cb) && isFinite(S) && vk > 0 ? cb * S ** 0.81 * vk ** 2.08 / 20 : 0);
+            const sq = squat(v);
+            const heel = isFinite(pn(s.heel)) && isFinite(B) ? B / 2 * Math.sin(pn(s.heel) * AD) : 0;
+            const swell = pn(s.swell) || 0;
+            const ukc = h - T - sq - heel - swell;
+            const reqUkc = isFinite(pn(s.reqM)) ? pn(s.reqM) : (pn(s.req) || 0) / 100 * T;
+            let vmax = NaN; if (isFinite(h) && isFinite(T)) { for (let k = 0; k <= 250; k++) { const vk = k * 0.1; if (h - T - squat(vk) - heel - swell < reqUkc) { vmax = (k - 1) * 0.1; break; } } if (!isFinite(vmax)) vmax = 25; }
+            const hT = isFinite(h / T) ? h / T : NaN;
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">UKC and Squat</h2>
+                    <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="cx-row">
+                                <CxField label="Charted depth (m)" value={s.depth} onChange={set('depth')} />
+                                <CxField label="Height of tide (m)" value={s.tide} onChange={set('tide')} />
+                                <CxField label="Deepest draft, static (m)" value={s.draft} onChange={set('draft')} />
+                            </div>
+                            <div className="cx-row">
+                                <CxField label="Breadth (m)" value={s.B} onChange={set('B')} />
+                                <CxField label="Block coefficient" value={s.cb} onChange={set('cb')} hint="Bulk carrier loaded about 0.80 to 0.85" />
+                                <CxField label="Speed through water (kn)" value={s.v} onChange={set('v')} />
+                            </div>
+                            <ErSel label="Waterway" value={s.chan} onChange={set('chan')} opts={[['open', 'Open water, shallow'], ['conf', 'Confined channel'], ['cut', 'Dredged channel with banks']]} />
+                            {s.chan !== 'open' && <div className="cx-row">
+                                <CxField label="Channel width at the bottom (m)" value={s.wch} onChange={set('wch')} />
+                                {s.chan === 'cut' && <CxField label="Depth in the channel (m)" value={s.hch} onChange={set('hch')} />}
+                            </div>}
+                            <div className="cx-row">
+                                <CxField label="Heel (°)" value={s.heel} onChange={set('heel')} hint="From wind or turning" />
+                                <CxField label="Wave or swell allowance (m)" value={s.swell} onChange={set('swell')} />
+                                <CxField label="Required UKC (% of draft)" value={s.req} onChange={set('req')} />
+                                <CxField label="or required UKC (m)" value={s.reqM} onChange={set('reqM')} />
+                            </div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Result</div>
+                            <div className="cx-grid" style={{ marginTop: 0 }}>
+                                <CxOut l="Depth of water" v={cxF(h, 2)} u="m" sub={isFinite(hT) ? 'H/T ' + hT.toFixed(2) : ''} />
+                                <CxOut l="Squat (max)" v={cxF(sq, 2)} u="m" hi sub={isFinite(S) ? 'blockage ' + S.toFixed(3) : ''} />
+                                <CxOut l="Heel increase" v={cxF(heel, 2)} u="m" />
+                                <CxOut l="Dynamic draft" v={cxF(T + sq + heel, 2)} u="m" />
+                                <CxOut l="UKC" v={cxF(ukc, 2)} u="m" hi sub={'required ' + cxF(reqUkc, 2) + ' m'} />
+                                <CxOut l="Max speed for required UKC" v={cxF(vmax, 1)} u="kn" hi />
+                            </div>
+                            {isFinite(ukc) && <div className={'cx-status ' + (ukc >= reqUkc ? 'ok' : 'bad')} style={{ marginTop: 10 }}>{ukc >= reqUkc ? 'UKC meets the requirement.' : 'UKC below the requirement. Reduce speed, wait for more tide or reduce draft.'}</div>}
+                            <div className="cx-sub">Squat at other speeds</div>
+                            <table className="bw-steps er-pt"><thead><tr><th className="n">Speed (kn)</th><th className="n">Squat (m)</th><th className="n">UKC (m)</th></tr></thead>
+                                <tbody>{[4, 6, 8, 10, 12, 14].map((vk) => <tr key={vk}><td className="n">{vk}</td><td className="n">{cxF(squat(vk), 2)}</td><td className="n">{cxF(h - T - squat(vk) - heel - swell, 2)}</td></tr>)}</tbody></table>
+                            <div className="cx-hint" style={{ marginTop: 8 }}>Squat by Barrass: Cb × S^0.81 × V^2.08 / 20, maximum at the bow for full ships (Cb over 0.7). Valid for H/T 1.1 to 1.4. Follow the company UKC policy and the port's requirement.</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ---------- 5. Tides ----------
+        const TD_KEY = 'tfm_br_tide_v1';
+        const TD_DEF = () => ({ hwT: '', hwH: '', lwT: '', lwH: '', qT: '', qH: '', tz: cxDevTz(), useD: false, dHW: '', dLW: '', dMHW: '', dMLW: '' });
+        function TideTab() {
+            const [s, , set] = useErStore(TD_KEY, TD_DEF);
+            const off = cxTzMin(s.tz);
+            const shift = (t, d) => (s.useD && isFinite(pn(d)) ? t + pn(d) * 60000 : t);
+            const hwT = shift(cxWallToUtc(s.hwT, off), s.dHW), lwT = shift(cxWallToUtc(s.lwT, off), s.dLW);
+            const hwH = pn(s.hwH) + (s.useD ? pn(s.dMHW) || 0 : 0), lwH = pn(s.lwH) + (s.useD ? pn(s.dMLW) || 0 : 0);
+            const ok = isFinite(hwT) && isFinite(lwT) && isFinite(hwH) && isFinite(lwH) && hwH > lwH;
+            const range = hwH - lwH, dur = Math.abs(hwT - lwT);
+            const t0 = Math.min(hwT, lwT), rising = lwT < hwT;
+            const hAt = (t) => { if (!ok) return NaN; const f = Math.min(1, Math.max(0, (t - t0) / dur)); const g = (1 - Math.cos(Math.PI * f)) / 2; return rising ? lwH + range * g : hwH - range * g; };
+            const tFor = (h) => { if (!ok || h < lwH || h > hwH) return NaN; const g = (h - lwH) / range; const f = Math.acos(1 - 2 * g) / Math.PI; return rising ? t0 + f * dur : t0 + (1 - f) * dur; };
+            const qT = cxWallToUtc(s.qT, off), qH = pn(s.qH);
+            const rows = ok ? Array.from({ length: 7 }, (_, i) => { const t = t0 + dur * i / 6; return { t, h: hAt(t), tw: rising ? lwH + range * [0, 1, 3, 6, 9, 11, 12][i] / 12 : hwH - range * [0, 1, 3, 6, 9, 11, 12][i] / 12 }; }) : [];
+            const pts = ok ? Array.from({ length: 41 }, (_, i) => { const t = t0 + dur * i / 40; return [i * 7.5, 150 - (hAt(t) - lwH) / range * 120]; }) : [];
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Tides</h2>
+                    <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="card-title">High and low water (consecutive)</div>
+                            <div className="cx-row">
+                                <CxField label="High water time" type="datetime-local" value={s.hwT} onChange={set('hwT')} />
+                                <CxField label="High water height (m)" value={s.hwH} onChange={set('hwH')} />
+                            </div>
+                            <div className="cx-row">
+                                <CxField label="Low water time" type="datetime-local" value={s.lwT} onChange={set('lwT')} />
+                                <CxField label="Low water height (m)" value={s.lwH} onChange={set('lwH')} />
+                            </div>
+                            <CxTz label="Zone" value={s.tz} onChange={set('tz')} />
+                            <label className="cx-check"><input type="checkbox" checked={!!s.useD} onChange={(e) => set('useD')(e.target.checked)} /> These are for the standard port: apply secondary port differences</label>
+                            {s.useD && <div className="cx-row">
+                                <CxField label="HW time difference (min)" value={s.dHW} onChange={set('dHW')} placeholder="+25" />
+                                <CxField label="LW time difference (min)" value={s.dLW} onChange={set('dLW')} placeholder="+40" />
+                                <CxField label="HW height difference (m)" value={s.dMHW} onChange={set('dMHW')} placeholder="-0.3" />
+                                <CxField label="LW height difference (m)" value={s.dMLW} onChange={set('dMLW')} placeholder="-0.1" />
+                            </div>}
+                            <div className="cx-sub">Ask</div>
+                            <div className="cx-row">
+                                <CxField label="Height at time" type="datetime-local" value={s.qT} onChange={set('qT')} />
+                                <CxField label="Time for height (m)" value={s.qH} onChange={set('qH')} />
+                            </div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">{ok ? (rising ? 'Flood' : 'Ebb') + ', range ' + range.toFixed(2) + ' m, duration ' + bHM(dur / 60000) : 'Result'}</div>
+                            {ok ? <>
+                                <div className="cx-grid" style={{ marginTop: 0 }}>
+                                    <CxOut l="Height at the time" v={isFinite(qT) ? cxF(hAt(qT), 2) : '-'} u="m" hi sub={isFinite(qT) && (qT < t0 || qT > t0 + dur) ? 'outside this tide' : ''} />
+                                    <CxOut l={'Time for ' + (s.qH || '?') + ' m'} v={isFinite(tFor(qH)) ? cxFmt(tFor(qH), off).slice(-5) : '-'} hi />
+                                    {s.useD && <CxOut l="Secondary port HW" v={cxFmt(hwT, off).slice(-11)} sub={hwH.toFixed(2) + ' m'} />}
+                                    {s.useD && <CxOut l="Secondary port LW" v={cxFmt(lwT, off).slice(-11)} sub={lwH.toFixed(2) + ' m'} />}
+                                </div>
+                                <svg className="td-curve" viewBox="0 0 300 160"><polyline points={pts.map((p) => p.join(',')).join(' ')} /><line x1="0" y1="150" x2="300" y2="150" /><line x1="0" y1="30" x2="300" y2="30" />{isFinite(qT) && qT >= t0 && qT <= t0 + dur && <circle cx={(qT - t0) / dur * 300} cy={150 - (hAt(qT) - lwH) / range * 120} r="4" />}<text x="2" y="26">{hwH.toFixed(1)} m</text><text x="2" y="146">{lwH.toFixed(1)} m</text></svg>
+                                <table className="bw-steps er-pt"><thead><tr><th>Hour</th><th>Time</th><th className="n">Height (cosine)</th><th className="n">Rule of twelfths</th></tr></thead>
+                                    <tbody>{rows.map((x, i) => <tr key={i}><td>{i}</td><td>{cxFmt(x.t, off).slice(-5)}</td><td className="n">{x.h.toFixed(2)}</td><td className="n">{x.tw.toFixed(2)}</td></tr>)}</tbody></table>
+                                <div className="cx-hint" style={{ marginTop: 8 }}>Cosine curve between HW and LW, the shape used in tide tables for most ports. Places with irregular tides (Solent, shallow estuaries) need the port's own curve.</div>
+                            </> : <div className="cx-hint">Enter a high water and the next or previous low water.</div>}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ---------- 6. Wheel over ----------
+        const WO_KEY = 'tfm_br_wop_v1';
+        const WO_DEF = () => ({ c1: '', c2: '', v: '', by: 'rot', rot: '', rad: '', delay: '10' });
+        function WopTab() {
+            const [s, , set] = useErStore(WO_KEY, WO_DEF);
+            const c1 = pn(s.c1), c2 = pn(s.c2), v = pn(s.v), delay = pn(s.delay) || 0;
+            const a = isFinite(c1) && isFinite(c2) ? Math.abs(bDz(c2, c1)) : NaN;
+            let R = NaN, rot = NaN;
+            if (s.by === 'rot') { rot = pn(s.rot); R = v > 0 && rot > 0 ? v / (rot * 60 * AD) : NaN; } else { R = pn(s.rad); rot = v > 0 && R > 0 ? v / R / AD / 60 : NaN; }
+            const wo = isFinite(R) && isFinite(a) && a < 180 ? R * Math.tan(a / 2 * AD) + v * delay / 3600 : NaN;
+            const tTurn = isFinite(a) && rot > 0 ? a / rot : NaN;
+            const adv = R * Math.sin(Math.min(a, 90) * AD), tra = R * (1 - Math.cos(a * AD));
+            const side = isFinite(c1) && isFinite(c2) ? (bDz(c2, c1) > 0 ? 'Starboard' : 'Port') : '';
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Wheel Over Point</h2>
+                    <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="cx-row">
+                                <CxField label="Present course (°T)" value={s.c1} onChange={set('c1')} />
+                                <CxField label="New course (°T)" value={s.c2} onChange={set('c2')} />
+                                <CxField label="Speed (kn)" value={s.v} onChange={set('v')} />
+                            </div>
+                            <ErTabs tabs={[['rot', 'By rate of turn'], ['rad', 'By radius']]} value={s.by} onChange={set('by')} />
+                            <div className="cx-row">
+                                {s.by === 'rot' ? <CxField label="Rate of turn (°/min)" value={s.rot} onChange={set('rot')} /> : <CxField label="Turn radius (NM)" value={s.rad} onChange={set('rad')} />}
+                                <CxField label="Delay before the ship answers (s)" value={s.delay} onChange={set('delay')} />
+                            </div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Result</div>
+                            <div className="cx-grid" style={{ marginTop: 0 }}>
+                                <CxOut l="Alteration" v={isFinite(a) ? a.toFixed(0) + '°' : '-'} sub={side} />
+                                <CxOut l="Wheel over before the new course line" v={cxF(wo, 2)} u="NM" hi sub={isFinite(wo) ? Math.round(wo * 1852) + ' m along the present track' : ''} />
+                                <CxOut l={s.by === 'rot' ? 'Turn radius' : 'Rate of turn'} v={s.by === 'rot' ? cxF(R, 2) : cxF(rot, 1)} u={s.by === 'rot' ? 'NM' : '°/min'} />
+                                <CxOut l="Time to turn" v={cxF(tTurn, 1)} u="min" />
+                                <CxOut l="Advance" v={cxF(adv, 2)} u="NM" />
+                                <CxOut l="Transfer" v={cxF(tra, 2)} u="NM" />
+                            </div>
+                            <div className="cx-sub">Rate of turn for this speed</div>
+                            <table className="bw-steps er-pt"><thead><tr><th className="n">Radius (NM)</th><th className="n">ROT (°/min)</th><th className="n">Wheel over (NM)</th></tr></thead>
+                                <tbody>{[0.3, 0.5, 0.75, 1, 1.5, 2].map((rr) => <tr key={rr}><td className="n">{rr}</td><td className="n">{v > 0 ? (v / rr / AD / 60).toFixed(1) : '-'}</td><td className="n">{isFinite(a) ? (rr * Math.tan(a / 2 * AD) + (v || 0) * delay / 3600).toFixed(2) : '-'}</td></tr>)}</tbody></table>
+                            <div className="cx-hint" style={{ marginTop: 8 }}>Radius = speed / rate of turn. Wheel over distance = R × tan(alteration / 2) plus the distance run while the rudder takes effect. Mark the wheel over position with a parallel index or bearing.</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ---------- 7. Ranges of lights ----------
+        const LR_KEY = 'tfm_br_lights_v1';
+        const LR_DEF = () => ({ he: '20', hl: '', nom: '', vis: '10', ant: '', tgt: '', objH: '', ang: '' });
+        function LightsTab() {
+            const [s, , set] = useErStore(LR_KEY, LR_DEF);
+            const he = pn(s.he), hl = pn(s.hl), nom = pn(s.nom), vis = pn(s.vis);
+            const hor = he >= 0 ? 2.08 * Math.sqrt(he) : NaN;
+            const geo = he >= 0 && hl >= 0 ? 2.08 * (Math.sqrt(he) + Math.sqrt(hl)) : NaN;
+            let lum = NaN;
+            if (nom > 0 && vis > 0) { const T0 = 0.05 ** (1 / 10), T = 0.05 ** (1 / vis); const I = nom * nom * T0 ** (-nom); const f = (d) => d * d * T ** (-d) - I; let a = 0.01, b = 200; for (let k = 0; k < 80; k++) { const m = (a + b) / 2; if (f(m) > 0) b = m; else a = m; } lum = (a + b) / 2; }
+            const visible = isFinite(geo) && isFinite(lum) ? Math.min(geo, lum) : isFinite(geo) ? geo : lum;
+            const ant = pn(s.ant), tgt = pn(s.tgt);
+            const radar = ant >= 0 ? 2.21 * (Math.sqrt(ant) + (tgt > 0 ? Math.sqrt(tgt) : 0)) : NaN;
+            const H = pn(s.objH), ang = bAng(s.ang);
+            const dOff = H > 0 && ang > 0 ? H / Math.tan(ang * AD) / 1852 : NaN;
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Ranges of Lights</h2>
+                    <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="card-title">Light</div>
+                            <div className="cx-row">
+                                <CxField label="Height of eye (m)" value={s.he} onChange={set('he')} />
+                                <CxField label="Elevation of light (m)" value={s.hl} onChange={set('hl')} hint="From the chart or List of Lights" />
+                                <CxField label="Nominal range (NM)" value={s.nom} onChange={set('nom')} />
+                                <CxField label="Meteorological visibility (NM)" value={s.vis} onChange={set('vis')} />
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l="Distance to your horizon" v={cxF(hor, 1)} u="NM" />
+                                <CxOut l="Geographical range (dipping distance)" v={cxF(geo, 1)} u="NM" />
+                                <CxOut l="Luminous range at this visibility" v={cxF(lum, 1)} u="NM" />
+                                <CxOut l="Light first seen at about" v={cxF(visible, 1)} u="NM" hi sub={isFinite(geo) && isFinite(lum) ? (lum < geo ? 'limited by visibility' : 'limited by the horizon, will rise') : ''} />
+                            </div>
+                            <div className="cx-hint" style={{ marginTop: 8 }}>Geographical range 2.08 (√h + √H) with h and H in metres. Luminous range from the nominal range by Allard's law (IALA E-200), the same as the luminous range diagram.</div>
+                        </div>
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">Radar horizon</div>
+                                <div className="cx-row">
+                                    <CxField label="Antenna height (m)" value={s.ant} onChange={set('ant')} />
+                                    <CxField label="Target height (m)" value={s.tgt} onChange={set('tgt')} />
+                                </div>
+                                <div className="cx-grid"><CxOut l="Radar detection range, about" v={cxF(radar, 1)} u="NM" hi /></div>
+                                <div className="cx-hint" style={{ marginTop: 8 }}>2.21 (√h + √H) for standard radar refraction. Super refraction or ducting can give much more, sub refraction less.</div>
+                            </div>
+                            <div className="card cx-card">
+                                <div className="card-title">Distance off by vertical sextant angle</div>
+                                <div className="cx-row">
+                                    <CxField label="Height of object above sea (m)" value={s.objH} onChange={set('objH')} hint="Charted height plus height above MHWS correction" />
+                                    <CxField label="Vertical angle (° ′)" value={s.ang} onChange={set('ang')} type="text" placeholder="0 45.2" />
+                                </div>
+                                <div className="cx-grid"><CxOut l="Distance off" v={cxF(dOff, 2)} u="NM" hi sub={isFinite(dOff) ? Math.round(dOff * 1852) + ' m' : ''} /></div>
+                                <div className="cx-hint" style={{ marginTop: 8 }}>For objects whose base is on or inside your horizon.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ---------- 8. Tropical storm avoidance ----------
+        const ST_KEY = 'tfm_br_storm_v1';
+        const ST_DEF = () => ({ slat: '', slon: '', sc: '', ss: '', r34: '', olat: '', olon: '', oc: '', os: '', hrs: '72', wind: '' });
+        function StormTab() {
+            const [s, , set] = useErStore(ST_KEY, ST_DEF);
+            const sla = bLat(s.slat), slo = bLon(s.slon), ola = bLat(s.olat), olo = bLon(s.olon);
+            const sc = pn(s.sc), ss = pn(s.ss), oc = pn(s.oc), os = pn(s.os), r34 = pn(s.r34) || 0, H = Math.min(120, Math.max(6, pn(s.hrs) || 72));
+            const ok = [sla, slo, ola, olo, sc, ss, oc, os].every(isFinite);
+            const NH = isFinite(sla) ? sla >= 0 : true;
+            let r = null;
+            if (ok) {
+                const P0 = bToXY(sla, slo, ola, olo), vs = bVec(sc, ss);
+                const danger = (t) => r34 + 100 * t / 24; // 1-2-3 rule
+                const track = (c, v) => { let minM = Infinity, tMin = 0, minD = Infinity, tD = 0; for (let t = 0; t <= H; t += 0.5) { const vo = bVec(c, v); const sp = [P0[0] + vs[0] * t, P0[1] + vs[1] * t], op = [vo[0] * t, vo[1] * t]; const d = Math.hypot(sp[0] - op[0], sp[1] - op[1]); const m = d - danger(t); if (m < minM) { minM = m; tMin = t; } if (d < minD) { minD = d; tD = t; } } return { minM, tMin, minD, tD }; };
+                const now = track(oc, os);
+                const dist0 = Math.hypot(...P0), brg = anrm(Math.atan2(P0[0], P0[1]) / AD);
+                const rel = [-P0[0], -P0[1]]; const cross = Math.sin(sc * AD) * rel[1] - Math.cos(sc * AD) * rel[0]; // >0: ship left of track
+                const rightSide = cross < 0;
+                const dangerous = NH ? rightSide : !rightSide;
+                let best = null; for (let c = 0; c < 360; c += 5) { const q = track(c, os); if (!best || q.minM > best.q.minM) best = { c, q }; }
+                r = { now, dist0, brg, dangerous, rightSide, best };
+            }
+            const wind = pn(s.wind);
+            const centre = isFinite(wind) ? anrm(wind + (NH ? 112 : -112)) : NaN;
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Tropical Storm Avoidance</h2>
+                    <div className="cx-two">
+                        <div>
+                            <div className="card cx-card">
+                                <div className="card-title">Storm (from the latest warning)</div>
+                                <ErPosPair lat={s.slat} lon={s.slon} setLat={set('slat')} setLon={set('slon')} gps={false} />
+                                <div className="cx-row">
+                                    <CxField label="Moving towards (°T)" value={s.sc} onChange={set('sc')} />
+                                    <CxField label="Speed (kn)" value={s.ss} onChange={set('ss')} />
+                                    <CxField label="34 kt wind radius (NM)" value={s.r34} onChange={set('r34')} hint="Largest quadrant" />
+                                    <CxField label="Look ahead (h)" value={s.hrs} onChange={set('hrs')} />
+                                </div>
+                            </div>
+                            <div className="card cx-card">
+                                <div className="card-title">Own ship</div>
+                                <ErPosPair lat={s.olat} lon={s.olon} setLat={set('olat')} setLon={set('olon')} />
+                                <div className="cx-row">
+                                    <CxField label="Course (°T)" value={s.oc} onChange={set('oc')} />
+                                    <CxField label="Speed (kn)" value={s.os} onChange={set('os')} />
+                                </div>
+                            </div>
+                            <div className="card cx-card">
+                                <div className="card-title">No warning yet: Buys Ballot</div>
+                                <CxField label="True wind from (°)" value={s.wind} onChange={set('wind')} />
+                                <div className="cx-grid"><CxOut l="Centre bears about" v={bZ(centre)} hi sub={NH ? 'wind + 112° (north)' : 'wind − 112° (south)'} /></div>
+                                <div className="cx-hint" style={{ marginTop: 8 }}>Wind veering: you are in the right-hand semicircle (dangerous in the north). Backing: left-hand. Steady direction with rising wind and falling barometer: on the track ahead of the centre.</div>
+                            </div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Result</div>
+                            {r ? <>
+                                <div className="cx-grid" style={{ marginTop: 0 }}>
+                                    <CxOut l="Storm centre bears" v={bZ(r.brg)} sub={r.dist0.toFixed(0) + ' NM'} />
+                                    <CxOut l="You are in the" v={r.rightSide ? 'Right semicircle' : 'Left semicircle'} sub={r.dangerous ? 'dangerous semicircle' : 'navigable semicircle'} hi />
+                                    <CxOut l="Closest to centre on this course" v={r.now.minD.toFixed(0)} u="NM" sub={'in ' + r.now.tD.toFixed(0) + ' h'} />
+                                    <CxOut l="Margin outside the danger area" v={r.now.minM.toFixed(0)} u="NM" hi sub={'34 kt radius + 100/200/300 NM at 24/48/72 h'} />
+                                    <CxOut l="Course with most sea room" v={bZ(r.best.c)} hi sub={'margin ' + r.best.q.minM.toFixed(0) + ' NM at ' + s.os + ' kn'} />
+                                </div>
+                                <div className={'cx-status ' + (r.now.minM >= 0 ? 'ok' : 'bad')} style={{ marginTop: 10 }}>{r.now.minM >= 0 ? 'Present course stays outside the danger area for ' + H + ' h.' : 'Present course enters the danger area in about ' + r.now.tMin.toFixed(0) + ' h. Alter now.'}</div>
+                                <div className="cx-hint" style={{ marginTop: 8 }}>{NH ? 'North: right semicircle dangerous. Put the wind 1 to 4 points on the starboard bow and make way; in the navigable semicircle put it on the starboard quarter.' : 'South: left semicircle dangerous. Put the wind 1 to 4 points on the port bow; in the navigable semicircle on the port quarter.'} On the track ahead, put the wind on the starboard quarter (north) or port quarter (south) and run for the navigable semicircle.</div>
+                            </> : <div className="cx-hint">Enter the storm and own ship positions, courses and speeds.</div>}
+                            <div className="cx-hint" style={{ marginTop: 8 }}>Uses the latest warning only. Update with every new warning; tracks can recurve. Follow the company heavy weather procedure.</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ---------- 9. Anchor watch ----------
+        const AN_KEY = 'tfm_br_anch_v1';
+        const AN_DEF = () => ({ alat: '', alon: '', sh: '', shl: '27.5', depth: '', hawse: '', loa: '', gps: '', margin: '30', track: [] });
+        function AnchTab() {
+            const [s, setS, set] = useErStore(AN_KEY, AN_DEF);
+            const [watch, setWatch] = useState(false);
+            const [cur, setCur] = useState(null);
+            const [err, setErr] = useState('');
+            const wid = useRef(null), lock = useRef(null), audio = useRef(null);
+            const la0 = bLat(s.alat), lo0 = bLon(s.alon);
+            const L = (pn(s.sh) || 0) * (pn(s.shl) || 27.5), dh = (pn(s.depth) || 0) + (pn(s.hawse) || 0);
+            const horiz = L > dh ? Math.sqrt(L * L - dh * dh) : 0;
+            const swing = horiz + (pn(s.loa) || 0);
+            const gpsR = horiz + (pn(s.gps) || 0);
+            const alarmR = gpsR + (pn(s.margin) || 0);
+            const ok = isFinite(la0) && isFinite(lo0) && gpsR > 0;
+            const dist = cur && ok ? (() => { const [x, y] = bToXY(cur.la, cur.lo, la0, lo0); return { m: Math.hypot(x, y) * 1852, brg: anrm(Math.atan2(x, y) / AD) }; })() : null;
+            const alarm = watch && dist && dist.m > alarmR;
+            useEffect(() => {
+                if (!alarm) return;
+                try { if (navigator.vibrate) navigator.vibrate([400, 200, 400]); } catch (e) {}
+                try { const ctx = audio.current || new (window.AudioContext || window.webkitAudioContext)(); audio.current = ctx; const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = 880; o.connect(g); g.connect(ctx.destination); g.gain.value = 0.25; o.start(); o.stop(ctx.currentTime + 0.6); } catch (e) {}
+            }, [alarm, cur]);
+            const stop = () => { if (wid.current != null && navigator.geolocation) navigator.geolocation.clearWatch(wid.current); wid.current = null; try { lock.current && lock.current.release(); } catch (e) {} lock.current = null; setWatch(false); };
+            const start = async () => {
+                if (!navigator.geolocation) { setErr('No GPS on this device'); return; }
+                setErr(''); setWatch(true);
+                try { if (navigator.wakeLock) lock.current = await navigator.wakeLock.request('screen'); } catch (e) {}
+                try { audio.current = audio.current || new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+                wid.current = navigator.geolocation.watchPosition((p) => {
+                    const pt = { la: p.coords.latitude, lo: p.coords.longitude, acc: p.coords.accuracy, t: Date.now() };
+                    setCur(pt); setS((o) => ({ ...o, track: [...(o.track || []), [pt.la, pt.lo, pt.t]].slice(-500) }));
+                }, (e) => setErr(e.code === 1 ? 'Location permission denied' : 'No GPS fix yet'), { enableHighAccuracy: true, maximumAge: 5000, timeout: 30000 });
+            };
+            useEffect(() => () => stop(), []);
+            const setHere = () => { if (cur) setS((o) => ({ ...o, alat: erPosStr(cur.la, true), alon: erPosStr(cur.lo, false) })); };
+            const sc = 140 / Math.max(alarmR, swing, 50), C = 160;
+            const trk = ok ? (s.track || []).map(([la, lo]) => bToXY(la, lo, la0, lo0).map((v) => v * 1852 * sc)) : [];
+            return (
+                <div className="tab-pane">
+                    <h2 className="section-title">Anchor Watch</h2>
+                    <div className="cx-two">
+                        <div className="card cx-card">
+                            <div className="card-title">Anchor position</div>
+                            <ErPosPair lat={s.alat} lon={s.alon} setLat={set('alat')} setLon={set('alon')} />
+                            {cur && <div className="er-gps"><button type="button" className="btn-ghost" onClick={setHere}>Set anchor at the current GPS position</button></div>}
+                            <div className="cx-row">
+                                <CxField label="Shackles in the water" value={s.sh} onChange={set('sh')} />
+                                <CxField label="Shackle length (m)" value={s.shl} onChange={set('shl')} />
+                                <CxField label="Depth (m)" value={s.depth} onChange={set('depth')} />
+                                <CxField label="Hawse pipe above water (m)" value={s.hawse} onChange={set('hawse')} />
+                            </div>
+                            <div className="cx-row">
+                                <CxField label="LOA (m)" value={s.loa} onChange={set('loa')} />
+                                <CxField label="GPS antenna from the bow (m)" value={s.gps} onChange={set('gps')} />
+                                <CxField label="Alarm margin (m)" value={s.margin} onChange={set('margin')} />
+                            </div>
+                            <div className="cx-grid">
+                                <CxOut l="Cable out" v={cxInt(L)} u="m" sub={dh > 0 ? 'scope ' + (L / dh).toFixed(1) + ' × depth' : ''} />
+                                <CxOut l="Swinging circle (stern)" v={cxInt(swing)} u="m" hi />
+                                <CxOut l="GPS circle" v={cxInt(gpsR)} u="m" />
+                                <CxOut l="Alarm at" v={cxInt(alarmR)} u="m" hi />
+                            </div>
+                            <div className="cx-hint" style={{ marginTop: 8 }}>Cable is taken as straight from the hawse to the anchor, the largest circle it can make. Keep the swinging circle clear of other ships, shallows and cables.</div>
+                        </div>
+                        <div className="card cx-card">
+                            <div className="card-title">Watch</div>
+                            <div className="cx-btns">{!watch ? <button type="button" className="btn btn-primary" style={{ marginTop: 0 }} onClick={start}>Start anchor watch</button> : <button type="button" className="btn btn-danger" style={{ marginTop: 0 }} onClick={stop}>Stop</button>}<button type="button" className="btn-ghost" onClick={() => set('track')([])}>Clear track</button></div>
+                            {err && <div className="cx-status bad" style={{ marginTop: 8 }}>{err}</div>}
+                            <div className="cx-grid">
+                                <CxOut l="From anchor" v={dist ? Math.round(dist.m) : '-'} u="m" hi sub={dist ? 'bearing from anchor ' + bZ(dist.brg) : ''} />
+                                <CxOut l="GPS accuracy" v={cur ? Math.round(cur.acc) : '-'} u="m" />
+                                <CxOut l="Last fix" v={cur ? new Date(cur.t).toTimeString().slice(0, 8) : '-'} />
+                            </div>
+                            {watch && dist && <div className={'cx-status ' + (alarm ? 'bad an-alarm' : 'ok')} style={{ marginTop: 10 }}>{alarm ? 'DRAGGING? ' + Math.round(dist.m) + ' m from the anchor, beyond the alarm circle.' : 'Inside the alarm circle.'}</div>}
+                            <BPlot rings={[]} scale={1} label="track since the watch started">
+                                {ok && <><circle cx={C} cy={C} r={alarmR * sc} className="an-alarmc" /><circle cx={C} cy={C} r={gpsR * sc} className="b-ring" /><circle cx={C} cy={C} r={swing * sc} className="an-swing" /></>}
+                                {trk.length > 1 && <polyline points={trk.map(([x, y]) => (C + x) + ',' + (C - y)).join(' ')} className="an-trk" />}
+                                <path d={`M${C - 6} ${C}h12M${C} ${C - 6}v12`} className="b-own" />
+                                {dist && cur && (() => { const [x, y] = bToXY(cur.la, cur.lo, la0, lo0).map((v) => v * 1852 * sc); return <circle cx={C + x} cy={C - y} r={5} className={alarm ? 'b-tgt' : 'b-fix'} />; })()}
+                            </BPlot>
+                            <div className="cx-hint">Uses this phone's GPS. Keep the app open and the screen on (it asks the phone to stay awake). The phone's GPS is less exact than the ship's; keep the bridge anchor watch as usual.</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        function ErEW({ label, value, onChange }) {
+            const t = String(value || '').trim().toUpperCase(); const h = /W/.test(t) || t.startsWith('-') ? 'W' : 'E'; const n = t.replace(/[^\d.]/g, '');
+            return (
+                <div>
+                    <label className="input-label">{label}</label>
+                    <div className="er-pos er-ew">
+                        <input className="input-field" inputMode="decimal" value={n} placeholder="3.5" onChange={(e) => onChange((e.target.value.replace(/[^\d.]/g, '') + ' ' + h).trim())} />
+                        <span>°</span>
+                        <select className="input-field" value={h} onChange={(e) => onChange((n + ' ' + e.target.value).trim())}><option value="E">E</option><option value="W">W</option></select>
+                    </div>
+                </div>
+            );
+        }
+
+        const APP_VERSION = '3.4.0';
         const WHATS_NEW = [
+            ['3.4.0', ['Nine more Bridge tools: Celestial Fix, Great Circle, Radar Plot, UKC & Squat, Tides, Wheel Over, Light Ranges, Storm Avoidance and Anchor Watch', 'Latitude and longitude entry with degrees, minutes and an N/S or E/W drop-down, plus Use device GPS']],
             ['3.3.0', ['New Bridge group with Compass Error: azimuth and amplitude by Sun, Moon, planets and 57 stars plus Polaris, gyro error, compass error and deviation, night sky chart, almanac page with sunrise and twilights, and a log', 'Alt+1 to 6 switch between the six groups']],
             ['3.2.0', ['New Engine Room group: ORB Entry Maker, Fuel Changeover (ECA), Bunker Planner, ME Performance and Engineer\'s Calculator', 'Alt+1 to 5 switch between the five groups']],
             ['3.1.0', ['i button like Meridian PDF Mate: keyboard shortcuts, quick tour, about, app guide and update', 'NRE Days is its own tool under Personal', 'Media and Proofread moved to Personal']],
@@ -8188,11 +9042,20 @@ const Proof = (function () {
             { key: 'bunk', label: 'Bunker Planner', c: '#b91c1c', cd: '#fca5a5' },
             { key: 'perf', label: 'ME Performance', c: '#4338ca', cd: '#a5b4fc' },
             { key: 'ecalc', label: "Engineer's Calculator", c: '#6d28d9', cd: '#c4b5fd' },
-            { key: 'cerr', label: 'Compass Error', c: '#1e3a8a', cd: '#93c5fd' }
+            { key: 'cerr', label: 'Compass Error', c: '#1e3a8a', cd: '#93c5fd' },
+            { key: 'cfix', label: 'Celestial Fix', c: '#6d28d9', cd: '#c4b5fd' },
+            { key: 'gcs', label: 'Great Circle', c: '#0369a1', cd: '#7dd3fc' },
+            { key: 'rplot', label: 'Radar Plot', c: '#15803d', cd: '#86efac' },
+            { key: 'ukc', label: 'UKC & Squat', c: '#b45309', cd: '#fcd34d' },
+            { key: 'tide', label: 'Tides', c: '#0e7490', cd: '#67e8f9' },
+            { key: 'wop', label: 'Wheel Over', c: '#be123c', cd: '#fda4af' },
+            { key: 'lights', label: 'Light Ranges', c: '#ca8a04', cd: '#fde047' },
+            { key: 'storm', label: 'Storm Avoidance', c: '#475569', cd: '#cbd5e1' },
+            { key: 'anch', label: 'Anchor Watch', c: '#9d174d', cd: '#f9a8d4' }
         ];
         const TAB_GROUPS = [
             { name: 'Voyage', icon: 'g0', keys: ['rob', 'eta', 'speed', 'time', 'load'] },
-            { name: 'Bridge', icon: 'gB', keys: ['cerr'] },
+            { name: 'Bridge', icon: 'gB', keys: ['cerr', 'cfix', 'gcs', 'rplot', 'ukc', 'tide', 'wop', 'lights', 'storm', 'anch'] },
             { name: 'Cargo & Stability', short: 'Cargo', icon: 'g1', keys: ['vent', 'dwt', 'hydro', 'bwe', 'calc'] },
             { name: 'Engine Room', short: 'Engine', icon: 'gE', keys: ['orb', 'fco', 'bunk', 'perf', 'ecalc'] },
             { name: "Ship's Office", short: 'Office', icon: 'g2', keys: ['ot', 'garbage', 'conv'] },
@@ -8213,6 +9076,15 @@ const Proof = (function () {
             calc: 'DWA, days, SF, trim, roll, anchor, mooring',
             nre: 'Days in India and NRI status per financial year',
             cerr: 'Azimuth and amplitude, sky chart and almanac',
+            cfix: 'Sights to intercepts, fix and plot',
+            gcs: 'Great circle and rhumb line, vertex, waypoints',
+            rplot: 'CPA, TCPA, target course and speed, action',
+            ukc: 'Squat, dynamic draft and under keel clearance',
+            tide: 'Height at a time, time for a height, secondary port',
+            wop: 'Wheel over point, turn radius and rate of turn',
+            lights: 'Geographical and luminous range, radar horizon',
+            storm: 'Semicircle, danger area and best course',
+            anch: 'Swinging circle and GPS drag alarm',
             orb: 'Oil Record Book Part I entries, sludge and bilge totals',
             fco: 'ECA changeover start time, timeline and log entry',
             bunk: 'Tank plan, received quantity against the BDN',
@@ -8228,6 +9100,15 @@ const Proof = (function () {
             conv: 'units convert', hydro: 'hydrostatics tpc mctc lcf km', dwt: 'deadweight cargo intake draft', proof: 'spelling grammar email',
             time: 'time zone clock', load: 'load line zone summer winter tropical', garbage: 'garbage marpol annex v',
             calc: 'salinity dwa fwa days contract stowage factor density trim draft rolling period gm turning heel anchor holding cable scope catenary windlass mooring hours lines form 5 all fast all clear',
+            cfix: 'celestial fix sight reduction intercept marcq st hilaire noon sight meridian altitude star sights running fix sextant altitude dip refraction plot position line',
+            gcs: 'great circle rhumb line mercator sailing distance initial course final course vertex waypoints composite limiting latitude dmp',
+            rplot: 'radar plotting arpa cpa tcpa relative motion target course speed aspect bow crossing collision avoidance alteration',
+            ukc: 'ukc under keel clearance squat barrass blockage shallow water channel dynamic draft heel speed',
+            tide: 'tide tides height time secondary port differences rule of twelfths range duration flood ebb hw lw',
+            wop: 'wheel over point wop rate of turn rot radius advance transfer alteration turning',
+            lights: 'light range geographical luminous nominal visibility dipping distance horizon radar horizon vertical sextant angle distance off',
+            storm: 'tropical revolving storm cyclone typhoon hurricane dangerous navigable semicircle buys ballot 1-2-3 rule avoidance',
+            anch: 'anchor watch anchoring swinging circle drag alarm scope shackles cable gps',
             cerr: 'compass error gyro error deviation variation azimuth amplitude sun moon star polaris planet venus jupiter almanac gha dec sha aries sunrise sunset twilight meridian passage night sky chart celestial',
             orb: 'oil record book orb part i marpol annex i sludge bilge incinerator evaporation 15 ppm ows reception facility bunkering code c d e f h i 11.1 12.1 12.2 12.3 12.4 circ 736',
             fco: 'fuel changeover eca seca sulphur 0.10 mgo ulsfo hfo vlsfo switch over annex vi regulation 14 timing flush',
@@ -8266,6 +9147,15 @@ const Proof = (function () {
             lock: <><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></>,
             offline: <><path d="M2 8.5a15 15 0 0 1 20 0" /><path d="M5.5 12a10 10 0 0 1 13 0" /><path d="M9 15.5a5 5 0 0 1 6 0" /><path d="M12 19h.01" /><path d="M3 3l18 18" /></>,
             gB: <><path d="M4 18h16l-2 3H6z" /><path d="M12 3v12" /><path d="M12 5l6 8h-6" /><path d="M12 7l-5 6h5" /></>,
+            cfix: <><path d="M4 20 20 4" /><path d="M4 9l11 11" /><circle cx="12" cy="12" r="2" /><path d="M18 2v4M16 4h4" /></>,
+            gcs: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M5 17c4-8 10-11 14-11" /></>,
+            rplot: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><path d="M12 12 18 6" /><circle cx="17" cy="15" r="1.3" /></>,
+            ukc: <><path d="M4 7h16l-2 5H6z" /><path d="M12 12v6" /><path d="m9.5 15.5 2.5 2.5 2.5-2.5" /><path d="M3 21h18" /></>,
+            tide: <><path d="M2 12c2.5-4 5-4 7.5 0s5 4 7.5 0 3.5-3 5-2" /><path d="M2 18c2.5-2 5-2 7.5 0s5 2 7.5 0" /><path d="M12 3v5" /></>,
+            wop: <><path d="M6 21V11a5 5 0 0 1 5-5h9" /><path d="m17 3 3 3-3 3" /><circle cx="6" cy="11" r="1.5" /></>,
+            lights: <><path d="M10 21h4l-1-10h-2z" /><path d="M9 11h6" /><path d="M12 7V5" /><path d="m5 6 3 2M19 6l-3 2M4 11h3M17 11h3" /></>,
+            storm: <><path d="M12 12m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0" /><path d="M12 3a9 9 0 0 1 7 4" /><path d="M21 12a9 9 0 0 1-4 7" /><path d="M12 21a9 9 0 0 1-7-4" /><path d="M3 12a9 9 0 0 1 4-7" /></>,
+            anch: <><circle cx="12" cy="5" r="2" /><path d="M12 7v14" /><path d="M5 13a7 7 0 0 0 14 0" /><path d="M9 10h6" /></>,
             cerr: <><circle cx="12" cy="12" r="9" /><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21" /><path d="m12 7.5 1.6 4.5-1.6 4.5-1.6-4.5z" /></>,
             gE: <><circle cx="12" cy="12" r="3" /><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" /></>,
             orb: <><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z" /><path d="M5 17a3 3 0 0 1 3-3h11" /><path d="M9 8h6" /></>,
@@ -9310,6 +10200,15 @@ const Proof = (function () {
                             {activeTab === 20 && <PerfTab />}
                             {activeTab === 21 && <EcalcTab />}
                             {activeTab === 22 && <CerrTab />}
+                            {activeTab === 23 && <CfixTab />}
+                            {activeTab === 24 && <GcTab />}
+                            {activeTab === 25 && <RplotTab />}
+                            {activeTab === 26 && <UkcTab />}
+                            {activeTab === 27 && <TideTab />}
+                            {activeTab === 28 && <WopTab />}
+                            {activeTab === 29 && <LightsTab />}
+                            {activeTab === 30 && <StormTab />}
+                            {activeTab === 31 && <AnchTab />}
                         </div>
                     </div>
                     </main>
